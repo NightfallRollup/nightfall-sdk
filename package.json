@@ -84,17 +84,18 @@
     "eg:ganache:withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawal.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:finalise-withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawalFinalise.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:balances": "ts-node -r dotenv/config examples/scripts/balances.ts dotenv_config_path=./examples/scripts/.env.ganache",
-    "eg:ganache:export-commitments": "ts-node -r dotenv/config examples/scripts/exportCommitments.ts dotenv_config_path=./examples/scripts/.env.ganache",
-    "eg:ganache:import-commitments": "ts-node -r dotenv/config examples/scripts/importCommitments.ts dotenv_config_path=./examples/scripts/.env.ganache",
+    "eg:ganache:export-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsExport.ts dotenv_config_path=./examples/scripts/.env.ganache",
+    "eg:ganache:import-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsImport.ts dotenv_config_path=./examples/scripts/.env.ganache",
+    "utils:ganache:mint-721": "ts-node -r dotenv/config examples/scripts/utils/mint721.ts dotenv_config_path=./examples/scripts/.env.ganache",
+    "utils:ganache:contract-addresses": "ts-node -r dotenv/config examples/scripts/utils/ercMockContractAddresses.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:goerli:deposit": "ts-node -r dotenv/config examples/scripts/txDeposit.ts dotenv_config_path=./examples/scripts/.env.goerli dotenv_config_debug=true",
     "eg:goerli:transfer": "ts-node -r dotenv/config examples/scripts/txTransfer.ts dotenv_config_path=./examples/scripts/.env.goerli",
     "eg:goerli:withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawal.ts dotenv_config_path=./examples/scripts/.env.goerli",
     "eg:goerli:finalise-withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawalFinalise.ts dotenv_config_path=./examples/scripts/.env.goerli",
     "eg:goerli:balances": "ts-node -r dotenv/config examples/scripts/balances.ts dotenv_config_path=./examples/scripts/.env.goerli",
-    "eg:goerli:export-commitments": "ts-node -r dotenv/config examples/scripts/exportCommitments.ts dotenv_config_path=./examples/scripts/.env.goerli",
-    "eg:goerli:import-commitments": "ts-node -r dotenv/config examples/scripts/importCommitments.ts dotenv_config_path=./examples/scripts/.env.goerli",
-    "eg:start-react-app": "npm run build && cd examples/web-app/ && npm start",
-    "utils:ganache:mint-721": "ts-node -r dotenv/config examples/scripts/utils/mint721.ts dotenv_config_path=./examples/scripts/.env.ganache"
+    "eg:goerli:export-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsExport.ts dotenv_config_path=./examples/scripts/.env.goerli",
+    "eg:goerli:import-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsImport.ts dotenv_config_path=./examples/scripts/.env.goerli",
+    "start-react-app": "npm run build && cd examples/web-app/ && npm start"
   },
   "release": {
     "branches": [

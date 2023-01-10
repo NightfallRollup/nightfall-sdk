@@ -3,6 +3,7 @@ import { CONTRACT_SHIELD } from "./constants";
 import {
   UserFactoryCreate,
   UserConstructor,
+  UserGetContractAddress,
   UserMakeDeposit,
   UserMintL2Token,
   UserMakeTransfer,
@@ -34,6 +35,7 @@ import {
 import { logger, NightfallSdkError } from "../utils";
 import {
   createOptions,
+  getContractAddressOptions,
   makeDepositOptions,
   mintL2Token,
   makeTransferOptions,
@@ -196,6 +198,28 @@ class User {
   }
 
   /**
+   * Get Shield, ERC Mocked contract addresses (the latter is Ganache only)
+   *
+   * @async
+   * @method updateEthAccountFromMetamask
+   * @param {UserGetContractAddress} options
+   * @param {string} options.contractName
+   * @returns {string} Ethereum account address
+   */
+  async getContractAddress(options: UserGetContractAddress): Promise<string> {
+    logger.debug("User :: getContractAddress");
+
+    // Validate and format options
+    const { error, value } = getContractAddressOptions.validate(options);
+    isInputValid(error);
+    logger.debug({ value }, "getContractAddress formatted parameters");
+
+    const { contractName } = value;
+
+    return this.client.getContractAddress(contractName);
+  }
+
+  /**
    * [Browser + MetaMask only] Update Ethereum account address
    *
    * @async
@@ -221,7 +245,6 @@ class User {
    * @param {string} [options.value]
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
-   * @param {boolean} [options.isFeePaidInL2]
    * @returns {Promise<OnChainTransactionReceipts>}
    */
   async makeDeposit(
