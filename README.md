@@ -8,7 +8,7 @@ Software Development Kit for interacting with Nightfall.
 
 Clone the repo and [play with the scripts and the web app](#play-with-the-sdk-repository), or [install it as a dependency](#install-the-sdk-as-a-dependency) from NPM.
 
-More about [Nightfall](https://github.com/EYBlockchain/nightfall_3/blob/master/doc/how_it_works.md).
+Visit the main repo for more details about the [Nightfall protocol](https://github.com/EYBlockchain/nightfall_3/blob/master/doc/how_it_works.md).
 
 ## SDK core features
 
@@ -221,7 +221,7 @@ Then, import a ganache account with Test token to be able to execute transaction
 
 #### Start the app
 
-Open the repository, navigate to the web-app and install the dependencies
+Open the repository, navigate to the web-app and install the dependencies:
 
 ```
 cd examples/web-app
@@ -231,17 +231,29 @@ npm install
 Navigate to the root directory and run the following script. The app is running on port 4000.
 
 ```
-cd ../../
-npm run eg:start-react-app
+cd ../..
+npm run start-react-app
 ```
-
-### Error handling
-
-Today we are handling errors using the `NightfallSdkError` class, which is a simple implementation of the Error class. We might improve this in the future, but in the meantime make sure to wrap all SDK calls within a `try/catch` block.
 
 ## Install the SDK as a dependency
 
-TODO
+Add the Nightfall SDK to your project:
+
+```bash
+npm install nightfall-sdk
+```
+
+Import `UserFactory` to open an SDK instance and interact with the methods available.
+
+```bash
+import { UserFactory } from 'nightfall-sdk';
+```
+
+Refer to the [example scripts](#example-scripts) to understand how to integrate the SDK into your codebase.
+
+## Error handling
+
+Today we are handling errors using the `NightfallSdkError` class, which is a simple implementation of the Error class. We might improve this in the future, but in the meantime make sure to wrap all SDK calls within a `try/catch` block.
 
 ## Need help?
 
