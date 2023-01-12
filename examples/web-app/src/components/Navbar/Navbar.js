@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
+import logo from "../../images/nightfall.svg";
 
 export default function Navbar() {
   const userAddress = localStorage.getItem("userAddress");
@@ -16,8 +17,8 @@ export default function Navbar() {
         <div className="container-fluid">
           <a className="navbar-brand" href="">
             <img
-              src="https://polygon.technology/_nuxt/img/nightfall.03d98e7.svg"
-              alt="Logo"
+              src={logo}
+              alt="Nightfall Logo"
               width="40"
               height="30"
               className="d-inline-block align-text-top"
