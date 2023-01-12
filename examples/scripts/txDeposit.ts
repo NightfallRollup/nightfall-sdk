@@ -7,7 +7,7 @@ const main = async () => {
 
   try {
     // # 1 Create an instance of User (mnemonic is optional)
-    // Not providing an existing mnemonic creates generates new Nightfall keys
+    // Not providing an existing mnemonic generates new Nightfall keys
     user = await UserFactory.create({
       clientApiUrl: config.clientApiUrl,
       nightfallMnemonic: config.nightfallMnemonic,
