@@ -1,37 +1,59 @@
 import Joi, { CustomHelpers, ValidationError } from "joi";
 import { NightfallSdkError } from "../utils/error";
-import { TX_FEE_WEI_DEFAULT } from "./constants";
-import gen from 'general-number';
+import { CONTRACT_SHIELD, TX_FEE_WEI_DEFAULT } from "./constants";
+import gen from "general-number";
 
 const { GN } = gen;
 
-const isValidL2TokenAddress = (tokenAddress: string, helpers: CustomHelpers) => {
-  const binAddress = (new GN(tokenAddress)).binary;
-  const isValid = binAddress.charAt(0) === '1' && binAddress.charAt(1) === '1' && Number(binAddress.substring(61,93)) === 0;
+const isValidL2TokenAddress = (
+  tokenAddress: string,
+  helpers: CustomHelpers,
+) => {
+  const binAddress = new GN(tokenAddress).binary;
+  const isValid =
+    binAddress.charAt(0) === "1" &&
+    binAddress.charAt(1) === "1" &&
+    Number(binAddress.substring(61, 93)) === 0;
   if (!isValid)
-    return helpers.message({ custom: "Invalid L2TokenAddress, review Address" });
+    return helpers.message({
+      custom: "Invalid L2TokenAddress, review Address",
+    });
   return tokenAddress;
 };
 
 const isValidSalt = (salt: string, helpers: CustomHelpers) => {
-  const isValid = BigInt(salt) < BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+  const isValid =
+    BigInt(salt) <
+    BigInt(
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    );
   if (!isValid)
-    return helpers.message({ custom: "Invalid salt. It should be an element of BN_128 field" });
+    return helpers.message({
+      custom: "Invalid salt. It should be an element of BN_128 field",
+    });
   return salt;
 };
 
-const isValidTokenId = (tokenId: string|number, helpers: CustomHelpers) => {
+const isValidTokenId = (tokenId: string | number, helpers: CustomHelpers) => {
   let isValid = typeof tokenId === "string" || typeof tokenId === "number";
   if (!isValid)
-    return helpers.message({ custom: "Invalid tokenId, should be number or string" });
+    return helpers.message({
+      custom: "Invalid tokenId, should be number or string",
+    });
 
-  const tokenIdStr = typeof tokenId === "string" ? tokenId.trim() : tokenId.toString();
-  isValid = BigInt(tokenIdStr) < BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+  const tokenIdStr =
+    typeof tokenId === "string" ? tokenId.trim() : tokenId.toString();
+  isValid =
+    BigInt(tokenIdStr) <
+    BigInt(
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+    );
   if (!isValid)
-    return helpers.message({ custom: "Invalid tokenId, should be an element of BN_128 field" });
+    return helpers.message({
+      custom: "Invalid tokenId, should be an element of BN_128 field",
+    });
   return tokenIdStr;
 };
-
 
 // See https://joi.dev/tester/
 
@@ -42,6 +64,12 @@ export const createOptions = Joi.object({
   ethereumPrivateKey: Joi.string().trim().pattern(PATTERN_ETH_PRIVATE_KEY),
   nightfallMnemonic: Joi.string().trim(),
 }).with("ethereumPrivateKey", "blockchainWsUrl");
+
+export const getContractAddressOptions = Joi.object({
+  contractName: Joi.string()
+    .required()
+    .valid(CONTRACT_SHIELD, "ERC20Mock", "ERC721Mock", "ERC1155Mock"),
+});
 
 const makeTransaction = Joi.object({
   tokenContractAddress: Joi.string().trim().required(),

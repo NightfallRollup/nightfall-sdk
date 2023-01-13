@@ -8,30 +8,22 @@ const main = async () => {
   try {
     // # 1 Create an instance of User
     userSender = await UserFactory.create({
-      blockchainWsUrl: config.blockchainWsUrl,
       clientApiUrl: config.clientApiUrl,
       ethereumPrivateKey: config.ethereumPrivateKey,
       nightfallMnemonic: config.nightfallMnemonic,
+      blockchainWsUrl: config.blockchainWsUrl,
     });
 
-    // # 2 [OPTIONAL] For this example, we create a 2nd instance
+    // # 2 [OPTIONAL] For this example, we create a 2nd User
+    // For simplicity, we re-use L1 wallet,
+    // but we skip the mnemonic to generate new keys or 'a different wallet'
     userRecipient = await UserFactory.create({
-      blockchainWsUrl: config.blockchainWsUrl,
       clientApiUrl: config.clientApiUrl,
       ethereumPrivateKey: config.ethereumPrivateKey,
+      blockchainWsUrl: config.blockchainWsUrl,
     });
 
-    // # 3 [OPTIONAL] If you did not pass a mnemonic, you can retrieve it
-    const mnemonic = userSender.getNightfallMnemonic();
-
-    // # 4 [OPTIONAL] You can check API Client, blockchain ws connection
-    const isClientAlive = await userSender.isClientAlive();
-    const isWeb3WsAlive = await userSender.isWeb3WsAlive();
-    console.log(
-      `API Client alive: ${isClientAlive}, blockchain ws alive: ${isWeb3WsAlive}`,
-    );
-
-    // # 5 Make transfer
+    // # 3 Make transfer
     const txReceipts = await userSender.makeTransfer({
       tokenContractAddress: config.tokenContractAddress,
       value: config.value,
@@ -41,13 +33,13 @@ const main = async () => {
     });
     console.log("Transaction receipts", txReceipts);
 
-    // # 6 [OPTIONAL] You can check the transaction hash
+    // # 4 [OPTIONAL] You can check the transaction hash
     console.log(
-      "Nightfall deposit tx hashes",
+      "Nightfall transfer tx hashes",
       userSender.nightfallTransferTxHashes,
     );
 
-    // # 7 [OPTIONAL] You can check transfers that are not yet in a block
+    // # 5 [OPTIONAL] You can check transfers that are not yet in a block
     const pendingTransfers = await userSender.checkPendingTransfers();
     console.log("Pending balances", pendingTransfers);
   } catch (error) {
