@@ -28,10 +28,6 @@ const main = async () => {
       "Nightfall withdrawal tx hashes",
       user.nightfallWithdrawalTxHashes,
     );
-
-    // # 4 [OPTIONAL] You can check transfers that are not yet in a block
-    const pendingTransfers = await user.checkPendingTransfers();
-    console.log("Pending ****************", pendingTransfers);
   } catch (error) {
     console.log(error);
     process.exit(1);

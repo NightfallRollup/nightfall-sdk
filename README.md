@@ -21,7 +21,7 @@ Visit the main repo for more details about the [Nightfall protocol](https://gith
 
 ## SDK requirements (Nightfall Client)
 
-To use the SDK a Nightfall Client must be up and running.
+**To use the SDK a Nightfall Client must be up and running**.
 
 The Client is one of the key services composing Nightfall architecture. It enables interactions with the protocol via API calls, for example enables all available transactions facilitating the generation zero-knowledge proofs.
 
@@ -56,7 +56,7 @@ To get a good idea of how to interact with Nightfall using the SDK, we provide a
 
 The SDK is a library, so it does not use environment variables (except for tests and logs). However, the example scripts require a few parameters, some of them sensitive.
 
-As such, the scripts will use a `config` object that preloads env vars from a file. We suggest to create a file per environments.
+As such, the scripts use a [config](./examples/scripts/appConfig.ts) object that preloads env vars from a file. We suggest to create a file per environment.
 
 ```bash
 # Contents of examples/scripts/.env.ganache (based on .env.example)
@@ -67,7 +67,8 @@ APP_NIGHTFALL_MNEMONIC= # A bip39 mnemonic
 APP_ETH_PRIVATE_KEY=0x4775af73d6dc84a0ae76f8726bda4b9ecf187c377229cb39e1afa7a18236a69e
 APP_BLOCKCHAIN_WEBSOCKET_URL=ws://localhost:8546
 
-# Monitor the local deployment and double-check the contract addresses below
+# When running Nightfall in Ganache
+# use `npm run utils:ganache:contract-addresses` to populate the vars below
 APP_TOKEN_ERC20=0x7F68ba0dB1D62fB166758Fe5Ef10853537F8DFc5
 APP_TOKEN_ERC721=0x60234EB1380175818ca2c22Fa64Eee04e174fbE2
 APP_TOKEN_ERC1155=0xe28C7F9D1a79677F2C48BdcD678197bDa40b883e
@@ -129,7 +130,7 @@ Learn how to:
 
 - Create an SDK instance via `UserFactory` class
 - Make a transfer
-- Check spent balances not yet included in an L2 block - TODO
+- Check spent balances not yet included in an L2 block
 
 :bulb: For making a transfer an already existing account in L2 with balance is required. This can be achieved by saving the mnemonic used for previous deposits and adding it to the .env file.
 
@@ -146,7 +147,6 @@ Learn how to:
 
 - Create an SDK instance via `UserFactory` class
 - Make a withdrawal
-- Check spent balances not yet included in an L2 block - TODO
 
 :bulb: For making a withdrawal an already existing account in L2 with balance is required. This can be achieved by saving the mnemonic used for previous deposits and adding it to the .env file.
 
@@ -162,7 +162,7 @@ Learn how to create an SDK instance via `UserFactory` class and finalise a previ
 
 :bulb: To finalise a withdrawal, update `withdrawTxHashL2` in `txWithdrawalFinalise.ts`. Run the script after the cooling off period to get the funds back to L1.
 
-```
+```bash
 npm run eg:[network]:finalise-withdrawal
 ```
 
@@ -172,7 +172,7 @@ See [balances.ts](/examples/scripts/balances.ts).
 
 Learn how to create an SDK instance via `UserFactory` class and check balances in Nightfall.
 
-```
+```bash
 npm run eg:[network]:balances
 ```
 
@@ -182,7 +182,7 @@ See [commitmentsExport.ts](/examples/scripts/commitmentsExport.ts).
 
 Learn how to export commitments to prevent losing L2 funds.
 
-```
+```bash
 npm run eg:[network]:export-commitments
 ```
 
@@ -194,8 +194,16 @@ Learn how to import already exported Nightfall commitments.
 
 :bulb: Commitments are exported to a JSON file. The same file should be used for the import. Make sure that the import was successful by checking the balance in L2.
 
-```
+```bash
 npm run eg:[network]:import-commitments
+```
+
+#### Other scripts
+
+When running Nightfall in Ganache, the following Mock Tokens are deployed: ERC20Mock, ERC721Mock, ERC1155Mock. Use the script below to learn the addresses:
+
+```bash
+npm run utils:ganache:contract-addresses
 ```
 
 ### Example web app
@@ -223,14 +231,14 @@ Then, import a ganache account with Test token to be able to execute transaction
 
 Open the repository, navigate to the web-app and install the dependencies:
 
-```
+```bash
 cd examples/web-app
 npm install
 ```
 
 Navigate to the root directory and run the following script. The app is running on port 4000.
 
-```
+```bash
 cd ../..
 npm run start-react-app
 ```
