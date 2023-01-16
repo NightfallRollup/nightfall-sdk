@@ -1,6 +1,6 @@
 {
   "name": "nightfall-sdk",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "SDK for interacting with Nightfall",
   "keywords": [
     "nightfall",
@@ -95,6 +95,13 @@
     "eg:goerli:balances": "ts-node -r dotenv/config examples/scripts/balances.ts dotenv_config_path=./examples/scripts/.env.goerli",
     "eg:goerli:export-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsExport.ts dotenv_config_path=./examples/scripts/.env.goerli",
     "eg:goerli:import-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsImport.ts dotenv_config_path=./examples/scripts/.env.goerli",
+    "eg:edge:deposit": "ts-node -r dotenv/config examples/scripts/txDeposit.ts dotenv_config_path=./examples/scripts/.env.edge dotenv_config_debug=true",
+    "eg:edge:transfer": "ts-node -r dotenv/config examples/scripts/txTransfer.ts dotenv_config_path=./examples/scripts/.env.edge",
+    "eg:edge:withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawal.ts dotenv_config_path=./examples/scripts/.env.edge",
+    "eg:edge:finalise-withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawalFinalise.ts dotenv_config_path=./examples/scripts/.env.edge",
+    "eg:edge:balances": "ts-node -r dotenv/config examples/scripts/balances.ts dotenv_config_path=./examples/scripts/.env.edge",
+    "eg:edge:export-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsExport.ts dotenv_config_path=./examples/scripts/.env.edge",
+    "eg:edge:import-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsImport.ts dotenv_config_path=./examples/scripts/.env.edge",
     "start-react-app": "npm run build && cd examples/web-app/ && npm start"
   },
   "release": {

@@ -23,10 +23,15 @@ export async function whichTokenStandard(
 ): Promise<string> {
   logger.debug({ contractAddress }, "whichTokenStandard");
 
-  const abi = erc165Abi as unknown as AbiItem;
-  const erc165 = new web3.eth.Contract(abi, contractAddress);
-
   try {
+    const abi = erc165Abi as unknown as AbiItem;
+    const erc165 = new web3.eth.Contract(abi, contractAddress);
+    
+    const funcSelector = web3.utils.keccak256('supportsInterface(bytes4)').slice(2,10);
+    const bytecode = await web3.eth.getCode(contractAddress);
+
+    if (!bytecode.includes(funcSelector)) return ERC20;
+
     const interface721 = await erc165.methods
       .supportsInterface(ERC721_INTERFACE_ID)
       .call();

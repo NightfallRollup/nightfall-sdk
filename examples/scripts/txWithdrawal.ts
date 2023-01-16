@@ -17,9 +17,10 @@ const main = async () => {
     const txReceipts = await user.makeWithdrawal({
       tokenContractAddress: config.tokenContractAddress,
       value: config.value,
-      // tokenId: config.tokenId,
+      tokenId: config.tokenId,
       recipientEthAddress: user.ethAddress,
-      // isOffChain: true,
+      isOffChain: true,
+      feeWei: config.feeWei,
     });
     console.log("Transaction receipts", txReceipts);
 
