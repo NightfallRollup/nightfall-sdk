@@ -27,9 +27,10 @@ const main = async () => {
     const txReceipts = await userSender.makeTransfer({
       tokenContractAddress: config.tokenContractAddress,
       value: config.value,
-      // tokenId: config.tokenId,
+      tokenId: config.tokenId,
       recipientNightfallAddress: userRecipient.getNightfallAddress(),
-      // isOffChain: true,
+      isOffChain: true,
+      feeWei: config.feeWei,
     });
     console.log("Transaction receipts", txReceipts);
 
