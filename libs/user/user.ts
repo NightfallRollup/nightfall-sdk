@@ -139,18 +139,6 @@ class User {
   }
 
   /**
-   * Allow user to check client API availability and blockchain ws connection
-   *
-   * @async
-   * @deprecated checkStatus - Will be removed in upcoming versions
-   */
-  async checkStatus() {
-    throw new NightfallSdkError(
-      "To be deprecated: use `isClientAlive`, `isWeb3WsAlive`",
-    );
-  }
-
-  /**
    * Allow user to check client API availability
    *
    * @async
