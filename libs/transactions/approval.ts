@@ -1,7 +1,7 @@
 import type Web3 from "web3";
 import { logger, NightfallSdkError } from "../utils";
-// import type { Token } from "../tokens";
-import { submitTransaction } from "./helpers/submit";
+import { createSignedTransaction } from "./helpers/createSignedTx";
+import { sendSignedTransaction } from "./helpers/sendSignedTx";
 import type { TransactionReceipt } from "web3-core";
 
 /**
@@ -50,13 +50,14 @@ export async function createAndSubmitApproval(
       );
       logger.debug({ unsignedTx }, "Approval tx, unsigned");
 
-      txReceipt = await submitTransaction(
+      const signedTxL1 = await createSignedTransaction(
         ownerEthAddress,
         ownerEthPrivateKey,
         token.contractAddress,
         unsignedTx,
         web3,
       );
+      txReceipt = await sendSignedTransaction(signedTxL1, web3);
     } else {
       txReceipt = await token.approve(ownerEthAddress, spenderEthAddress);
     }

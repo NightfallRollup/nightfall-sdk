@@ -1,21 +1,23 @@
 import { createAndSubmitApproval } from "./approval";
-import { createAndSubmitDeposit } from "./deposit";
-import { createAndSubmitTransfer } from "./transfer";
-import { createAndSubmitWithdrawal } from "./withdrawal";
-import { createAndSubmitTokenise } from "./l2Tokenise";
-import { createAndSubmitBurn } from "./l2Burn";
-import { createAndSubmitFinaliseWithdrawal } from "./withdrawalFinalise";
+import { createDepositTx } from "./deposit";
+import { createTransferTx } from "./transfer";
+import { createWithdrawalTx } from "./withdrawal";
+import { createTokeniseTx } from "./l2Tokenise";
+import { createBurnTx } from "./l2Burn";
+import { createFinaliseWithdrawalTx } from "./withdrawalFinalise";
 import { stringValueToWei } from "./helpers/stringValueToWei";
 import { prepareTokenValueTokenId } from "./helpers/prepareTokenValueTokenId";
+import { enqueueSendingSignedTxs } from "./helpers/enqueueSendingSignedTxs";
 
 export {
   createAndSubmitApproval,
-  createAndSubmitDeposit,
-  createAndSubmitTransfer,
-  createAndSubmitWithdrawal,
-  createAndSubmitTokenise,
-  createAndSubmitBurn,
-  createAndSubmitFinaliseWithdrawal,
+  createDepositTx,
+  createTransferTx,
+  createWithdrawalTx,
+  createTokeniseTx,
+  createBurnTx,
+  createFinaliseWithdrawalTx,
   stringValueToWei,
   prepareTokenValueTokenId,
+  enqueueSendingSignedTxs,
 };

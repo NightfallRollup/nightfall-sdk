@@ -1,13 +1,14 @@
 import { logger } from "../utils";
 import type { Client } from "../client";
 import type { NightfallZkpKeys } from "../nightfall/types";
-import type { OffChainTransactionReceipt } from "./types";
+import type { TransactionResult } from "./types";
 
 /**
  * Handle the flow for tokenisation transaction (tx)
+ * FYI This is a Nightfall native transaction
  *
  * @async
- * @function createAndSubmitTokenise
+ * @function createTokeniseTx
  * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
  * @param {Client} client An instance of Client to interact with the API
  * @param {string} tokenAddress Token address to be minted in L2
@@ -15,9 +16,9 @@ import type { OffChainTransactionReceipt } from "./types";
  * @param {string} tokenId The tokenId of the token to be minted
  * @param {string} salt Random Salt
  * @param {string} fee Proposer payment in Wei for the tx in L2
- * @returns {Promise<OffChainTransactionReceipt>}
+ * @returns {Promise<TransactionResult>}
  */
-export async function createAndSubmitTokenise(
+export async function createTokeniseTx(
   ownerZkpKeys: NightfallZkpKeys,
   client: Client,
   tokenAddress: string,
@@ -25,8 +26,8 @@ export async function createAndSubmitTokenise(
   tokenId: string,
   salt: string,
   fee: string,
-): Promise<OffChainTransactionReceipt> {
-  logger.debug("createAndSubmitTokenise");
+): Promise<TransactionResult> {
+  logger.debug("createTokeniseTx");
 
   const resData = await client.tokenise(
     ownerZkpKeys,

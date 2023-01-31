@@ -1,19 +1,15 @@
 import type Web3 from "web3";
 import { logger, NightfallSdkError } from "../utils";
-import { submitTransaction } from "./helpers/submit";
+import { createSignedTransaction } from "./helpers/createSignedTx";
 import type { Client } from "../client";
 import type { NightfallZkpKeys } from "../nightfall/types";
-import type { TransactionReceipt } from "web3-core";
-import type {
-  OffChainTransactionReceipt,
-  OnChainTransactionReceipts,
-} from "./types";
+import type { TransactionResult } from "./types";
 
 /**
  * Handle the flow for withdrawal transaction (tx)
  *
  * @async
- * @function createAndSubmitWithdrawal
+ * @function createWithdrawalTx
  * @param {*} token An instance of Token holding token data such as contract address
  * @param {string} ownerEthAddress Eth address sending the contents of the withdrawal
  * @param {undefined | string} ownerEthPrivateKey Eth private key of the sender to sign the tx
@@ -27,9 +23,9 @@ import type {
  * @param {string} recipientEthAddress Recipient Eth address
  * @param {boolean} isOffChain If true, tx will be sent to the proposer's API (handled off-chain)
  * @throws {NightfallSdkError} Error while broadcasting on-chain tx
- * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
+ * @returns {Promise<TransactionResult>}
  */
-export async function createAndSubmitWithdrawal(
+export async function createWithdrawalTx(
   token: any,
   ownerAddress: string,
   ownerEthPrivateKey: undefined | string,
@@ -42,9 +38,10 @@ export async function createAndSubmitWithdrawal(
   fee: string,
   recipientEthAddress: string,
   isOffChain: boolean,
-): Promise<OnChainTransactionReceipts | OffChainTransactionReceipt> {
-  logger.debug("createAndSubmitWithdrawal");
+): Promise<TransactionResult> {
+  logger.debug("createWithdrawalTx");
 
+  // L2 withdrawal
   const resData = await client.withdraw(
     token,
     ownerZkpKeys,
@@ -56,25 +53,24 @@ export async function createAndSubmitWithdrawal(
   );
   const txReceiptL2 = resData.transaction;
 
-  if (!isOffChain) {
-    const unsignedTx = resData.txDataToSign;
-    logger.debug({ unsignedTx }, "Withdrawal tx, unsigned");
+  if (isOffChain) return { txReceiptL2 };
 
-    let txReceipt: TransactionReceipt;
-    try {
-      txReceipt = await submitTransaction(
-        ownerAddress,
-        ownerEthPrivateKey,
-        shieldContractAddress,
-        unsignedTx,
-        web3,
-      );
-    } catch (err) {
-      logger.child({ resData }).error(err, "Error when submitting transaction");
-      throw new NightfallSdkError(err);
-    }
-    return { txReceipt, txReceiptL2 };
+  // Else, proceed with L1 transaction
+  const unsignedTx = resData.txDataToSign;
+  logger.debug({ unsignedTx }, "Withdrawal tx, unsigned");
+
+  let signedTxL1;
+  try {
+    signedTxL1 = await createSignedTransaction(
+      ownerAddress,
+      ownerEthPrivateKey,
+      shieldContractAddress,
+      unsignedTx,
+      web3,
+    );
+  } catch (err) {
+    logger.child({ resData }).error(err, "Error when submitting transaction");
+    throw new NightfallSdkError(err);
   }
-
-  return { txReceiptL2 };
+  return { signedTxL1, txReceiptL2 };
 }
