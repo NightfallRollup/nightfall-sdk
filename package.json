@@ -8,10 +8,10 @@
     "nightfall_3",
     "nf3"
   ],
-  "main": "./dist/cjs/user/index.js",
+  "main": "./dist/cjs/index.js",
   "exports": {
-    "import": "./dist/esm/user/index.js",
-    "require": "./dist/cjs/user/index.js"
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.js"
   },
   "types": "./dist/types/user/index.d.ts",
   "files": [
@@ -68,7 +68,7 @@
     }
   },
   "scripts": {
-    "build": "rm -rf /dist && npm run build:esm && npm run build:cjs",
+    "build": "rm -rf ./dist && npm run build:esm && npm run build:cjs",
     "build:esm": "tsc",
     "build:cjs": "tsc --module CommonJS -outDir dist/cjs",
     "lint": "eslint . --ext .ts",

@@ -1,4 +1,4 @@
-import { getContractAddress } from "../../../libs/utils";
+import { getContractAddress } from "../../../libs";
 import { config } from "../appConfig";
 
 const main = async () => {

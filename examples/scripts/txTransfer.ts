@@ -1,5 +1,5 @@
-import { UserFactory } from "../../libs/user";
-import { createZkpKeys } from "../../libs/utils";
+import { UserFactory } from "../../libs";
+import { createZkpKeys } from "../../libs";
 import { config } from "./appConfig";
 
 const main = async () => {

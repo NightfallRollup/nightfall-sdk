@@ -1,4 +1,4 @@
-import { createZkpKeys } from "../../../libs/utils";
+import { createZkpKeys } from "../../../libs";
 import { config } from "../appConfig";
 
 const main = async () => {

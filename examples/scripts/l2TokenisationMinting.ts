@@ -1,6 +1,6 @@
-import { UserFactory } from "../../libs/user";
+import { UserFactory } from "../../libs";
+import { randomL2TokenAddress, randomSalt } from "../../libs";
 import { config } from "./appConfig";
-import { randomL2TokenAddress, randomSalt } from "../../libs/utils/random";
 
 const main = async () => {
   let user;
