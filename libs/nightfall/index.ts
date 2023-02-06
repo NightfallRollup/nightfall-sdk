@@ -1,4 +1,11 @@
-import { createZkpKeysAndSubscribeToIncomingKeys } from "./keys";
+import {
+  createZkpKeysAndSubscribeToIncomingKeys,
+  validateOrCreateNfMnemonic,
+} from "./keys";
 import commitmentsFromMnemonic from "./commitmentsFromMnemonic";
 
-export { createZkpKeysAndSubscribeToIncomingKeys, commitmentsFromMnemonic };
+export {
+  createZkpKeysAndSubscribeToIncomingKeys,
+  commitmentsFromMnemonic,
+  validateOrCreateNfMnemonic,
+};

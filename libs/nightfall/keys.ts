@@ -4,12 +4,12 @@ import type { Client } from "../client";
 import type { NightfallKeys } from "./types";
 
 /**
- * Validate given mnemonic or create a mnemonic
+ * Create a bip39 if mnemonic none was given, else validate according to bip39
  *
  * @function validateOrCreateNfMnemonic
  * @param {string} mnemonic
  * @throws {NightfallSdkError} Given mnemonic is not bip39
- * @returns {string} mnemonic <string> if the mnemonic is new or given one is valid
+ * @returns {string} bip39 mnemonic
  */
 export function validateOrCreateNfMnemonic(
   mnemonic: undefined | string,
@@ -31,12 +31,13 @@ export function validateOrCreateNfMnemonic(
 }
 
 /**
- * Create a set of Zero-knowledge proof keys from given/new mnemonic, then subscribe to incoming viewing keys
+ * Derive a set of zero-knowledge proof keys from given/new mnemonic,
+ * then subscribe to incoming viewing keys
  *
  * @function createZkpKeysAndSubscribeToIncomingKeys
  * @param {string} mnemonic
  * @param {Client} client an instance of Client to interact with the API
- * @throws {NightfallSdkError} Something went wrong - CHECK
+ * @throws {NightfallSdkError} Something went wrong
  * @returns {NightfallKeys} NightfallKeys if the mnemonic is new or given one is valid
  */
 export async function createZkpKeysAndSubscribeToIncomingKeys(

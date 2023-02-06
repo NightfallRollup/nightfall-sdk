@@ -1,6 +1,6 @@
 import Joi, { CustomHelpers, ValidationError } from "joi";
 import { NightfallSdkError } from "../utils/error";
-import { CONTRACT_SHIELD, TX_FEE_WEI_DEFAULT } from "./constants";
+import { TX_FEE_WEI_DEFAULT } from "./constants";
 import gen from "general-number";
 
 const { GN } = gen;
@@ -65,15 +65,8 @@ export const createOptions = Joi.object({
   nightfallMnemonic: Joi.string().trim(),
 }).with("ethereumPrivateKey", "blockchainWsUrl");
 
-export const getContractAddressOptions = Joi.object({
-  contractName: Joi.string()
-    .required()
-    .valid(CONTRACT_SHIELD, "ERC20Mock", "ERC721Mock", "ERC1155Mock"),
-});
-
 const makeTransaction = Joi.object({
   tokenContractAddress: Joi.string().trim().required(),
-  tokenErcStandard: Joi.string(), // keep it for a while for compatibility
   value: Joi.string(),
   tokenId: Joi.string(),
   feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),

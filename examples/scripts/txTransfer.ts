@@ -1,9 +1,9 @@
 import { UserFactory } from "../../libs/user";
+import { createZkpKeys } from "../../libs/utils";
 import { config } from "./appConfig";
 
 const main = async () => {
   let userSender;
-  let userRecipient;
 
   try {
     // # 1 Create an instance of User
@@ -14,21 +14,15 @@ const main = async () => {
       blockchainWsUrl: config.blockchainWsUrl,
     });
 
-    // # 2 [OPTIONAL] For this example, we create a 2nd User
-    // For simplicity, we re-use L1 wallet,
-    // but we skip the mnemonic to generate new keys or 'a different wallet'
-    userRecipient = await UserFactory.create({
-      clientApiUrl: config.clientApiUrl,
-      ethereumPrivateKey: config.ethereumPrivateKey,
-      blockchainWsUrl: config.blockchainWsUrl,
-    });
+    // # 2 Make transfer
+    // For this example, we generate a L2 address to receive the transfer
+    const { zkpKeys } = await createZkpKeys(config.clientApiUrl);
 
-    // # 3 Make transfer
     const txReceipts = await userSender.makeTransfer({
       tokenContractAddress: config.tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
-      recipientNightfallAddress: userRecipient.getNightfallAddress(),
+      recipientNightfallAddress: zkpKeys.compressedZkpPublicKey,
       isOffChain: true,
       feeWei: config.feeWei,
     });
@@ -48,7 +42,6 @@ const main = async () => {
     process.exit(1);
   } finally {
     userSender.close();
-    userRecipient.close();
     console.log("Bye bye");
   }
 };

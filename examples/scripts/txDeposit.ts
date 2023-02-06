@@ -6,8 +6,8 @@ const main = async () => {
   let user;
 
   try {
-    // # 1 Create an instance of User (mnemonic is optional)
-    // Not providing an existing mnemonic generates new Nightfall keys
+    // # 1 Create an instance of User (bip39 mnemonic is optional)
+    // Will generate a new bip39 mnemonic if you don't pass one and derive a new set of zero-knowledge proof keys
     user = await UserFactory.create({
       clientApiUrl: config.clientApiUrl,
       nightfallMnemonic: config.nightfallMnemonic,
@@ -15,7 +15,7 @@ const main = async () => {
       blockchainWsUrl: config.blockchainWsUrl,
     });
 
-    // # 2 [OPTIONAL] If you did not pass a mnemonic, you can retrieve it
+    // # 2 [OPTIONAL] If you did not pass a mnemonic, make sure to retrieve it
     const mnemonic = user.getNightfallMnemonic();
 
     // # 3 [OPTIONAL] You can check API Client, blockchain ws connection

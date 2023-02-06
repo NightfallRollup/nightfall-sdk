@@ -19,13 +19,8 @@ export interface UserConstructor {
   zkpKeys: any;
 }
 
-export interface UserGetContractAddress {
-  contractName: string;
-}
-
 export interface UserMakeTransaction {
   tokenContractAddress: string;
-  tokenErcStandard?: string; // keep it for a while for compatibility
   value?: string;
   tokenId?: string;
   feeWei?: string;

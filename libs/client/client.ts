@@ -81,7 +81,7 @@ class Client {
   }
 
   /**
-   * Make POST request to get a set of Zero-knowledge proof keys
+   * Make POST request to derive a set of zero-knowledge proof keys
    *
    * @method generateZkpKeysFromMnemonic
    * @param {string} validMnemonic A valid bip39 mnemonic
@@ -110,7 +110,7 @@ class Client {
    * Make POST request to subscribe to incoming viewing keys
    *
    * @method subscribeToIncomingViewingKeys
-   * @param {NightfallZkpKeys} zkpKeys A set of Zero-knowledge proof keys
+   * @param {NightfallZkpKeys} zkpKeys A set of zero-knowledge proof keys
    * @throws {NightfallSdkError} Bad response
    * @returns {Promise<string>} Should resolve `string` (success) if request is successful
    */
@@ -138,7 +138,7 @@ class Client {
    * @async
    * @method deposit
    * @param {*} token An instance of Token holding token data such as contract address
-   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
+   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
    * @param {string} value The amount in Wei of the token to be deposited
    * @param {string} tokenId The tokenId of the token to be deposited
    * @param {string} fee Proposer payment in Wei for the tx in L2
@@ -176,7 +176,7 @@ class Client {
    *
    * @async
    * @method tokenise
-   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
+   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
    * @param {string} tokenAddress Token address to be minted in L2
    * @param {string} value The amount in Wei of the token to be minted
    * @param {string} tokenId The tokenId of the token to be minted
@@ -218,7 +218,7 @@ class Client {
    * @async
    * @method transfer
    * @param {*} token An instance of Token holding token data such as contract address
-   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
+   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
    * @param {RecipientNightfallData} recipientNightfallData An object with [valueWei], [recipientCompressedZkpPublicKey]
    * @param {string} tokenId The tokenId of the token to be transferred
    * @param {string} fee Proposer payment in Wei for the tx in L2
@@ -262,7 +262,7 @@ class Client {
    *
    * @async
    * @method burn
-   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
+   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
    * @param {string} tokenAddress Token address of the token to be burnt in L2
    * @param {string} value The amount in Wei of the token to be burnt
    * @param {string} tokenId The tokenId of the token to be burnt
@@ -302,7 +302,7 @@ class Client {
    * @async
    * @method withdraw
    * @param {*} token An instance of Token holding token data such as contract address
-   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
+   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
    * @param {string} value The amount in Wei of the token to be withdrawn
    * @param {string} tokenId The tokenId of the token to be withdrawn
    * @param {string} fee Proposer payment in Wei for the tx in L2
@@ -369,7 +369,7 @@ class Client {
    *
    * @async
    * @method getPendingDeposits
-   * @param {NightfallZkpKeys} zkpKeys Sender's set of Zero-knowledge proof keys
+   * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
    * @param {string[]} tokenContractAddresses A list of token addresses
    * @throws {NightfallSdkError} Bad response
    * @returns {*}

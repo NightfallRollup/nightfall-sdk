@@ -87,6 +87,7 @@
     "eg:ganache:import-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsImport.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "utils:ganache:mint-721": "ts-node -r dotenv/config examples/scripts/utils/mint721.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "utils:ganache:contract-addresses": "ts-node -r dotenv/config examples/scripts/utils/ercMockContractAddresses.ts dotenv_config_path=./examples/scripts/.env.ganache",
+    "utils:ganache:l2-keys": "ts-node -r dotenv/config examples/scripts/utils/nightfallKeys.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:goerli:deposit": "ts-node -r dotenv/config examples/scripts/txDeposit.ts dotenv_config_path=./examples/scripts/.env.goerli dotenv_config_debug=true",
     "eg:goerli:transfer": "ts-node -r dotenv/config examples/scripts/txTransfer.ts dotenv_config_path=./examples/scripts/.env.goerli",
     "eg:goerli:withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawal.ts dotenv_config_path=./examples/scripts/.env.goerli",

@@ -8,7 +8,7 @@ Software Development Kit for interacting with Nightfall.
 
 Clone the repo and [play with the scripts and the web app](#play-with-the-sdk-repository), or [install it as a dependency](#install-the-sdk-as-a-dependency) from NPM.
 
-Visit the main repo for more details about the [Nightfall protocol](https://github.com/EYBlockchain/nightfall_3/blob/master/doc/how_it_works.md).
+More about [Nightfall protocol](https://github.com/NightfallRollup/nightfall-docs).
 
 ## SDK core features
 
@@ -23,13 +23,18 @@ Visit the main repo for more details about the [Nightfall protocol](https://gith
 
 **To use the SDK a Nightfall Client must be up and running**.
 
-The Client is one of the key services composing Nightfall architecture. It enables interactions with the protocol via API calls, for example enables all available transactions facilitating the generation zero-knowledge proofs.
+The Client is one of the key services composing Nightfall architecture. It enables interactions with the protocol via API calls, for example enables all available transactions facilitating the generation of zero-knowledge proofs.
 
 ### Set up a local Client
 
-Run a local Client by [running the Nightfall project](https://github.com/EYBlockchain/nightfall_3#to-start-the-application).
+Run a local Client by [running the Nightfall project](https://github.com/EYBlockchain/nightfall_3#to-start-the-application). We recommend the following flags:
 
-When running Nightfall locally, a local Proposer application is also needed:
+```bash
+# From Nightfall dir root
+./bin/start-nightfall -g -d
+```
+
+When running Nightfall locally, a local Proposer application is also needed to produce blocks:
 
 ```bash
 # From Nightfall dir root
@@ -38,7 +43,7 @@ When running Nightfall locally, a local Proposer application is also needed:
 
 ## Play with the SDK repository
 
-Run the example scripts available by cloning this repository. Note that Node 16 is required.
+Run the example scripts available by cloning this repository. Node 16 is required.
 
 ```bash
 git clone git@github.com:NightfallRollup/nightfall-sdk.git
@@ -60,7 +65,7 @@ As such, the scripts use a [config](./examples/scripts/appConfig.ts) object that
 
 ```bash
 # Contents of examples/scripts/.env.ganache (based on .env.example)
-LOG_LEVEL=info
+LOG_LEVEL=warn
 
 APP_CLIENT_API_URL=http://localhost:8080
 APP_NIGHTFALL_MNEMONIC= # A bip39 mnemonic
@@ -75,11 +80,12 @@ APP_TOKEN_ERC1155=0xe28C7F9D1a79677F2C48BdcD678197bDa40b883e
 
 APP_TX_VALUE=0.001
 APP_TX_TOKEN_ID=28948022309329048855892746252171976963317496166410141009864396001978282410021
+APP_TX_FEE_WEI=0
 ```
 
 #### Nightfall keys
 
-To transact on Nightfall L2 a set of zero-knowledge keys is needed. This can be derived from a bip39 mnemonic, which can be passed as an env var.
+Similar to Ethereum keys, a set of zero-knowledge proof keys (zkpKeys) is required to transact in Nightfall. This can be derived from a bip39 mnemonic, which can be passed as an env var.
 
 If no mnemonic is provided, a new mnemonic is generated upon each running of any of the scripts. This can be convenient to play with deposits, but it also means that a new Nightfall "wallet" is generated each time.
 
@@ -89,9 +95,13 @@ If no mnemonic is provided, a new mnemonic is generated upon each running of any
 user.getNightfallMnemonic();
 ```
 
+Learn more about [Nightfall zkpKeys](https://github.com/NightfallRollup/nightfall-docs/blob/main/protocol/keys.md#keys).
+
 #### Nightfall transactions and L2 balance
 
-Nightfall is an optimistic rollup. Start by making a deposit transaction, then wait until the transaction is included in an L2 block to have balance. After this, you can perform transfers and withdrawals.
+Start by making a deposit transaction, then wait until the transaction is included in an L2 block to have balance.
+
+After depositing funds, you can perform transfers and withdrawals. Nightfall is an optimistic rollup, so after withdrawals are included in an L2 block you must wait for some "challenge period" to expire, after which it is possible to "finalise the withdrawal" and move the funds back to L1. The challenge period is often 1 week, but can be configured per deployment.
 
 Having said this, note that Nightfall supports a number of native transactions for tokenisation, ie managing assets exclusively on L2.
 
@@ -102,6 +112,21 @@ See [scripts](/examples/scripts/).
 All of the scripts are explained in short detail below. Run them using the given commands (present in the project package.json `scripts`).
 
 **We strongly recommend reading the [Getting started](#getting-started) section first**.
+
+#### User Factory
+
+All scripts begin with an instantiation of the `UserFactory` class, which requires the following params:
+
+- `clientApiUrl`: HTTP URL of a running Nightfall Client
+- `blockchainWsUrl`: [optional] Websocket URL of a blockchain node - not needed when using SDK in browser
+- `ethereumPrivateKey`: [optional] Ethereum (Eth) private key to sign L1 transactions - not needed when using SDK in browser
+- `nightfallMnemonic`: [optional] bip39 mnemonic to derive a set of zkpKeys
+
+**The SDK can be used in browser applications that can connect with MetaMask**. To signal this, do not provide an `ethereumPrivateKey` (in which `blockchainWsUrl` can be ignored too).
+
+Nightfall is a L2 protocol, but for instance deposits require to sign a L1 transaction which is why the Eth private key is required. Same happens when finalising a withdrawal, once the challenge period has expired. Other operations like transfer and withdrawal can be performed on-chain too, but this is not recommended.
+
+Regarding zkpKeys, the same set of keys is derived from the mnemonic when instantiating `UserFactory`. But if you don't pass a mnemonic, a new one is created. Make sure to recover the mnemonic to be able to spend the associated commitments.
 
 #### Transaction (Tx) deposit
 
@@ -160,7 +185,7 @@ See [txWithdrawalFinalise.ts](/examples/scripts/txWithdrawalFinalise.ts).
 
 Learn how to create an SDK instance via `UserFactory` class and finalise a previously initiated withdrawal.
 
-:bulb: To finalise a withdrawal, update `withdrawTxHashL2` in `txWithdrawalFinalise.ts`. Run the script after the cooling off period to get the funds back to L1.
+:bulb: To finalise a withdrawal, update `withdrawTxHashL2` in `txWithdrawalFinalise.ts`. Run the script after the challenge period to get the funds back to L1.
 
 ```bash
 npm run eg:[network]:finalise-withdrawal
@@ -196,6 +221,24 @@ Learn how to import already exported Nightfall commitments.
 
 ```bash
 npm run eg:[network]:import-commitments
+```
+
+#### Nightfall keys util
+
+See [nightfallKeys.ts](/examples/scripts/utils/nightfallKeys.ts).
+
+Following from [Nightfall keys](#nightfall-keys) above, use this script to obtain a set of zkpKeys from a given/new bip39 mnemonic.
+
+The script returns the `nightfallMnemonic` as string, and the set of `zkpKeys` which contains:
+
+- **rootKey**: derived from the mnemonic
+- **nullifierKey**: used for spending commitments, derived from rootKey
+- **zkpPrivateKey**: private key, derived from rootKey
+- **zkpPublicKey**: array of public keys, derived from rootKey
+- **compressedZkpPublicKey**: **a.k.a. Nightfall address**, obtained from zkpPublicKey
+
+```bash
+npm run utils:ganache:l2-keys
 ```
 
 #### Other scripts
