@@ -300,11 +300,17 @@ Import `UserFactory` to open an SDK instance and interact with the methods avail
 import { UserFactory } from 'nightfall-sdk';
 ```
 
+A part from the factory, there are a number of utils available:
+
+- `createZkpKeys`: derive a set of zkpKeys from given/new mnemonic
+- `getContractAddress`: get Nightfall contract address by name
+- `NightfallSdkError`: see [error handling](#error-handling)
+
 Refer to the [example scripts](#example-scripts) to understand how to integrate the SDK into your codebase.
 
 ## Error handling
 
-Today we are handling errors using the `NightfallSdkError` class, which is a simple implementation of the Error class. We might improve this in the future, but in the meantime make sure to wrap all SDK calls within a `try/catch` block.
+Today we are handle errors using the `NightfallSdkError` class, which is a simple implementation of the `Error` class. We might improve this in the future, but in the meantime make sure to wrap all SDK calls within a `try/catch` block.
 
 ## Need help?
 
