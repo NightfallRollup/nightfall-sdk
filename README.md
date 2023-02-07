@@ -101,7 +101,7 @@ Learn more about [Nightfall zkpKeys](https://github.com/NightfallRollup/nightfal
 
 Start by making a deposit transaction, then wait until the transaction is included in an L2 block to have balance.
 
-After depositing funds, you can perform transfers and withdrawals. Nightfall is an optimistic rollup, so after withdrawals are included in an L2 block you must wait for some "challenge period" to expire, after which it is possible to "finalise the withdrawal" and move the funds back to L1. The challenge period is often 1 week, but can be configured per deployment.
+After depositing funds, you can perform transfers and withdrawals. Nightfall is an optimistic rollup, so after withdrawals are included in an L2 block you must wait for some "challenge period" to expire, then it is possible to "finalise the withdrawal" and move the funds back to L1. The challenge period is often 1 week, but can be configured per deployment.
 
 Having said this, note that Nightfall supports a number of native transactions for tokenisation, ie managing assets exclusively on L2.
 
@@ -122,7 +122,7 @@ All scripts begin with an instantiation of the `UserFactory` class, which requir
 - `ethereumPrivateKey`: [optional] Ethereum (Eth) private key to sign L1 transactions - not needed when using SDK in browser
 - `nightfallMnemonic`: [optional] bip39 mnemonic to derive a set of zkpKeys
 
-**The SDK can be used in browser applications that can connect with MetaMask**. To signal this, do not provide an `ethereumPrivateKey` (in which `blockchainWsUrl` can be ignored too).
+**The SDK can be used in browser applications that can connect with MetaMask**. To signal this, do not provide an `ethereumPrivateKey` (in such case `blockchainWsUrl` can be ignored too).
 
 Nightfall is a L2 protocol, but for instance deposits require to sign a L1 transaction which is why the Eth private key is required. Same happens when finalising a withdrawal, once the challenge period has expired. Other operations like transfer and withdrawal can be performed on-chain too, but this is not recommended.
 
