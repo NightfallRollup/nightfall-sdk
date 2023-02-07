@@ -310,7 +310,7 @@ Refer to the [example scripts](#example-scripts) to understand how to integrate 
 
 ## Error handling
 
-Today we are handle errors using the `NightfallSdkError` class, which is a simple implementation of the `Error` class. We might improve this in the future, but in the meantime make sure to wrap all SDK calls within a `try/catch` block.
+Today we handle errors using the `NightfallSdkError` class, which is a simple implementation of the `Error` class. We might improve this in the future, but in the meantime make sure to wrap all SDK calls within a `try/catch` block.
 
 ## Need help?
 
