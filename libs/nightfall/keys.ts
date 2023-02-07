@@ -4,7 +4,7 @@ import type { Client } from "../client";
 import type { NightfallKeys } from "./types";
 
 /**
- * Create a bip39 if mnemonic none was given, else validate according to bip39
+ * Create a bip39 mnemonic if none was given, else validate according to bip39
  *
  * @function validateOrCreateNfMnemonic
  * @param {string} mnemonic

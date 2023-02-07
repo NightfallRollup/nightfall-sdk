@@ -109,13 +109,13 @@ Having said this, note that Nightfall supports a number of native transactions f
 
 See [scripts](/examples/scripts/).
 
-All of the scripts are explained in short detail below. Run them using the given commands (present in the project package.json `scripts`).
+All scripts are explained in short detail below. Run them using the given commands (present in the project package.json `scripts`).
 
 **We strongly recommend reading the [Getting started](#getting-started) section first**.
 
 #### User Factory
 
-All scripts begin with an instantiation of the `UserFactory` class, which requires the following params:
+Most of the examples begin with an instantiation of the `UserFactory` class, which requires the following params:
 
 - `clientApiUrl`: HTTP URL of a running Nightfall Client
 - `blockchainWsUrl`: [optional] Websocket URL of a blockchain node - not needed when using SDK in browser
