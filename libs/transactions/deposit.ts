@@ -1,16 +1,15 @@
 import type Web3 from "web3";
 import { logger, NightfallSdkError } from "../utils";
-import { submitTransaction } from "./helpers/submit";
+import { createSignedTransaction } from "./helpers/createSignedTx";
 import type { Client } from "../client";
 import type { NightfallZkpKeys } from "../nightfall/types";
-import type { TransactionReceipt } from "web3-core";
-import type { OnChainTransactionReceipts } from "./types";
+import type { TransactionResult } from "./types";
 
 /**
  * Handle the flow for deposit transaction (tx)
  *
  * @async
- * @function createAndSubmitDeposit
+ * @function createDepositTx
  * @param {*} token An instance of Token holding token data such as contract address
  * @param {string} ownerEthAddress Eth address sending the contents of the deposit
  * @param {undefined | string} ownerEthPrivateKey Eth private key of the sender to sign the tx
@@ -22,9 +21,9 @@ import type { OnChainTransactionReceipts } from "./types";
  * @param {string} tokenId The tokenId of an erc721
  * @param {string} fee Proposer payment in Wei for the tx in L2
  * @throws {NightfallSdkError} Error while broadcasting tx
- * @returns {Promise<OnChainTransactionReceipts>}
+ * @returns {Promise<TransactionResult>}
  */
-export async function createAndSubmitDeposit(
+export async function createDepositTx(
   token: any,
   ownerEthAddress: string,
   ownerEthPrivateKey: undefined | string,
@@ -35,9 +34,10 @@ export async function createAndSubmitDeposit(
   value: string,
   tokenId: string,
   fee: string,
-): Promise<OnChainTransactionReceipts> {
-  logger.debug("createAndSubmitDeposit");
+): Promise<TransactionResult> {
+  logger.debug("createDepositTx");
 
+  // L2 deposit
   const resData = await client.deposit(
     token,
     ownerZkpKeys,
@@ -49,9 +49,10 @@ export async function createAndSubmitDeposit(
   const unsignedTx = resData.txDataToSign;
   logger.debug({ unsignedTx }, "Deposit tx, unsigned");
 
-  let txReceipt: TransactionReceipt;
+  // L1 transaction
+  let signedTxL1;
   try {
-    txReceipt = await submitTransaction(
+    signedTxL1 = await createSignedTransaction(
       ownerEthAddress,
       ownerEthPrivateKey,
       shieldContractAddress,
@@ -63,5 +64,5 @@ export async function createAndSubmitDeposit(
     throw new NightfallSdkError(err);
   }
 
-  return { txReceipt, txReceiptL2 };
+  return { signedTxL1, txReceiptL2 };
 }

@@ -108,7 +108,7 @@ export const makeWithdrawalOptions = makeTransaction.append({
 });
 
 export const finaliseWithdrawalOptions = Joi.object({
-  withdrawTxHashL2: Joi.string().trim(),
+  withdrawTxHashL2: Joi.string().trim().required(),
 });
 
 export const checkBalancesOptions = Joi.object({

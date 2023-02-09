@@ -1,14 +1,14 @@
 import type Web3 from "web3";
 import { logger, NightfallSdkError } from "../utils";
-import { submitTransaction } from "./helpers/submit";
+import { createSignedTransaction } from "./helpers/createSignedTx";
 import type { Client } from "../client";
-import type { TransactionReceipt } from "web3-core";
+import type { TransactionResult } from "./types";
 
 /**
  * Handle the flow for finalising previously initiated withdrawal transaction (tx)
  *
  * @async
- * @function createAndSubmitFinaliseWithdrawal
+ * @function createFinaliseWithdrawalTx
  * @param {string} ownerEthAddress Eth address sending the contents of the tx
  * @param {undefined | string} ownerEthPrivateKey Eth private key of the sender to sign the tx
  * @param {string} shieldContractAddress Address of the Shield smart contract
@@ -16,25 +16,25 @@ import type { TransactionReceipt } from "web3-core";
  * @param {Client} client An instance of Client to interact with the API
  * @param {string} withdrawTxHashL2 Tx hash in Layer2 of the previously initiated withdrawal
  * @throws {NightfallSdkError} Error while broadcasting tx
- * @returns {Promise<TransactionReceipt>}
+ * @returns {Promise<TransactionResult>}
  */
-export async function createAndSubmitFinaliseWithdrawal(
+export async function createFinaliseWithdrawalTx(
   ownerEthAddress: string,
   ownerEthPrivateKey: undefined | string,
   shieldContractAddress: string,
   web3: Web3,
   client: Client,
   withdrawTxHashL2: string,
-): Promise<TransactionReceipt> {
-  logger.debug("createAndSubmitFinaliseWithdrawal");
+): Promise<TransactionResult> {
+  logger.debug("createFinaliseWithdrawalTx");
 
   const resData = await client.finaliseWithdrawal(withdrawTxHashL2);
   const unsignedTx = resData.txDataToSign;
   logger.debug({ unsignedTx }, "Finalise withdrawal tx, unsigned");
 
-  let txReceipt: TransactionReceipt;
+  let signedTxL1;
   try {
-    txReceipt = await submitTransaction(
+    signedTxL1 = await createSignedTransaction(
       ownerEthAddress,
       ownerEthPrivateKey,
       shieldContractAddress,
@@ -45,5 +45,5 @@ export async function createAndSubmitFinaliseWithdrawal(
     logger.child({ resData }).error(err, "Error when submitting transaction");
     throw new NightfallSdkError(err);
   }
-  return txReceipt;
+  return { signedTxL1 };
 }

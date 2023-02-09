@@ -1,20 +1,15 @@
 import type Web3 from "web3";
 import { logger, NightfallSdkError } from "../utils";
-import { submitTransaction } from "./helpers/submit";
+import { createSignedTransaction } from "./helpers/createSignedTx";
 import type { Client } from "../client";
 import type { NightfallZkpKeys } from "../nightfall/types";
-import type { TransactionReceipt } from "web3-core";
-import type {
-  RecipientNightfallData,
-  OffChainTransactionReceipt,
-  OnChainTransactionReceipts,
-} from "./types";
+import type { RecipientNightfallData, TransactionResult } from "./types";
 
 /**
  * Handle the flow for transfer transaction (tx)
  *
  * @async
- * @function createAndSubmitTransfer
+ * @function createTransferTx
  * @param {*} token An instance of Token holding token data such as contract address
  * @param {string} ownerEthAddress Eth address sending the contents of the transfer
  * @param {undefined | string} ownerEthPrivateKey Eth private key of the sender to sign the tx
@@ -28,9 +23,9 @@ import type {
  * @param {string} recipientNightfallAddress Recipient zkpKeys.compressedZkpPublicKey
  * @param {boolean} isOffChain If true, tx will be sent to the proposer's API (handled off-chain)
  * @throws {NightfallSdkError} Error while broadcasting on-chain tx
- * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
+ * @returns {Promise<TransactionResult>}
  */
-export async function createAndSubmitTransfer(
+export async function createTransferTx(
   token: any,
   ownerEthAddress: string,
   ownerEthPrivateKey: undefined | string,
@@ -43,9 +38,10 @@ export async function createAndSubmitTransfer(
   fee: string,
   recipientNightfallAddress: string,
   isOffChain: boolean,
-): Promise<OnChainTransactionReceipts | OffChainTransactionReceipt> {
-  logger.debug("createAndSubmitTransfer");
+): Promise<TransactionResult> {
+  logger.debug("createTransferTx");
 
+  // L2 transfer
   const recipientNightfallData: RecipientNightfallData = {
     recipientCompressedZkpPublicKeys: [recipientNightfallAddress],
     values: [value],
@@ -60,25 +56,24 @@ export async function createAndSubmitTransfer(
   );
   const txReceiptL2 = resData.transaction;
 
-  if (!isOffChain) {
-    const unsignedTx = resData.txDataToSign;
-    logger.debug({ unsignedTx }, "Transfer tx, unsigned");
+  if (isOffChain) return { txReceiptL2 };
 
-    let txReceipt: TransactionReceipt;
-    try {
-      txReceipt = await submitTransaction(
-        ownerEthAddress,
-        ownerEthPrivateKey,
-        shieldContractAddress,
-        unsignedTx,
-        web3,
-      );
-    } catch (err) {
-      logger.child({ resData }).error(err, "Error when submitting transaction");
-      throw new NightfallSdkError(err);
-    }
-    return { txReceipt, txReceiptL2 };
+  // Else, proceed with L1 transaction
+  const unsignedTx = resData.txDataToSign;
+  logger.debug({ unsignedTx }, "Transfer tx, unsigned");
+
+  let signedTxL1;
+  try {
+    signedTxL1 = await createSignedTransaction(
+      ownerEthAddress,
+      ownerEthPrivateKey,
+      shieldContractAddress,
+      unsignedTx,
+      web3,
+    );
+  } catch (err) {
+    logger.child({ resData }).error(err, "Error when submitting transaction");
+    throw new NightfallSdkError(err);
   }
-
-  return { txReceiptL2 };
+  return { signedTxL1, txReceiptL2 };
 }
