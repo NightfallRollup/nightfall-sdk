@@ -18,31 +18,47 @@ const main = async () => {
     // For this example, we generate a L2 address to receive the transfer
     const { zkpKeys } = await createZkpKeys(config.clientApiUrl);
 
-    const txReceipts = await userSender.makeTransfer({
+    const isOffChain = true;
+    const { txHashL1, txHashL2 } = await userSender.makeTransfer({
       tokenContractAddress: config.tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       recipientNightfallAddress: zkpKeys.compressedZkpPublicKey,
-      isOffChain: true,
+      isOffChain,
       feeWei: config.feeWei,
     });
-    console.log("Transaction receipts", txReceipts);
-
-    // # 4 [OPTIONAL] You can check the transaction hash
     console.log(
-      "Nightfall transfer tx hashes",
-      userSender.nightfallTransferTxHashes,
+      ">>>>> Transaction hash L1 (`undefined` if off-chain)",
+      txHashL1,
     );
+    console.log(">>>>> Transaction hash L2", txHashL2);
 
-    // # 5 [OPTIONAL] You can check transfers that are not yet in a block
+    // # 3 [OPTIONAL] You can check the transaction hash
+    // TODO
+
+    // # 4 [OPTIONAL] You can check transfers that are not yet in a block
     const pendingTransfers = await userSender.checkPendingTransfers();
-    console.log("Pending balances", pendingTransfers);
+    console.log(">>>>> Pending balances", pendingTransfers);
+
+    // # 5 [EXTRA] Check that L1 tx was mined before closing the websocket in `finally` clause
+    if (!isOffChain) {
+      let isTxL1Mined =
+        await userSender.web3Websocket.web3.eth.getTransactionReceipt(txHashL1);
+      while (isTxL1Mined === null) {
+        console.log(">>>>> Waiting for L1 transaction to be mined..");
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        isTxL1Mined =
+          await userSender.web3Websocket.web3.eth.getTransactionReceipt(
+            txHashL1,
+          );
+      }
+    }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     process.exit(1);
   } finally {
     userSender.close();
-    console.log("Bye bye");
+    console.log(">>>>> Bye bye");
   }
 };
 

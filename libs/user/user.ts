@@ -1,6 +1,41 @@
 import fs from "fs";
+import Queue from "queue";
 import { CONTRACT_SHIELD } from "./constants";
 import {
+  createOptions,
+  makeDepositOptions,
+  mintL2Token,
+  makeTransferOptions,
+  burnL2Token,
+  makeWithdrawalOptions,
+  finaliseWithdrawalOptions,
+  checkBalancesOptions,
+  isInputValid,
+} from "./validations";
+import { Client } from "../client";
+import {
+  Web3Websocket,
+  getEthAccountAddress,
+  isMetaMaskAvailable,
+  getEthAccountFromMetaMask,
+} from "../ethereum";
+import {
+  commitmentsFromMnemonic,
+  createZkpKeysAndSubscribeToIncomingKeys,
+} from "../nightfall";
+import {
+  createAndSubmitApproval,
+  createDepositTx,
+  createTokeniseTx,
+  createTransferTx,
+  createBurnTx,
+  createWithdrawalTx,
+  createFinaliseWithdrawalTx,
+  prepareTokenValueTokenId,
+  enqueueSendingSignedTxs,
+} from "../transactions";
+import { logger, NightfallSdkError } from "../utils";
+import type {
   UserFactoryCreate,
   UserConstructor,
   UserMakeDeposit,
@@ -13,44 +48,8 @@ import {
   UserExportCommitments,
   UserImportCommitments,
 } from "./types";
-import { Client } from "../client";
-import {
-  Web3Websocket,
-  getEthAccountAddress,
-  isMetaMaskAvailable,
-  getEthAccountFromMetaMask,
-} from "../ethereum";
-import { createZkpKeysAndSubscribeToIncomingKeys } from "../nightfall";
-import {
-  createAndSubmitApproval,
-  createAndSubmitDeposit,
-  createAndSubmitTokenise,
-  createAndSubmitTransfer,
-  createAndSubmitBurn,
-  createAndSubmitWithdrawal,
-  createAndSubmitFinaliseWithdrawal,
-  prepareTokenValueTokenId,
-} from "../transactions";
-import { logger, NightfallSdkError } from "../utils";
-import {
-  createOptions,
-  makeDepositOptions,
-  mintL2Token,
-  makeTransferOptions,
-  burnL2Token,
-  makeWithdrawalOptions,
-  finaliseWithdrawalOptions,
-  checkBalancesOptions,
-  isInputValid,
-} from "./validations";
-import type { NightfallZkpKeys } from "../nightfall/types";
-import type { Commitment } from "../nightfall/types";
-import {
-  OffChainTransactionReceipt,
-  OnChainTransactionReceipts,
-} from "../transactions/types";
-import type { TransactionReceipt } from "web3-core";
-import { commitmentsFromMnemonic } from "../nightfall";
+import type { Commitment, NightfallZkpKeys } from "../nightfall/types";
+import type { NightfallSDKTransactionReceipt } from "../transactions/types";
 
 /** Class to create Nightfall transactors (ie instances of User) */
 class UserFactory {
@@ -133,12 +132,7 @@ class User {
   nightfallMnemonic: string;
   zkpKeys: NightfallZkpKeys;
 
-  // Set when transacting
-  nightfallDepositTxHashes: string[] = [];
-  nightfallTransferTxHashes: string[] = [];
-  nightfallMintingTxHashes: string[] = [];
-  nightfallBurningTxHashes: string[] = [];
-  nightfallWithdrawalTxHashes: string[] = [];
+  txsQueue: Queue;
 
   // You must not instantiate `User` directly, use `UserFactory` instead
   constructor(options: UserConstructor) {
@@ -148,18 +142,8 @@ class User {
     for (key in options) {
       this[key] = options[key];
     }
-  }
 
-  /**
-   * Allow user to check client API availability and blockchain ws connection
-   *
-   * @async
-   * @deprecated checkStatus - Will be removed in upcoming versions
-   */
-  async checkStatus() {
-    throw new NightfallSdkError(
-      "To be deprecated: use `isClientAlive`, `isWeb3WsAlive`",
-    );
+    this.txsQueue = new Queue({ autostart: true });
   }
 
   /**
@@ -234,11 +218,11 @@ class User {
    * @param {string} [options.value]
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
-   * @returns {Promise<OnChainTransactionReceipts>}
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async makeDeposit(
     options: UserMakeDeposit,
-  ): Promise<OnChainTransactionReceipts> {
+  ): Promise<NightfallSDKTransactionReceipt> {
     logger.debug({ options }, "User :: makeDeposit");
 
     // Validate and format options
@@ -273,7 +257,7 @@ class User {
       logger.info({ approvalReceipt }, "Approval completed!");
 
     // Deposit
-    const depositReceipts = await createAndSubmitDeposit(
+    const { signedTxL1, txReceiptL2 } = await createDepositTx(
       token,
       this.ethAddress,
       this.ethPrivateKey,
@@ -285,13 +269,16 @@ class User {
       tokenId,
       feeWei,
     );
-    logger.info({ depositReceipts }, "Deposit completed!");
+    logger.info({ signedTxL1, txReceiptL2 }, "Deposit created");
 
-    this.nightfallDepositTxHashes.push(
-      depositReceipts.txReceiptL2?.transactionHash,
-    );
+    // Submit L1 transaction
+    enqueueSendingSignedTxs(this.txsQueue, signedTxL1, this.web3Websocket.web3);
 
-    return depositReceipts;
+    // Return L1 and L2 transaction hashes
+    return {
+      txHashL1: signedTxL1.transactionHash,
+      txHashL2: txReceiptL2.transactionHash,
+    };
   }
 
   /**
@@ -305,11 +292,11 @@ class User {
    * @param {string} options.value
    * @param {string} [options.salt]
    * @param {string} [options.feeWei]
-   * @returns {Promise<OffChainTransactionReceipt>}
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async mintL2Token(
     options: UserMintL2Token,
-  ): Promise<OffChainTransactionReceipt> {
+  ): Promise<NightfallSDKTransactionReceipt> {
     logger.debug(options, "User :: mintL2Token");
 
     // Validate and format options
@@ -320,7 +307,7 @@ class User {
     const { tokenAddress, value, tokenId, salt, feeWei } = joiValue;
 
     // Mint (aka Tokenise)
-    const mintingReceipts = await createAndSubmitTokenise(
+    const { txReceiptL2 } = await createTokeniseTx(
       this.zkpKeys,
       this.client,
       tokenAddress,
@@ -329,13 +316,9 @@ class User {
       salt,
       feeWei,
     );
-    logger.info({ mintingReceipts }, "Minting completed!");
+    logger.info({ txReceiptL2 }, "Minting completed!");
 
-    this.nightfallMintingTxHashes.push(
-      mintingReceipts.txReceiptL2?.transactionHash,
-    );
-
-    return mintingReceipts;
+    return { txHashL2: txReceiptL2.transactionHash };
   }
 
   /**
@@ -349,12 +332,12 @@ class User {
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
    * @param {string} options.recipientNightfallAddress
-   * @param {Boolean} [options.isOffChain=false]
+   * @param {Boolean} [options.isOffChain]
    * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
    */
   async makeTransfer(
     options: UserMakeTransfer,
-  ): Promise<OnChainTransactionReceipts | OffChainTransactionReceipt> {
+  ): Promise<NightfallSDKTransactionReceipt> {
     logger.debug(options, "User :: makeTransfer");
 
     // Validate and format options
@@ -383,7 +366,7 @@ class User {
     tokenId = result.tokenId;
 
     // Transfer
-    const transferReceipts = await createAndSubmitTransfer(
+    const { signedTxL1, txReceiptL2 } = await createTransferTx(
       token,
       this.ethAddress,
       this.ethPrivateKey,
@@ -397,13 +380,20 @@ class User {
       recipientNightfallAddress,
       isOffChain,
     );
-    logger.info({ transferReceipts }, "Transfer completed!");
 
-    this.nightfallTransferTxHashes.push(
-      transferReceipts.txReceiptL2?.transactionHash,
-    );
+    if (isOffChain) {
+      logger.info({ signedTxL1, txReceiptL2 }, "Transfer completed!");
+      return { txHashL2: txReceiptL2.transactionHash };
+    }
 
-    return transferReceipts;
+    // Submit L1 transaction
+    logger.info({ signedTxL1, txReceiptL2 }, "Transfer created");
+    enqueueSendingSignedTxs(this.txsQueue, signedTxL1, this.web3Websocket.web3);
+
+    return {
+      txHashL1: signedTxL1.transactionHash,
+      txHashL2: txReceiptL2.transactionHash,
+    };
   }
 
   /**
@@ -416,11 +406,11 @@ class User {
    * @param {string | number} options.tokenId
    * @param {string} options.value
    * @param {string} [options.feeWei]
-   * @returns {Promise<OffChainTransactionReceipt>}
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async burnL2Token(
     options: UserBurnL2Token,
-  ): Promise<OffChainTransactionReceipt> {
+  ): Promise<NightfallSDKTransactionReceipt> {
     logger.debug(options, "User :: burnL2Token");
 
     // Validate and format options
@@ -431,7 +421,7 @@ class User {
     const { tokenAddress, value, tokenId, feeWei } = joiValue;
 
     // Burn
-    const burningReceipts = await createAndSubmitBurn(
+    const { txReceiptL2 } = await createBurnTx(
       this.zkpKeys,
       this.client,
       tokenAddress,
@@ -439,13 +429,9 @@ class User {
       tokenId,
       feeWei,
     );
-    logger.info({ burningReceipts }, "Burning completed!");
+    logger.info({ txReceiptL2 }, "Burning completed!");
 
-    this.nightfallBurningTxHashes.push(
-      burningReceipts.txReceiptL2?.transactionHash,
-    );
-
-    return burningReceipts;
+    return { txHashL2: txReceiptL2.transactionHash };
   }
 
   /**
@@ -459,12 +445,12 @@ class User {
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
    * @param {string} options.recipientEthAddress
-   * @param {Boolean} [options.isOffChain=false]
+   * @param {Boolean} [options.isOffChain]
    * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
    */
   async makeWithdrawal(
     options: UserMakeWithdrawal,
-  ): Promise<OnChainTransactionReceipts | OffChainTransactionReceipt> {
+  ): Promise<NightfallSDKTransactionReceipt> {
     logger.debug({ options }, "User :: makeWithdrawal");
 
     // Validate and format options
@@ -493,7 +479,7 @@ class User {
     tokenId = result.tokenId;
 
     // Withdrawal
-    const withdrawalReceipts = await createAndSubmitWithdrawal(
+    const { signedTxL1, txReceiptL2 } = await createWithdrawalTx(
       token,
       this.ethAddress,
       this.ethPrivateKey,
@@ -507,13 +493,20 @@ class User {
       recipientEthAddress,
       isOffChain,
     );
-    logger.info({ withdrawalReceipts }, "Withdrawal completed!");
 
-    this.nightfallWithdrawalTxHashes.push(
-      withdrawalReceipts.txReceiptL2?.transactionHash,
-    );
+    if (isOffChain) {
+      logger.info({ signedTxL1, txReceiptL2 }, "Withdrawal completed!");
+      return { txHashL2: txReceiptL2.transactionHash };
+    }
 
-    return withdrawalReceipts;
+    // Submit L1 transaction
+    logger.info({ signedTxL1, txReceiptL2 }, "Withdrawal created");
+    enqueueSendingSignedTxs(this.txsQueue, signedTxL1, this.web3Websocket.web3);
+
+    return {
+      txHashL1: signedTxL1.transactionHash,
+      txHashL2: txReceiptL2.transactionHash,
+    };
   }
 
   /**
@@ -522,32 +515,19 @@ class User {
    * @async
    * @method finaliseWithdrawal
    * @param {UserFinaliseWithdrawal} options
-   * @param {string} [options.withdrawTxHashL2] If not provided, will attempt to use latest withdrawal transaction hash
-   * @returns {Promise<TransactionReceipt>}
+   * @param {string} options.withdrawTxHashL2
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async finaliseWithdrawal(
-    options?: UserFinaliseWithdrawal,
-  ): Promise<TransactionReceipt> {
+    options: UserFinaliseWithdrawal,
+  ): Promise<NightfallSDKTransactionReceipt> {
     logger.debug({ options }, "User :: finaliseWithdrawal");
 
-    let withdrawTxHashL2 = "";
+    const { error, value } = finaliseWithdrawalOptions.validate(options);
+    isInputValid(error);
+    const { withdrawTxHashL2 } = value;
 
-    // If options were passed validate and format, else use latest withdrawal hash
-    if (options) {
-      const { error, value } = finaliseWithdrawalOptions.validate(options);
-      isInputValid(error);
-      withdrawTxHashL2 = value.withdrawTxHashL2;
-    } else {
-      const withdrawalTxHashes = this.nightfallWithdrawalTxHashes;
-      withdrawTxHashL2 = withdrawalTxHashes[withdrawalTxHashes.length - 1];
-    }
-
-    if (!withdrawTxHashL2)
-      throw new NightfallSdkError("Could not find any withdrawal tx hash");
-
-    logger.debug({ withdrawTxHashL2 }, "Finalise withdrawal with tx hash");
-
-    return createAndSubmitFinaliseWithdrawal(
+    const { signedTxL1 } = await createFinaliseWithdrawalTx(
       this.ethAddress,
       this.ethPrivateKey,
       this.shieldContractAddress,
@@ -555,6 +535,13 @@ class User {
       this.client,
       withdrawTxHashL2,
     );
+    logger.info({ signedTxL1 }, "Finalise withdrawal created");
+
+    // Submit L1 transaction
+    enqueueSendingSignedTxs(this.txsQueue, signedTxL1, this.web3Websocket.web3);
+
+    // Return L1 transaction hash
+    return { txHashL1: signedTxL1.transactionHash };
   }
 
   /**
@@ -676,6 +663,9 @@ class User {
 
   /**
    * Close user blockchain ws connection
+   * Use carefully: closing the ws too soon can result in errors,
+   * make sure you call it only after all L1 operations have finished
+   * Some ideas: check this.txsQueue.length, check L1 tx status
    */
   close() {
     logger.debug("User :: close");

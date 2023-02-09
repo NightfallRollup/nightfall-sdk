@@ -15,35 +15,35 @@ const main = async () => {
       nightfallMnemonic: config.nightfallMnemonic,
     });
 
+    // # 2 Get my unspent commitments, then
+    // pick one commitment to burn (for now, at most 1 commitment can be burnt)
     const myNightfallAddress = user.getNightfallAddress();
     const unspentCommitments = await client.getUnspentCommitments([
       myNightfallAddress,
     ]);
 
-    // #2 Pick one commitment to burn
-    // For now, at most 1 commitment can be burnt
     const commitmentsToBurn = Object.values(
       unspentCommitments[myNightfallAddress as keyof object],
     )[0];
-    console.log("commitmentToBurn", commitmentsToBurn);
+    console.log(">>>> commitmentToBurn", commitmentsToBurn);
 
     // # 3 Burn
-    const txReceipts = await user.burnL2Token({
+    const { txHashL2 } = await user.burnL2Token({
       tokenAddress: commitmentsToBurn[0].ercAddress,
       value: String(commitmentsToBurn[0].balance),
       tokenId: commitmentsToBurn[0].tokenId,
-      feeWei: "0",
+      feeWei: config.feeWei,
     });
-    console.log("Transaction receipts", txReceipts);
+    console.log(">>>>> Transaction hash L2", txHashL2);
 
     // # 4 [OPTIONAL] You can check the transaction hash
-    console.log("Nightfall burning tx hashes", user.nightfallBurningTxHashes);
+    // TODO
   } catch (error) {
-    console.log(error);
+    console.error(error);
     process.exit(1);
   } finally {
     user.close();
-    console.log("Bye bye");
+    console.log(">>>>> Bye bye");
   }
 };
 

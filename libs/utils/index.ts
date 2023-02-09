@@ -1,8 +1,8 @@
-import logger from "./logger";
 import { NightfallSdkError } from "./error";
+import { logger } from "./logger";
+import { randomL2TokenAddress, randomSalt } from "./random";
 import { createZkpKeys } from "./nightfallKeys";
 import { getContractAddress } from "./nightfallContractAddress";
-import { randomL2TokenAddress, randomSalt } from "./random";
 
 export {
   logger,

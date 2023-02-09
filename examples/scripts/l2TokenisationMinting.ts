@@ -17,23 +17,23 @@ const main = async () => {
     // # 2 Mint token within L2
     const tokenAddress = await randomL2TokenAddress();
     const salt = await randomSalt();
-    const txReceipts = await user.mintL2Token({
+    const { txHashL2 } = await user.mintL2Token({
       tokenAddress,
       value: config.value,
       tokenId: config.tokenId,
       salt, // optional
-      feeWei: "0",
+      feeWei: config.feeWei,
     });
-    console.log("Transaction receipts", txReceipts);
+    console.log(">>>>> Transaction hash L2", txHashL2);
 
     // # 3 [OPTIONAL] You can check the transaction hash
-    console.log("Nightfall minting tx hashes", user.nightfallMintingTxHashes);
+    // TODO
   } catch (error) {
-    console.log(error);
+    console.error(error);
     process.exit(1);
   } finally {
     user.close();
-    console.log("Bye bye");
+    console.log(">>>>> Bye bye");
   }
 };
 
