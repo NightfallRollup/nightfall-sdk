@@ -52,6 +52,7 @@ import type {
 } from "./types";
 import type { Commitment, NightfallZkpKeys } from "../nightfall/types";
 import type { NightfallSDKTransactionReceipt } from "../transactions/types";
+import { shallowObfuscate } from "../utils";
 
 class UserFactory {
   static async create(options: UserFactoryCreate) {
@@ -60,7 +61,11 @@ class UserFactory {
     // Validate and format options
     const { error, value } = createOptions.validate(options);
     isInputValid(error);
-    // TODO log value with obfuscation
+
+    logger.debug(
+      shallowObfuscate(value, ["nightfallMnemonic", "ethereumPrivateKey"]),
+      "Valid user",
+    );
 
     const {
       clientApiUrl,
