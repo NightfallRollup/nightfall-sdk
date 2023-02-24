@@ -3,7 +3,6 @@ import Queue from "queue";
 import { CONTRACT_SHIELD } from "./constants";
 import {
   createOptions,
-  getContractAddressOptions,
   makeDepositOptions,
   mintL2Token,
   makeTransferOptions,
@@ -39,7 +38,6 @@ import { logger, NightfallSdkError } from "../utils";
 import type {
   UserFactoryCreate,
   UserConstructor,
-  UserGetContractAddress,
   UserMakeDeposit,
   UserMintL2Token,
   UserMakeTransfer,
@@ -53,14 +51,26 @@ import type {
 import type { Commitment, NightfallZkpKeys } from "../nightfall/types";
 import type { NightfallSDKTransactionReceipt } from "../transactions/types";
 
+/** Class to create Nightfall transactors (ie instances of User) */
 class UserFactory {
+  /**
+   * Create a User instance
+   *
+   * @async
+   * @function create
+   * @param {UserFactoryCreate} options
+   * @param {string} options.clientApiUrl HTTP URL of a running Nightfall Client
+   * @param {string} [options.blockchainWsUrl] Websocket URL of a blockchain node - not needed when using SDK in browser apps that can connect w/MetaMask
+   * @param {string} [options.ethereumPrivateKey] Eth private key to sign L1 transactions eg deposits - not needed when using SDK in browser apps that can connect w/MetaMask
+   * @param {string} [options.nightfallMnemonic] bip39 mnemonic to derive a set of zero-knowledge proof keys - if not passed, one will be created
+   * @returns {Promise<User>}
+   */
   static async create(options: UserFactoryCreate) {
     logger.debug("UserFactory :: create");
 
     // Validate and format options
     const { error, value } = createOptions.validate(options);
     isInputValid(error);
-    // TODO log value with obfuscation
 
     const {
       clientApiUrl,
@@ -91,7 +101,7 @@ class UserFactory {
       ethAddress = getEthAccountAddress(ethPrivateKey, web3Websocket.web3);
     }
 
-    // Create a set of Zero-knowledge proof keys from a valid mnemonic
+    // Create a set of zero-knowledge proof keys from a valid bip39 mnemonic
     // or from a new mnemonic if none was provided,
     // subscribe to incoming viewing keys
     const nightfallKeys = await createZkpKeysAndSubscribeToIncomingKeys(
@@ -111,6 +121,7 @@ class UserFactory {
   }
 }
 
+/** Class representing a Nightfall transactor (ie User) */
 class User {
   // Set by constructor
   client: Client;
@@ -123,6 +134,7 @@ class User {
 
   txsQueue: Queue;
 
+  // You must not instantiate `User` directly, use `UserFactory` instead
   constructor(options: UserConstructor) {
     logger.debug("new User");
 
@@ -141,7 +153,7 @@ class User {
    * @method isClientAlive
    * @returns {Promise<boolean>}
    */
-  async isClientAlive() {
+  async isClientAlive(): Promise<boolean> {
     logger.debug("User :: isClientAlive");
     return this.client.healthCheck();
   }
@@ -153,7 +165,7 @@ class User {
    * @method isWeb3WsAlive
    * @returns {Promise<boolean>}
    */
-  async isWeb3WsAlive() {
+  async isWeb3WsAlive(): Promise<boolean> {
     logger.debug("User :: isWeb3WsAlive");
     const isWeb3WsAlive = await this.web3Websocket.setEthBlockNo();
     return !!isWeb3WsAlive;
@@ -163,7 +175,7 @@ class User {
    * Allow user to retrieve the Nightfall Mnemonic  - Keep this private
    *
    * @method getNightfallMnemonic
-   * @returns {string} Nightfall mnemonic
+   * @returns {string} bip39 mnemonic
    */
   getNightfallMnemonic(): string {
     logger.debug("User :: getNightfallMnemonic");
@@ -174,7 +186,7 @@ class User {
    * Allow user to retrieve Nightfall Layer2 address
    *
    * @method getNightfallAddress
-   * @returns {string} Nightfall Layer2 address
+   * @returns {string} compressedZkpPublicKey, ie Nightfall Layer2 address
    */
   getNightfallAddress(): string {
     logger.debug("User :: getNightfallAddress");
@@ -182,35 +194,13 @@ class User {
   }
 
   /**
-   * Get Shield, ERC Mocked contract addresses (the latter is Ganache only)
-   *
-   * @async
-   * @method updateEthAccountFromMetamask
-   * @param {UserGetContractAddress} options
-   * @param {string} options.contractName
-   * @returns {string} Ethereum account address
-   */
-  async getContractAddress(options: UserGetContractAddress): Promise<string> {
-    logger.debug("User :: getContractAddress");
-
-    // Validate and format options
-    const { error, value } = getContractAddressOptions.validate(options);
-    isInputValid(error);
-    logger.debug({ value }, "getContractAddress formatted parameters");
-
-    const { contractName } = value;
-
-    return this.client.getContractAddress(contractName);
-  }
-
-  /**
    * [Browser + MetaMask only] Update Ethereum account address
    *
    * @async
    * @method updateEthAccountFromMetamask
-   * @returns {string} Ethereum account address
+   * @returns {Promise<string>} Ethereum account address
    */
-  async updateEthAccountFromMetamask() {
+  async updateEthAccountFromMetamask(): Promise<string> {
     logger.debug("User :: updateEthAccountFromMetamask");
     if (this.ethPrivateKey) throw new NightfallSdkError("Method not available");
     const ethAddress = await getEthAccountFromMetaMask(this.web3Websocket);
@@ -225,7 +215,6 @@ class User {
    * @method makeDeposit
    * @param {UserMakeDeposit} options
    * @param {string} options.tokenContractAddress
-   * @param {string} [options.tokenErcStandard] Will be deprecated
    * @param {string} [options.value]
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
@@ -339,13 +328,12 @@ class User {
    * @method makeTransfer
    * @param {UserMakeTransfer} options
    * @param {string} options.tokenContractAddress
-   * @param {string} [options.tokenErcStandard] Will be deprecated
    * @param {string} [options.value]
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
    * @param {string} options.recipientNightfallAddress
    * @param {Boolean} [options.isOffChain]
-   * @returns {Promise<NightfallSDKTransactionReceipt>}
+   * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
    */
   async makeTransfer(
     options: UserMakeTransfer,
@@ -453,13 +441,12 @@ class User {
    * @method makeWithdrawal
    * @param {UserMakeWithdrawal} options
    * @param {string} options.tokenContractAddress
-   * @param {string} [options.tokenErcStandard] Will be deprecated
    * @param {string} [options.value]
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
    * @param {string} options.recipientEthAddress
    * @param {Boolean} [options.isOffChain]
-   * @returns {Promise<NightfallSDKTransactionReceipt>}
+   * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
    */
   async makeWithdrawal(
     options: UserMakeWithdrawal,

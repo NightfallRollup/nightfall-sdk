@@ -1,6 +1,6 @@
-import { UserFactory } from "../../libs/user";
-import { config } from "./appConfig";
+import { UserFactory } from "../../libs";
 import { Client } from "../../libs/client";
+import { config } from "./appConfig";
 
 const main = async () => {
   let user;

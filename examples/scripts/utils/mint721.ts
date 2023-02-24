@@ -1,6 +1,6 @@
-import { UserFactory } from "../../../libs/user";
-import { config } from "../appConfig";
+import { UserFactory } from "../../../libs";
 import erc721Abi from "../../../libs/tokens/abis/ERC721.json";
+import { config } from "../appConfig";
 import type { AbiItem } from "web3-utils";
 
 const erc721AbiItem = erc721Abi as unknown as AbiItem;
