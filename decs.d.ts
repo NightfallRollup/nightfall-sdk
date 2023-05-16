@@ -1,1 +1,1 @@
-declare module "general-number";
+declare module 'general-number';
