@@ -27,8 +27,14 @@ export interface Asset {
   qty: number,    // Quantity of good for this batch number
 }
 
+/**
+ * Token type for supply chain
+ */
 export type Token = PurchaseOrder | Asset; 
 
+/**
+ * Token information
+ */
 export interface TokenInfo {
   token: Token,
   sigR: string,

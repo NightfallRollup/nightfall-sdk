@@ -36,7 +36,7 @@ const main = async () => {
 
     const client = new Client(config.clientApiUrl);
     // #2 Create PO
-    const po: PurchaseOrder = { part: "222", poId: "103", deliveryDate: new Date("2023/07/19"), qty: 25 };
+    const po: PurchaseOrder = { part: "222", poId: "106", deliveryDate: new Date("2023-07-22:00:00.000Z"), qty: 32 };
     const asset: Asset = { part: "222", poId: "103", batch: "112234", qty: 25 };
 
     const serialisedInfo = serialiseToken(po, generalise('1'.padStart(255,'0')).toString(16));
@@ -63,7 +63,7 @@ const main = async () => {
     const commitments = await client.getCommitmentsByCompressedZkpPublicKey([myNightfallAddress]);
     const tokens : TokenInfo[] = getTokensFromCommitments(commitments);
 
-    console.log('**** Tokens ********', tokens);
+    console.log('**** Tokens User1 ********', tokens);
 
     // # 4 transfer
     const recipientNightfallData = {

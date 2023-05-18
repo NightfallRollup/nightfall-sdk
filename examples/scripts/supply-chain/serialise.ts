@@ -185,6 +185,13 @@ const getTokenType = (ercAddress: string) : TokenType => {
   return tokenType; 
 }
 
+/**
+ * Returns if the token is a PurchaseOrder type
+ *
+ * @param {Token} token  token to compare
+ *
+ * @returns { boolean } true if the token is a PurchaseOrder
+ */
 function isPurchaseOrder(token: Token): token is PurchaseOrder {
   return (token as PurchaseOrder).deliveryDate !== undefined;
 }
@@ -220,7 +227,6 @@ export const deserialiseToken = (tokenId: string, ercAddress: string, value = 0)
   }
   return deserialiseAsset(tokenId, ercAddress, value);
 }
-
 
 /**
  * Returns an array of tokens from the commitments
