@@ -11,7 +11,7 @@ const zeroes = (n: number) => ''.padStart(n,'0');
  *
  * @returns {Number}
  */
-function unixTimestamp (date: Date) {  
+const unixTimestamp = (date: Date) : number => {  
   return date.getTime()/1000;
 }
 
@@ -22,7 +22,7 @@ function unixTimestamp (date: Date) {
  *
  * @returns {Number}
  */
-function toDate (unixTimestamp: number) {  
+const toDate = (unixTimestamp: number) : Date => {  
   return new Date(unixTimestamp * 1000);
 }
 
@@ -34,7 +34,7 @@ function toDate (unixTimestamp: number) {
  *
  * @returns { string, string } tokenId, ercAddress
  */
-export const serialisePurchaseOrder = (po: PurchaseOrder, sigR: string) : { tokenId: string, ercAddress: string} => {
+const serialisePurchaseOrder = (po: PurchaseOrder, sigR: string) : { tokenId: string, ercAddress: string} => {
   const { part, poId, deliveryDate, qty } = po
   // TokenId Info -> sigR, deliveryDate
   const sigRBytes = generalise(sigR).limbs(32, 8); 
@@ -68,7 +68,7 @@ export const serialisePurchaseOrder = (po: PurchaseOrder, sigR: string) : { toke
  *
  * @returns { PurchaseOrder, sigR } po, sigR Purchase order and signature of the receiver
  */
-export const deserialisePurchaseOrder = (tokenId: string, ercAddress: string): TokenInfo => {
+const deserialisePurchaseOrder = (tokenId: string, ercAddress: string): TokenInfo => {
   const tokenIdBytes = generalise(tokenId).limbs(32, 8);
   const bottomSigRBytes = tokenIdBytes.slice(2);
   const deliveryDateBytes = tokenIdBytes.slice(0,2);
@@ -106,7 +106,7 @@ export const deserialisePurchaseOrder = (tokenId: string, ercAddress: string): T
  *
  * @returns { string, string } tokenId, ercAddress
  */
-export const serialiseAsset = (asset: Asset, sigR: string) : { tokenId: string, ercAddress: string} => {
+const serialiseAsset = (asset: Asset, sigR: string) : { tokenId: string, ercAddress: string} => {
   const { part, poId, batch } = asset
 
   // TokenId Info -> sigR (bottom bytes), batch
@@ -138,7 +138,7 @@ export const serialiseAsset = (asset: Asset, sigR: string) : { tokenId: string, 
  *
  * @returns { Asset, sigR } asset, sigR Asset and signature of the receiver
  */
-export const deserialiseAsset = (tokenId: string, ercAddress: string, value: number): TokenInfo => {
+const deserialiseAsset = (tokenId: string, ercAddress: string, value: number): TokenInfo => {
   // TokenId Info -> sigR (bottom bytes), batch
   const tokenIdBytes = generalise(tokenId).limbs(32, 8);
   const bottomSigRBytes = tokenIdBytes.slice(2);

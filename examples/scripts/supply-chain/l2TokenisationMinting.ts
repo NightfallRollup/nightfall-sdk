@@ -1,6 +1,6 @@
 import { UserFactory, randomSalt } from "../../../libs";
 import { config } from "../appConfig";
-import { deserialisePurchaseOrder, deserialiseToken, getTokensFromCommitments, serialisePurchaseOrder, serialiseToken } from "./serialise";
+import { getTokensFromCommitments, serialiseToken } from "./serialise";
 import { PurchaseOrder, Asset, TokenInfo } from "./types";
 import { Client } from "../../../libs/client";
 import { generalise } from "general-number"
