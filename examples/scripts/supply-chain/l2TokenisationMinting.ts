@@ -137,8 +137,37 @@ const main = async () => {
     console.log("Tokens for user1:", tokens);
     console.log("Tokens for user2:", tokens2);
 
-    // # 5 burn purchase order and create asset
-    console.log(`Burning PurchaseOrder commitment ${commitments2[commitments2.length - 1]._id} and minting Asset to ${user2.getNightfallAddress()}`)
+    // # 5 Transform purchase order to asset (or burn purchase order and create asset)
+    console.log(`Transform PurchaseOrder commitment ${commitments2[commitments2.length - 1]._id} to Asset to ${user2.getNightfallAddress()}`)
+    const asset: Asset = { part: tokens2[tokens2.length - 1].token.part, poId: tokens2[tokens2.length - 1].token.poId, batch: "12345", qty: tokens2[tokens2.length - 1].token.qty };
+    console.log("ASSET:", asset);
+    serialisedInfo = serialiseToken(asset, generalise('1'.padStart(255,'0')).toString(16));
+    salt = await randomSalt();
+
+    await axios.post(`${client.apiUrl}/transform`,
+      {
+        rootKey: user2.zkpKeys.rootKey,
+        inputTokens: [ 
+          { 
+            id: commitments2[commitments2.length - 1].preimage.tokenId, 
+            address: commitments2[commitments2.length - 1].preimage.ercAddress,
+            value: commitments2[commitments2.length - 1].preimage.value,
+            commitmentHash: commitments2[commitments2.length - 1]._id,
+          }
+        ],
+        outputTokens: [
+          {
+            id: serialisedInfo.tokenId,
+            address: serialisedInfo.ercAddress,
+            value: asset.qty.toString(),
+            salt,
+          }
+        ],
+        fee: '0',
+      }
+    );
+
+    /* console.log(`Burning PurchaseOrder commitment ${commitments2[commitments2.length - 1]._id} and minting Asset to ${user2.getNightfallAddress()}`)
     await axios.post(`${client.apiUrl}/burn`, {
       ercAddress: commitments2[commitments2.length - 1].preimage.ercAddress,
       rootKey: user2.zkpKeys.rootKey,
@@ -148,11 +177,6 @@ const main = async () => {
       providedCommitments: [commitments2[commitments2.length - 1]._id],
     });
 
-    const asset: Asset = { part: tokens2[tokens2.length - 1].token.part, poId: tokens2[tokens2.length - 1].token.poId, batch: "12345", qty: tokens2[tokens2.length - 1].token.qty };
-    console.log("ASSET:", asset);
-    serialisedInfo = serialiseToken(asset, generalise('1'.padStart(255,'0')).toString(16));
-
-    salt = await randomSalt();
     const { txHashL2:txHashL2Asset } = await user2.mintL2Token({
       tokenAddress: serialisedInfo.ercAddress,
       value: asset.qty.toString(),
@@ -160,7 +184,7 @@ const main = async () => {
       salt, // optional
       feeWei: config.feeWei,
     });
-    console.log(">>>>> Transaction hash L2", txHashL2Asset);
+    console.log(">>>>> Transaction hash L2", txHashL2Asset); */
 
     await makeBlock();
     // TODO: wait 25 seconds to make a block
