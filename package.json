@@ -8,12 +8,8 @@
     "nightfall_3",
     "nf3"
   ],
-  "main": "./dist/cjs/index.js",
-  "exports": {
-    "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.js"
-  },
-  "types": "./dist/types/user/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/user/index.d.ts",
   "files": [
     "dist/**/*"
   ],
@@ -66,9 +62,7 @@
     }
   },
   "scripts": {
-    "build": "rm -rf ./dist && npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc",
-    "build:cjs": "tsc --module CommonJS -outDir dist/cjs",
+    "build": "rm -rf ./dist && tsc",
     "lint": "eslint . --ext .ts",
     "prettier": "prettier --check .",
     "test:ganache": "DOTENV_CONFIG_PATH=./examples/scripts/.env.ganache jest --setupFiles dotenv/config",
