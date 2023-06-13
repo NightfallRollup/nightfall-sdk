@@ -15,6 +15,8 @@ import type { TransactionResult } from "./types";
  * @param {string} value The amount in Wei of the token to be burnt
  * @param {string} tokenId The tokenId of the token to be burnt
  * @param {string} fee Proposer payment in Wei for the tx in L2
+ * @param {string[] | []} [providedCommitments] Commitments to be burnt
+ * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
  * @returns {Promise<TransactionResult>}
  */
 export async function createBurnTx(
@@ -24,6 +26,8 @@ export async function createBurnTx(
   value: string,
   tokenId: string,
   fee: string,
+  providedCommitments?: string[] | [],
+  providedCommitmentsFee?: string[] | [],
 ): Promise<TransactionResult> {
   logger.debug("createBurnTx");
 
@@ -33,6 +37,8 @@ export async function createBurnTx(
     value,
     tokenId,
     fee,
+    providedCommitments ?? [],
+    providedCommitmentsFee ?? [],
   );
   const txReceiptL2 = resData.transaction;
 

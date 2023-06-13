@@ -23,6 +23,8 @@ import type { TransactionResult } from "./types";
  * @param {string} fee Proposer payment in Wei for the tx in L2
  * @param {string} recipientEthAddress Recipient Eth address
  * @param {boolean} isOffChain If true, tx will be sent to the proposer's API (handled off-chain)
+ * @param {string[] | []} [providedCommitments] Commitments to be withdrawn
+ * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
  * @throws {NightfallSdkError} Error while broadcasting on-chain tx
  * @returns {Promise<TransactionResult>}
  */
@@ -39,6 +41,8 @@ export async function createWithdrawalTx(
   fee: string,
   recipientEthAddress: string,
   isOffChain: boolean,
+  providedCommitments?: string[] | [],
+  providedCommitmentsFee?: string[] | [],
 ): Promise<TransactionResult> {
   logger.debug("createWithdrawalTx");
 
@@ -51,6 +55,8 @@ export async function createWithdrawalTx(
     fee,
     recipientEthAddress,
     isOffChain,
+    providedCommitments ?? [],
+    providedCommitmentsFee ?? [],
   );
   const txReceiptL2 = resData.transaction;
 

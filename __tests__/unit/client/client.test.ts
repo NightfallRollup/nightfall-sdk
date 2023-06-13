@@ -222,6 +222,8 @@ describe("Client", () => {
             tokenId,
             fee,
             isOffChain,
+            [],
+            [],
           ),
       ).rejects.toThrow(NightfallSdkError);
       expect(axios.post).toHaveBeenCalledTimes(1);

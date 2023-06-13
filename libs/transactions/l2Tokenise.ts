@@ -14,8 +14,9 @@ import type { TransactionResult } from "./types";
  * @param {string} tokenAddress Token address to be minted in L2
  * @param {string} value The amount in Wei of the token to be minted
  * @param {string} tokenId The tokenId of the token to be minted
- * @param {string} salt Random Salt
  * @param {string} fee Proposer payment in Wei for the tx in L2
+ * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
+ * @param {string} [salt]  Salt to be added to the newly created deposit commitment
  * @returns {Promise<TransactionResult>}
  */
 export async function createTokeniseTx(
@@ -24,8 +25,9 @@ export async function createTokeniseTx(
   tokenAddress: string,
   value: string,
   tokenId: string,
-  salt: string,
   fee: string,
+  providedCommitmentsFee?: string[] | [],
+  salt?: string | undefined,
 ): Promise<TransactionResult> {
   logger.debug("createTokeniseTx");
 
@@ -34,8 +36,9 @@ export async function createTokeniseTx(
     tokenAddress,
     value,
     tokenId,
-    salt,
     fee,
+    providedCommitmentsFee ?? [],
+    salt,
   );
   const txReceiptL2 = resData.transaction;
 

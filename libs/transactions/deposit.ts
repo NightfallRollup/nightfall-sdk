@@ -21,6 +21,8 @@ import type { TransactionResult } from "./types";
  * @param {string} value The amount in Wei of the token to be deposited
  * @param {string} tokenId The tokenId of an erc721
  * @param {string} fee Proposer payment in Wei for the tx in L2
+ * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
+ * @param {string} [salt]  Salt to be added to the newly created deposit commitment
  * @throws {NightfallSdkError} Error while broadcasting tx
  * @returns {Promise<TransactionResult>}
  */
@@ -35,6 +37,8 @@ export async function createDepositTx(
   value: string,
   tokenId: string,
   fee: string,
+  providedCommitmentsFee?: string[] | [],
+  salt?: string | undefined,
 ): Promise<TransactionResult> {
   logger.debug("createDepositTx");
 
@@ -45,6 +49,8 @@ export async function createDepositTx(
     value,
     tokenId,
     fee,
+    providedCommitmentsFee ?? [],
+    salt,
   );
   const txReceiptL2 = resData.transaction;
   const unsignedTx = resData.txDataToSign;
