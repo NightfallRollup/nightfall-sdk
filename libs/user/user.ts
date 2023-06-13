@@ -60,6 +60,8 @@ class UserFactory {
    * @function create
    * @param {UserFactoryCreate} options
    * @param {string} options.clientApiUrl HTTP URL of a running Nightfall Client
+   * @param {string} [options.clientApiTxUrl] HTTP URL of a running Transaction Handler Worker
+   * @param {string} [options.clientApiBpUrl] HTTP URL of a running Block Proposed Worker
    * @param {string} [options.blockchainWsUrl] Websocket URL of a blockchain node - not needed when using SDK in browser apps that can connect w/MetaMask
    * @param {string} [options.ethereumPrivateKey] Eth private key to sign L1 transactions eg deposits - not needed when using SDK in browser apps that can connect w/MetaMask
    * @param {string} [options.nightfallMnemonic] bip39 mnemonic to derive a set of zero-knowledge proof keys - if not passed, one will be created
@@ -74,13 +76,15 @@ class UserFactory {
 
     const {
       clientApiUrl,
+      clientApiTxUrl,
+      clientApiBpUrl,
       blockchainWsUrl,
       ethereumPrivateKey: ethPrivateKey,
       nightfallMnemonic,
     } = value;
 
-    // Instantiate Client
-    const client = new Client(clientApiUrl);
+    // Instantiate Client and optional Workers URL
+    const client = new Client(clientApiUrl, clientApiTxUrl, clientApiBpUrl);
 
     // Get Shield contract address
     const shieldContractAddress = await client.getContractAddress(
