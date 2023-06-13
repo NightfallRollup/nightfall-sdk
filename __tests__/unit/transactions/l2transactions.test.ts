@@ -1,14 +1,14 @@
 import {
-  createAndSubmitTokenise,
-  createAndSubmitBurn,
+  createTokeniseTx,
+  createBurnTx,
 } from "../../../libs/transactions";
-import { submitTransaction } from "../../../libs/transactions/helpers/submit";
+import { createSignedTransaction } from "../../../libs/transactions/helpers/createSignedTx";
 import { NightfallSdkError } from "../../../libs/utils/error";
 import { tokeniseBurnReceipts } from "../../../__mocks__/mockTxTokeniseBurnReceipts";
 
-jest.mock("../../../libs/transactions/helpers/submit");
+jest.mock("../../../libs/transactions/helpers/createSignedTx");
 
-describe.skip("L2 Transactions", () => {
+describe("L2 Transactions", () => {
   const ownerZkpKeys = {};
   const l2TokenAddress =
     "0x300000000000000000000000d7b31f55b06a8fe34282aa62f250961d7afebc0a";
@@ -35,7 +35,7 @@ describe.skip("L2 Transactions", () => {
       // Act, Assert
       expect(
         async () =>
-          await createAndSubmitTokenise(
+          await createTokeniseTx(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             ownerZkpKeys,
@@ -56,10 +56,10 @@ describe.skip("L2 Transactions", () => {
         transaction: txReceiptL2,
       };
       mockedClient.tokenise.mockResolvedValue(mockedTokeniseResData);
-      (submitTransaction as jest.Mock).mockResolvedValue(txReceiptL2);
+      (createSignedTransaction as jest.Mock).mockResolvedValue(txReceiptL2);
 
       // Act
-      const txReceipts = await createAndSubmitTokenise(
+      const txReceipts = await createTokeniseTx(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         ownerZkpKeys,
@@ -99,7 +99,7 @@ describe.skip("L2 Transactions", () => {
       // Act, Assert
       expect(
         async () =>
-          await createAndSubmitBurn(
+          await createBurnTx(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             ownerZkpKeys,
@@ -119,10 +119,10 @@ describe.skip("L2 Transactions", () => {
         transaction: txReceiptL2,
       };
       mockedClient.burn.mockResolvedValue(mockedBurnResData);
-      (submitTransaction as jest.Mock).mockResolvedValue(txReceiptL2);
+      (createSignedTransaction as jest.Mock).mockResolvedValue(txReceiptL2);
 
       // Act
-      const txReceipts = await createAndSubmitBurn(
+      const txReceipts = await createBurnTx(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         ownerZkpKeys,

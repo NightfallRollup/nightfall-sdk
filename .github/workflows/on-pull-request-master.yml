@@ -1,0 +1,30 @@
+name: Check PR
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  eslint-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.17.0'
+      - name: eslint check
+        run: |
+          npm ci
+          npm run lint
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.17.0'
+      - name: SDK Tests
+        run: |
+          npm run build
+          npm run test:unit

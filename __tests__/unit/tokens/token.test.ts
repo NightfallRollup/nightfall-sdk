@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // import { Token } from "../../../libs/tokens";
 
 describe("Token", () => {
@@ -48,5 +49,6 @@ describe("Token", () => {
   //     expect(token.decimals).toBe(DECIMALS);
   //   });
   // });
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   test("Coming soon..", () => {});
 });

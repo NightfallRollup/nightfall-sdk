@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AbstractProvider } from "web3-core";
 
 // Using AbstractProvider to silence ts errors,

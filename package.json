@@ -65,6 +65,7 @@
     "build": "rm -rf ./dist && tsc",
     "lint": "eslint . --ext .ts",
     "prettier": "prettier --check .",
+    "test:unit": "jest __tests__/unit/transactions/l2transactions.test.ts",
     "test:ganache": "DOTENV_CONFIG_PATH=./examples/scripts/.env.ganache jest --setupFiles dotenv/config",
     "test:goerli": "DOTENV_CONFIG_PATH=./examples/scripts/.env.goerli jest --setupFiles dotenv/config",
     "eg:ganache:deposit": "ts-node -r dotenv/config examples/scripts/txDeposit.ts dotenv_config_path=./examples/scripts/.env.ganache dotenv_config_debug=true",

@@ -8,9 +8,11 @@ describe("Which Token Standard", () => {
   const web3 = web3Websocket.web3;
 
   // Token addresses
-  const erc721_address = process.env.APP_TOKEN_ERC721;
-  const erc1155_address = process.env.APP_TOKEN_ERC1155;
-  const erc20_address = process.env.APP_TOKEN_ERC20;
+  const erc721_address = `${process.env.APP_TOKEN_ERC721}`;
+  const erc1155_address = `${process.env.APP_TOKEN_ERC1155}`;
+  const erc20_address = `${process.env.APP_TOKEN_ERC20}`;
+
+  console.log('xxxx', erc721_address, erc1155_address, erc20_address)
 
   afterAll(() => {
     web3Websocket.close();

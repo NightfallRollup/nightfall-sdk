@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import type { Commitment } from "../nightfall/types";
 import { logger, NightfallSdkError } from "../utils";

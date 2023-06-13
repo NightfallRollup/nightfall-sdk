@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Client } from "../client";
 import type { Web3Websocket } from "../ethereum";
 import type { MetaMaskEthereumProvider } from "../ethereum/types";
