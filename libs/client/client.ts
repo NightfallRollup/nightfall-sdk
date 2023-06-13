@@ -21,8 +21,8 @@ axios.interceptors.response.use(
 class Client {
   /**
    * @property {string} apiUrl client address
-   * @property {string?} apiTxUrl client Transaction Worker address
-   * @property {string?} apiBpUrl client Block Proposed address
+   * @property {string} [apiTxUrl] client Transaction Worker address
+   * @property {string} [apiBpUrl] client Block Proposed address
    */
   apiUrl: string;
   apiTxUrl: string;
