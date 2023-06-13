@@ -4,6 +4,8 @@ import type { MetaMaskEthereumProvider } from "../ethereum/types";
 
 export interface UserFactoryCreate {
   clientApiUrl: string;
+  clientApiTxUrl?: string;
+  clientApiBpUrl?: string;
   blockchainWsUrl?: string;
   ethereumPrivateKey?: string;
   nightfallMnemonic?: string;

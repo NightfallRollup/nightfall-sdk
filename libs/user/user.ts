@@ -74,13 +74,15 @@ class UserFactory {
 
     const {
       clientApiUrl,
+      clientApiTxUrl,
+      clientApiBpUrl,
       blockchainWsUrl,
       ethereumPrivateKey: ethPrivateKey,
       nightfallMnemonic,
     } = value;
 
     // Instantiate Client
-    const client = new Client(clientApiUrl);
+    const client = new Client(clientApiUrl, clientApiTxUrl, clientApiBpUrl);
 
     // Get Shield contract address
     const shieldContractAddress = await client.getContractAddress(

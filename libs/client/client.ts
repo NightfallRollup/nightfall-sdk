@@ -23,15 +23,19 @@ class Client {
    * @property {string} apiUrl client address
    */
   apiUrl: string;
+  apiTxUrl: string;
+  apiBpUrl: string;
 
   /**
    * Client constructor
    *
    * @param  {string} apiUrl client address
    */
-  constructor(apiUrl: string) {
+  constructor(apiUrl: string, apiTxUrl?: string, apiBpUrl?: string) {
     logger.debug({ apiUrl }, "new Client at");
     this.apiUrl = apiUrl;
+    this.apiTxUrl = typeof apiTxUrl === 'undefined' ? '' : apiTxUrl;
+    this.apiBpUrl = typeof apiBpUrl === 'undefined' ? '' : apiBpUrl;
   }
 
   /**
@@ -118,9 +122,10 @@ class Client {
     zkpKeys: NightfallZkpKeys,
   ): Promise<string> {
     const endpoint = "incoming-viewing-key";
+    const apiUrl = this.apiBpUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.post(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
       zkpPrivateKeys: [zkpKeys.zkpPrivateKey],
       nullifierKeys: [zkpKeys.nullifierKey],
     });
@@ -153,9 +158,10 @@ class Client {
     fee: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "deposit";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.post(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
       ercAddress: token.contractAddress,
       tokenType: token.ercStandard,
       rootKey: ownerZkpKeys.rootKey,
@@ -194,9 +200,10 @@ class Client {
     fee: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "tokenise";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.post(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
       ercAddress: tokenAddress,
       rootKey: ownerZkpKeys.rootKey,
       value,
@@ -235,9 +242,10 @@ class Client {
     isOffChain: boolean,
   ): Promise<TransactionResponseData> {
     const endpoint = "transfer";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.post(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
       ercAddress: token.contractAddress,
       rootKey: ownerZkpKeys.rootKey,
       recipientData: recipientNightfallData,
@@ -278,9 +286,10 @@ class Client {
     fee: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "burn";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.post(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
       ercAddress: tokenAddress,
       rootKey: ownerZkpKeys.rootKey,
       value,
@@ -320,9 +329,10 @@ class Client {
     isOffChain: boolean,
   ): Promise<TransactionResponseData> {
     const endpoint = "withdraw";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.post(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
       ercAddress: token.contractAddress,
       tokenType: token.ercStandard,
       rootKey: ownerZkpKeys.rootKey,
@@ -379,9 +389,10 @@ class Client {
     tokenContractAddresses: string[],
   ) {
     const endpoint = "commitment/pending-deposit";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.get(`${this.apiUrl}/commitment/pending-deposit`, {
+    const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
         ercList: tokenContractAddresses,
@@ -397,9 +408,10 @@ class Client {
 
   async getNightfallBalances(zkpKeys: NightfallZkpKeys) {
     const endpoint = "commitment/balance";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.get(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
       },
@@ -414,9 +426,10 @@ class Client {
 
   async getPendingTransfers(zkpKeys: NightfallZkpKeys) {
     const endpoint = "commitment/pending-spent";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.get(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
       },
@@ -441,6 +454,7 @@ class Client {
     listOfCompressedZkpPublicKey: string[],
   ): Promise<Commitment[]> {
     const endpoint = "commitment/compressedZkpPublicKeys";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     if (!listOfCompressedZkpPublicKey.length) {
@@ -453,7 +467,7 @@ class Client {
       );
     }
     const res = await axios.post(
-      `${this.apiUrl}/${endpoint}`,
+      `${apiUrl}/${endpoint}`,
       listOfCompressedZkpPublicKey,
     );
     logger.info(
@@ -479,9 +493,10 @@ class Client {
     listOfErcAddresses?: string[],
   ): Promise<Commitment[]> {
     const endpoint = "commitment/commitments";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.get(`${this.apiUrl}/${endpoint}`, {
+    const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         listOfCompressedZkpPublicKey,
         listOfErcAddresses,
@@ -507,10 +522,11 @@ class Client {
    */
   async saveCommitments(listOfCommitments: Commitment[]) {
     const endpoint = "commitment/save";
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(
-      `${this.apiUrl}/${endpoint}`,
+      `${apiUrl}/${endpoint}`,
       listOfCommitments,
     );
     logger.info(
