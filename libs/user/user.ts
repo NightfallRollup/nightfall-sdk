@@ -81,7 +81,7 @@ class UserFactory {
       nightfallMnemonic,
     } = value;
 
-    // Instantiate Client
+    // Instantiate Client and optional Workers URL
     const client = new Client(clientApiUrl, clientApiTxUrl, clientApiBpUrl);
 
     // Get Shield contract address

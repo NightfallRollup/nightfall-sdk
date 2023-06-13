@@ -21,6 +21,8 @@ axios.interceptors.response.use(
 class Client {
   /**
    * @property {string} apiUrl client address
+   * @property {string?} apiTxUrl client Transaction Worker address
+   * @property {string?} apiBpUrl client Block Proposed address
    */
   apiUrl: string;
   apiTxUrl: string;
@@ -34,6 +36,7 @@ class Client {
   constructor(apiUrl: string, apiTxUrl?: string, apiBpUrl?: string) {
     logger.debug({ apiUrl }, "new Client at");
     this.apiUrl = apiUrl;
+    // Set optional worker addresses if provided
     this.apiTxUrl = typeof apiTxUrl === 'undefined' ? '' : apiTxUrl;
     this.apiBpUrl = typeof apiBpUrl === 'undefined' ? '' : apiBpUrl;
   }
