@@ -26,5 +26,6 @@ jobs:
           node-version: '16.17.0'
       - name: SDK Tests
         run: |
+          npm ci
           npm run build
           npm run test:unit
