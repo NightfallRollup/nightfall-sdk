@@ -222,6 +222,8 @@ class User {
    * @param {string} [options.value]
    * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
+   * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
+   * @param {string} [options.salt]  Salt to be added to the newly created deposit commitment
    * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async makeDeposit(
@@ -234,7 +236,7 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "makeDeposit formatted parameters");
 
-    const { tokenContractAddress, value, feeWei } = joiValue;
+    const { tokenContractAddress, value, feeWei, providedCommitmentsFee = [], salt } = joiValue;
     let { tokenId } = joiValue;
 
     // Determine ERC standard, set value/tokenId defaults,
@@ -272,6 +274,8 @@ class User {
       valueWei,
       tokenId,
       feeWei,
+      providedCommitmentsFee,
+      salt,
     );
     logger.info({ signedTxL1, txReceiptL2 }, "Deposit created");
 
@@ -296,6 +300,8 @@ class User {
    * @param {string} options.value
    * @param {string} [options.salt]
    * @param {string} [options.feeWei]
+   * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
+   * @param {string} [options.salt]  Salt to be added to the newly created deposit commitment
    * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async mintL2Token(
@@ -308,7 +314,7 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "mintL2Token formatted parameters");
 
-    const { tokenAddress, value, tokenId, salt, feeWei } = joiValue;
+    const { tokenAddress, value, tokenId, feeWei, providedCommitmentsFee = [], salt } = joiValue;
 
     // Mint (aka Tokenise)
     const { txReceiptL2 } = await createTokeniseTx(
@@ -317,8 +323,9 @@ class User {
       tokenAddress,
       value,
       tokenId,
-      salt,
       feeWei,
+      providedCommitmentsFee,
+      salt,
     );
     logger.info({ txReceiptL2 }, "Minting completed!");
 
@@ -337,6 +344,9 @@ class User {
    * @param {string} [options.feeWei]
    * @param {string} options.recipientNightfallAddress
    * @param {Boolean} [options.isOffChain]
+   * @param {string[] | []} [providedCommitments] Commitments to be used for transfer
+   * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
+   * @param {string} [regulatorUrl] regulatorUrl
    * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
    */
   async makeTransfer(
@@ -355,6 +365,9 @@ class User {
       feeWei,
       recipientNightfallAddress,
       isOffChain,
+      providedCommitments = [],
+      providedCommitmentsFee = [],
+      salt,
     } = joiValue;
     let { tokenId } = joiValue;
 
@@ -383,6 +396,9 @@ class User {
       feeWei,
       recipientNightfallAddress,
       isOffChain,
+      providedCommitments,
+      providedCommitmentsFee,
+      salt,
     );
 
     if (isOffChain) {
@@ -410,6 +426,8 @@ class User {
    * @param {string | number} options.tokenId
    * @param {string} options.value
    * @param {string} [options.feeWei]
+   * @param {string[] | []} [options.providedCommitments] Commitments to be burnt
+   * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
    * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async burnL2Token(
@@ -422,7 +440,7 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "burnL2Token formatted parameters");
 
-    const { tokenAddress, value, tokenId, feeWei } = joiValue;
+    const { tokenAddress, value, tokenId, feeWei, providedCommitments = [], providedCommitmentsFee = [] } = joiValue;
 
     // Burn
     const { txReceiptL2 } = await createBurnTx(
@@ -432,6 +450,8 @@ class User {
       value,
       tokenId,
       feeWei,
+      providedCommitments,
+      providedCommitmentsFee,
     );
     logger.info({ txReceiptL2 }, "Burning completed!");
 
@@ -450,6 +470,8 @@ class User {
    * @param {string} [options.feeWei]
    * @param {string} options.recipientEthAddress
    * @param {Boolean} [options.isOffChain]
+   * @param {string[] | []} [options.providedCommitments] Commitments to be withdrawn
+   * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
    * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
    */
   async makeWithdrawal(
@@ -468,6 +490,8 @@ class User {
       feeWei,
       recipientEthAddress,
       isOffChain,
+      providedCommitments = [],
+      providedCommitmentsFee = [],
     } = joiValue;
     let { tokenId } = joiValue;
 
@@ -496,6 +520,8 @@ class User {
       feeWei,
       recipientEthAddress,
       isOffChain,
+      providedCommitments,
+      providedCommitmentsFee,
     );
 
     if (isOffChain) {

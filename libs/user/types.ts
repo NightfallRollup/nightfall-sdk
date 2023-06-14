@@ -36,22 +36,34 @@ export interface UserL2TokenisationTransaction {
   feeWei?: string;
 }
 
-export type UserMakeDeposit = UserMakeTransaction;
+export interface UserMakeDeposit extends UserMakeTransaction {
+  providedCommitmentsFee?: string[] | [];
+  salt?: string;
+}
 
 export interface UserMintL2Token extends UserL2TokenisationTransaction {
+  providedCommitmentsFee?: string[] | [];
   salt?: string;
 }
 
 export interface UserMakeTransfer extends UserMakeTransaction {
   recipientNightfallAddress: string;
   isOffChain?: boolean;
+  providedCommitments?: string[] | [];
+  providedCommitmentsFee?: string[] | [];
+  regulatorUrl?: string;
 }
 
-export type UserBurnL2Token = UserL2TokenisationTransaction;
+export interface UserBurnL2Token extends UserL2TokenisationTransaction {
+  providedCommitments?: string[] | [];
+  providedCommitmentsFee?: string[] | [];
+}
 
 export interface UserMakeWithdrawal extends UserMakeTransaction {
   recipientEthAddress: string;
   isOffChain?: boolean;
+  providedCommitments?: string[] | [];
+  providedCommitmentsFee?: string[] | [];
 }
 
 export interface UserFinaliseWithdrawal {

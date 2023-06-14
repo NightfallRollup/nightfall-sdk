@@ -21,9 +21,9 @@ const isValidL2TokenAddress = (
   return tokenAddress;
 };
 
-const isValidSalt = (salt: string, helpers: CustomHelpers) => {
-  const isValid =
-    BigInt(salt) <
+const isValidSalt = (salt: string | undefined, helpers: CustomHelpers) => {
+  const isValid = 
+    BigInt(salt ?? "0") <
     BigInt(
       "21888242871839275222246405745257275088548364400416034343698204186575808495617",
     );
@@ -84,22 +84,34 @@ const l2TokenisationTransaction = Joi.object({
   feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),
 });
 
-export const makeDepositOptions = makeTransaction;
+export const makeDepositOptions = makeTransaction.append({
+  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
+  salt: Joi.string().trim().custom(isValidSalt, "custom validation"),
+});
 
 export const mintL2Token = l2TokenisationTransaction.append({
+  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
   salt: Joi.string().trim().custom(isValidSalt, "custom validation"),
 });
 
 export const makeTransferOptions = makeTransaction.append({
+  providedCommitments: Joi.array().items(Joi.string()) || Joi.array().min(0),
+  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
+  regulatorUrl: Joi.string().trim(),
   recipientNightfallAddress: Joi.string().trim().required(),
   isOffChain: Joi.boolean().default(false),
 });
 
-export const burnL2Token = l2TokenisationTransaction;
+export const burnL2Token = makeTransaction.append({
+  providedCommitments: Joi.array().items(Joi.string()) || Joi.array().min(0),
+  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
+});
 
 export const makeWithdrawalOptions = makeTransaction.append({
   recipientEthAddress: Joi.string().trim().required(),
   isOffChain: Joi.boolean().default(false),
+  providedCommitments: Joi.array().items(Joi.string()) || Joi.array().min(0),
+  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
 });
 
 export const finaliseWithdrawalOptions = Joi.object({
