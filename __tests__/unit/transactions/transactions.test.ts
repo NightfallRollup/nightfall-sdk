@@ -1,10 +1,10 @@
 import {
-  createAndSubmitDeposit,
-  createAndSubmitTransfer,
-  createAndSubmitWithdrawal,
-  createAndSubmitFinaliseWithdrawal,
+  createDepositTx,
+  createTransferTx,
+  createWithdrawalTx,
+  createFinaliseWithdrawalTx,
 } from "../../../libs/transactions";
-import { submitTransaction } from "../../../libs/transactions/helpers/submit";
+import { createSignedTransaction } from "../../../libs/transactions/helpers/createSignedTx";
 import { NightfallSdkError } from "../../../libs/utils/error";
 import { depositReceipts } from "../../../__mocks__/mockTxDepositReceipts";
 import { transferReceipts } from "../../../__mocks__/mockTxTransferReceipts";
@@ -14,7 +14,7 @@ import type { NightfallZkpKeys } from "../../../libs/nightfall/types";
 import type Web3 from "web3";
 import type { Client } from "../../../libs/client";
 
-jest.mock("../../../libs/transactions/helpers/submit");
+jest.mock("../../../libs/transactions/helpers/createSignedTx");
 
 describe("Transactions", () => {
   const token = {};
@@ -37,7 +37,7 @@ describe("Transactions", () => {
     const tokenId = "0x00";
     const unsignedTx =
       "0x9ae2b6be00000000000000000000000000000000000000000000000000f...";
-    const { txReceipt, txReceiptL2 } = depositReceipts;
+    const { signedTxL1, txReceiptL2 } = depositReceipts;
 
     test("Should fail if client throws a Nightfall error", () => {
       // Arrange
@@ -48,7 +48,7 @@ describe("Transactions", () => {
       // Act, Assert
       expect(
         async () =>
-          await createAndSubmitDeposit(
+          await createDepositTx(
             token,
             ownerEthAddress,
             ownerEthPrivateKey,
@@ -71,10 +71,10 @@ describe("Transactions", () => {
         transaction: txReceiptL2,
       };
       mockedClient.deposit.mockResolvedValue(mockedDepositResData);
-      (submitTransaction as jest.Mock).mockResolvedValue(txReceipt);
+      (createSignedTransaction as jest.Mock).mockResolvedValue(signedTxL1);
 
       // Act
-      const txReceipts = await createAndSubmitDeposit(
+      const txReceipts = await createDepositTx(
         token,
         ownerEthAddress,
         ownerEthPrivateKey,
@@ -95,14 +95,14 @@ describe("Transactions", () => {
         tokenId,
         fee,
       );
-      expect(submitTransaction).toHaveBeenCalledWith(
+      expect(createSignedTransaction).toHaveBeenCalledWith(
         ownerEthAddress,
         ownerEthPrivateKey,
         shieldContractAddress,
         unsignedTx,
         web3,
       );
-      expect(txReceipts).toStrictEqual({ txReceipt, txReceiptL2 });
+      expect(txReceipts).toStrictEqual({ signedTxL1, txReceiptL2 });
     });
   });
 
@@ -117,9 +117,7 @@ describe("Transactions", () => {
     };
     let isOffChain = true;
 
-    const unsignedTx =
-      "0x94d872be00000000000000000000000000000000000000000000000000f...";
-    const { txReceipt, txReceiptL2 } = transferReceipts;
+    const { txReceiptL2 } = transferReceipts;
 
     test("Should fail if client throws a Nightfall error", () => {
       // Arrange
@@ -130,7 +128,7 @@ describe("Transactions", () => {
       // Act, Assert
       expect(
         async () =>
-          await createAndSubmitTransfer(
+          await createTransferTx(
             token,
             ownerEthAddress,
             ownerEthPrivateKey,
@@ -155,7 +153,7 @@ describe("Transactions", () => {
       mockedClient.transfer.mockResolvedValue(mockedTransferResData);
 
       // Act
-      const txReceipts = await createAndSubmitTransfer(
+      const txReceipts = await createTransferTx(
         token,
         ownerEthAddress,
         ownerEthPrivateKey,
@@ -179,7 +177,7 @@ describe("Transactions", () => {
         fee,
         isOffChain,
       );
-      expect(submitTransaction).not.toHaveBeenCalled();
+      expect(createSignedTransaction).not.toHaveBeenCalled();
       expect(txReceipts).toStrictEqual({ txReceiptL2 });
     });
   });
@@ -192,9 +190,7 @@ describe("Transactions", () => {
     // eslint-disable-next-line prefer-const
     let isOffChain = true;
 
-    const unsignedTx =
-      "0x5af3107a400000000000000000000000000000000000000000000000000...";
-    const { txReceipt, txReceiptL2 } = withdrawalReceipts;
+    const { txReceiptL2 } = withdrawalReceipts;
 
     test("Should fail if client throws a Nightfall error", () => {
       // Arrange
@@ -205,7 +201,7 @@ describe("Transactions", () => {
       // Act, Assert
       expect(
         async () =>
-          await createAndSubmitWithdrawal(
+          await createWithdrawalTx(
             token,
             ownerEthAddress,
             ownerEthPrivateKey,
@@ -230,7 +226,7 @@ describe("Transactions", () => {
       mockedClient.withdraw.mockResolvedValue(mockedWithdrawResData);
 
       // Act
-      const txReceipts = await createAndSubmitWithdrawal(
+      const txReceipts = await createWithdrawalTx(
         token,
         ownerEthAddress,
         ownerEthPrivateKey,
@@ -255,7 +251,7 @@ describe("Transactions", () => {
         recipientEthAddress,
         isOffChain,
       );
-      expect(submitTransaction).not.toHaveBeenCalled();
+      expect(createSignedTransaction).not.toHaveBeenCalled();
       expect(txReceipts).toStrictEqual({ txReceiptL2 });
     });
   });
@@ -275,7 +271,7 @@ describe("Transactions", () => {
       // Act, Assert
       expect(
         async () =>
-          await createAndSubmitFinaliseWithdrawal(
+          await createFinaliseWithdrawalTx(
             ownerEthAddress,
             ownerEthPrivateKey,
             shieldContractAddress,
@@ -293,10 +289,10 @@ describe("Transactions", () => {
       mockedClient.finaliseWithdrawal.mockResolvedValue(
         mockedFinaliseWithdrawalResData,
       );
-      (submitTransaction as jest.Mock).mockResolvedValue(txReceipt);
+      (createSignedTransaction as jest.Mock).mockResolvedValue(txReceipt);
 
       // Act
-      const result = await createAndSubmitFinaliseWithdrawal(
+      const result = await createFinaliseWithdrawalTx(
         ownerEthAddress,
         ownerEthPrivateKey,
         shieldContractAddress,
@@ -311,14 +307,14 @@ describe("Transactions", () => {
       expect(mockedClient.finaliseWithdrawal).toHaveBeenCalledWith(
         withdrawTxHashL2,
       );
-      expect(submitTransaction).toHaveBeenCalledWith(
+      expect(createSignedTransaction).toHaveBeenCalledWith(
         ownerEthAddress,
         ownerEthPrivateKey,
         shieldContractAddress,
         unsignedTx,
         web3,
       );
-      expect(result).toStrictEqual(txReceipt);
+      expect(result.signedTxL1).toStrictEqual(txReceipt);
     });
   });
 });

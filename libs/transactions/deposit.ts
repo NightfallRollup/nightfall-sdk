@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type Web3 from "web3";
 import { logger, NightfallSdkError } from "../utils";
 import { createSignedTransaction } from "./helpers/createSignedTx";

@@ -51,7 +51,7 @@ const txReceiptL2 = {
     "0x08b6d1705e4294e0b01aca27fdb84ef94ddc67bc5991443f94bc3a9d44a222ba",
 };
 
-const txReceipt = {
+const signedTxL1 = {
   blockHash:
     "0x662ef5091477ca482ff516f874dae344badc1d3de499a651b1a81560ab83212b",
   blockNumber: 7437816,
@@ -124,4 +124,4 @@ const txReceipt = {
   type: "0x0",
 };
 
-export const depositReceipts = { txReceipt, txReceiptL2 };
+export const depositReceipts = { signedTxL1, txReceiptL2 };
