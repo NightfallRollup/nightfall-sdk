@@ -31,7 +31,7 @@ export interface UserMakeTransaction {
 }
 
 export interface UserL2TokenisationTransaction {
-  tokenAddress: string;
+  tokenContractAddress: string;
   value: string;
   tokenId: number | string;
   feeWei?: string;

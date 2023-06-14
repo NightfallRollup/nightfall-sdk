@@ -193,7 +193,7 @@ class Client {
    * @async
    * @method tokenise
    * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
-   * @param {string} tokenAddress Token address to be minted in L2
+   * @param {string} tokenContractAddress Token address to be minted in L2
    * @param {string} value The amount in Wei of the token to be minted
    * @param {string} tokenId The tokenId of the token to be minted
    * @param {string} fee Proposer payment in Wei for the tx in L2
@@ -204,7 +204,7 @@ class Client {
    */
   async tokenise(
     ownerZkpKeys: NightfallZkpKeys,
-    tokenAddress: string,
+    tokenContractAddress: string,
     value: string,
     tokenId: string,
     fee: string,
@@ -216,7 +216,7 @@ class Client {
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
-      ercAddress: tokenAddress,
+      ercAddress: tokenContractAddress,
       rootKey: ownerZkpKeys.rootKey,
       value,
       tokenId,
@@ -293,7 +293,7 @@ class Client {
    * @async
    * @method burn
    * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
-   * @param {string} tokenAddress Token address of the token to be burnt in L2
+   * @param {string} tokenContractAddress Token address of the token to be burnt in L2
    * @param {string} value The amount in Wei of the token to be burnt
    * @param {string} tokenId The tokenId of the token to be burnt
    * @param {string} fee Proposer payment in Wei for the tx in L2
@@ -304,7 +304,7 @@ class Client {
    */
   async burn(
     ownerZkpKeys: NightfallZkpKeys,
-    tokenAddress: string,
+    tokenContractAddress: string,
     value: string,
     tokenId: string,
     fee: string,
@@ -316,7 +316,7 @@ class Client {
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
-      ercAddress: tokenAddress,
+      ercAddress: tokenContractAddress,
       rootKey: ownerZkpKeys.rootKey,
       value,
       tokenId,

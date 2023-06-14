@@ -295,7 +295,7 @@ class User {
    * @async
    * @method mintL2Token
    * @param {UserMintL2Token} options
-   * @param {string} options.tokenAddress
+   * @param {string} options.tokenContractAddress
    * @param {string | number} options.tokenId
    * @param {string} options.value
    * @param {string} [options.salt]
@@ -314,13 +314,13 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "mintL2Token formatted parameters");
 
-    const { tokenAddress, value, tokenId, feeWei, providedCommitmentsFee = [], salt } = joiValue;
+    const { tokenContractAddress, value, tokenId, feeWei, providedCommitmentsFee = [], salt } = joiValue;
 
     // Mint (aka Tokenise)
     const { txReceiptL2 } = await createTokeniseTx(
       this.zkpKeys,
       this.client,
-      tokenAddress,
+      tokenContractAddress,
       value,
       tokenId,
       feeWei,
@@ -422,7 +422,7 @@ class User {
    * @async
    * @method burnL2Token
    * @param {UserBurnL2Token} options
-   * @param {string} options.tokenAddress
+   * @param {string} options.tokenContractAddress
    * @param {string | number} options.tokenId
    * @param {string} options.value
    * @param {string} [options.feeWei]
@@ -440,13 +440,13 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "burnL2Token formatted parameters");
 
-    const { tokenAddress, value, tokenId, feeWei, providedCommitments = [], providedCommitmentsFee = [] } = joiValue;
+    const { tokenContractAddress, value, tokenId, feeWei, providedCommitments = [], providedCommitmentsFee = [] } = joiValue;
 
     // Burn
     const { txReceiptL2 } = await createBurnTx(
       this.zkpKeys,
       this.client,
-      tokenAddress,
+      tokenContractAddress,
       value,
       tokenId,
       feeWei,

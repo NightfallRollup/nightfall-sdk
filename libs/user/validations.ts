@@ -6,10 +6,10 @@ import gen from "general-number";
 const { GN } = gen;
 
 const isValidL2TokenAddress = (
-  tokenAddress: string,
+  tokenContractAddress: string,
   helpers: CustomHelpers,
 ) => {
-  const binAddress = new GN(tokenAddress).binary;
+  const binAddress = new GN(tokenContractAddress).binary;
   const isValid =
     binAddress.charAt(0) === "1" &&
     binAddress.charAt(1) === "1" &&
@@ -18,7 +18,7 @@ const isValidL2TokenAddress = (
     return helpers.message({
       custom: "Invalid L2TokenAddress, review Address",
     });
-  return tokenAddress;
+  return tokenContractAddress;
 };
 
 const isValidSalt = (salt: string | undefined, helpers: CustomHelpers) => {
@@ -76,7 +76,7 @@ const makeTransaction = Joi.object({
 }).or("value", "tokenId"); // these cannot have default
 
 const l2TokenisationTransaction = Joi.object({
-  tokenAddress: Joi.string()
+  tokenContractAddress: Joi.string()
     .trim()
     .required()
     .custom(isValidL2TokenAddress, "custom validation"),
