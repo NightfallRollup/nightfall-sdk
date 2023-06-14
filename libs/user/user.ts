@@ -344,9 +344,9 @@ class User {
    * @param {string} [options.feeWei]
    * @param {string} options.recipientNightfallAddress
    * @param {Boolean} [options.isOffChain]
-   * @param {string[] | []} [providedCommitments] Commitments to be used for transfer
-   * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
-   * @param {string} [regulatorUrl] regulatorUrl
+   * @param {string[] | []} [options.providedCommitments] Commitments to be used for transfer
+   * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
+   * @param {string} [options.regulatorUrl] regulatorUrl
    * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
    */
   async makeTransfer(
