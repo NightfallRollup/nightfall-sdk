@@ -27,6 +27,7 @@ export interface UserMakeTransaction {
   value?: string;
   tokenId?: string;
   feeWei?: string;
+  providedCommitmentsFee?: string[] | [];
 }
 
 export interface UserL2TokenisationTransaction {
@@ -34,15 +35,14 @@ export interface UserL2TokenisationTransaction {
   value: string;
   tokenId: number | string;
   feeWei?: string;
+  providedCommitmentsFee?: string[] | [];
 }
 
 export interface UserMakeDeposit extends UserMakeTransaction {
-  providedCommitmentsFee?: string[] | [];
   salt?: string;
 }
 
 export interface UserMintL2Token extends UserL2TokenisationTransaction {
-  providedCommitmentsFee?: string[] | [];
   salt?: string;
 }
 
@@ -50,20 +50,17 @@ export interface UserMakeTransfer extends UserMakeTransaction {
   recipientNightfallAddress: string;
   isOffChain?: boolean;
   providedCommitments?: string[] | [];
-  providedCommitmentsFee?: string[] | [];
   regulatorUrl?: string;
 }
 
 export interface UserBurnL2Token extends UserL2TokenisationTransaction {
   providedCommitments?: string[] | [];
-  providedCommitmentsFee?: string[] | [];
 }
 
 export interface UserMakeWithdrawal extends UserMakeTransaction {
   recipientEthAddress: string;
   isOffChain?: boolean;
   providedCommitments?: string[] | [];
-  providedCommitmentsFee?: string[] | [];
 }
 
 export interface UserFinaliseWithdrawal {

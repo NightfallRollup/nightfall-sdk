@@ -72,6 +72,7 @@ const makeTransaction = Joi.object({
   value: Joi.string(),
   tokenId: Joi.string(),
   feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),
+  providedCommitmentsFee: Joi.array().items(Joi.string()), 
 }).or("value", "tokenId"); // these cannot have default
 
 const l2TokenisationTransaction = Joi.object({
@@ -85,18 +86,15 @@ const l2TokenisationTransaction = Joi.object({
 });
 
 export const makeDepositOptions = makeTransaction.append({
-  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
   salt: Joi.string().trim().custom(isValidSalt, "custom validation"),
 });
 
 export const mintL2Token = l2TokenisationTransaction.append({
-  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
   salt: Joi.string().trim().custom(isValidSalt, "custom validation"),
 });
 
 export const makeTransferOptions = makeTransaction.append({
   providedCommitments: Joi.array().items(Joi.string()) || Joi.array().min(0),
-  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
   regulatorUrl: Joi.string().trim(),
   recipientNightfallAddress: Joi.string().trim().required(),
   isOffChain: Joi.boolean().default(false),
@@ -104,14 +102,12 @@ export const makeTransferOptions = makeTransaction.append({
 
 export const burnL2Token = makeTransaction.append({
   providedCommitments: Joi.array().items(Joi.string()) || Joi.array().min(0),
-  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
 });
 
 export const makeWithdrawalOptions = makeTransaction.append({
   recipientEthAddress: Joi.string().trim().required(),
   isOffChain: Joi.boolean().default(false),
   providedCommitments: Joi.array().items(Joi.string()) || Joi.array().min(0),
-  providedCommitmentsFee: Joi.array().items(Joi.string()) || Joi.array().min(0),
 });
 
 export const finaliseWithdrawalOptions = Joi.object({

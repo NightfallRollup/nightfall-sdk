@@ -367,7 +367,7 @@ class User {
       isOffChain,
       providedCommitments = [],
       providedCommitmentsFee = [],
-      salt,
+      regulatorUrl,
     } = joiValue;
     let { tokenId } = joiValue;
 
@@ -398,7 +398,7 @@ class User {
       isOffChain,
       providedCommitments,
       providedCommitmentsFee,
-      salt,
+      regulatorUrl,
     );
 
     if (isOffChain) {
