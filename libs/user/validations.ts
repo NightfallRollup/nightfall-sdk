@@ -6,10 +6,10 @@ import gen from "general-number";
 const { GN } = gen;
 
 const isValidL2TokenAddress = (
-  tokenAddress: string,
+  tokenContractAddress: string,
   helpers: CustomHelpers,
 ) => {
-  const binAddress = new GN(tokenAddress).binary;
+  const binAddress = new GN(tokenContractAddress).binary;
   const isValid =
     binAddress.charAt(0) === "1" &&
     binAddress.charAt(1) === "1" &&
@@ -18,12 +18,12 @@ const isValidL2TokenAddress = (
     return helpers.message({
       custom: "Invalid L2TokenAddress, review Address",
     });
-  return tokenAddress;
+  return tokenContractAddress;
 };
 
-const isValidSalt = (salt: string, helpers: CustomHelpers) => {
-  const isValid =
-    BigInt(salt) <
+const isValidSalt = (salt: string | undefined, helpers: CustomHelpers) => {
+  const isValid = 
+    BigInt(salt ?? "0") <
     BigInt(
       "21888242871839275222246405745257275088548364400416034343698204186575808495617",
     );
@@ -72,10 +72,11 @@ const makeTransaction = Joi.object({
   value: Joi.string(),
   tokenId: Joi.string(),
   feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),
+  providedCommitmentsFee: Joi.array().items(Joi.string()), 
 }).or("value", "tokenId"); // these cannot have default
 
 const l2TokenisationTransaction = Joi.object({
-  tokenAddress: Joi.string()
+  tokenContractAddress: Joi.string()
     .trim()
     .required()
     .custom(isValidL2TokenAddress, "custom validation"),
@@ -84,22 +85,29 @@ const l2TokenisationTransaction = Joi.object({
   feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),
 });
 
-export const makeDepositOptions = makeTransaction;
+export const makeDepositOptions = makeTransaction.append({
+  salt: Joi.string().trim().custom(isValidSalt, "custom validation"),
+});
 
 export const mintL2Token = l2TokenisationTransaction.append({
   salt: Joi.string().trim().custom(isValidSalt, "custom validation"),
 });
 
 export const makeTransferOptions = makeTransaction.append({
+  providedCommitments: Joi.array().items(Joi.string()), 
+  regulatorUrl: Joi.string().trim(),
   recipientNightfallAddress: Joi.string().trim().required(),
   isOffChain: Joi.boolean().default(false),
 });
 
-export const burnL2Token = l2TokenisationTransaction;
+export const burnL2Token = makeTransaction.append({
+  providedCommitments: Joi.array().items(Joi.string()),
+});
 
 export const makeWithdrawalOptions = makeTransaction.append({
   recipientEthAddress: Joi.string().trim().required(),
   isOffChain: Joi.boolean().default(false),
+  providedCommitments: Joi.array().items(Joi.string()),
 });
 
 export const finaliseWithdrawalOptions = Joi.object({

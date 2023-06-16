@@ -23,6 +23,9 @@ import type { RecipientNightfallData, TransactionResult } from "./types";
  * @param {string} fee Proposer payment in Wei for the tx in L2
  * @param {string} recipientNightfallAddress Recipient zkpKeys.compressedZkpPublicKey
  * @param {boolean} isOffChain If true, tx will be sent to the proposer's API (handled off-chain)
+ * @param {string[] | []} [providedCommitments] Commitments to be used for transfer
+ * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
+ * @param {string} [regulatorUrl] regulatorUrl
  * @throws {NightfallSdkError} Error while broadcasting on-chain tx
  * @returns {Promise<TransactionResult>}
  */
@@ -39,6 +42,9 @@ export async function createTransferTx(
   fee: string,
   recipientNightfallAddress: string,
   isOffChain: boolean,
+  providedCommitments?: string[] | [],
+  providedCommitmentsFee?: string[] | [],
+  regulatorUrl?: string,
 ): Promise<TransactionResult> {
   logger.debug("createTransferTx");
 
@@ -54,6 +60,9 @@ export async function createTransferTx(
     tokenId,
     fee,
     isOffChain,
+    providedCommitments ?? [],
+    providedCommitmentsFee ?? [],
+    regulatorUrl,
   );
   const txReceiptL2 = resData.transaction;
 

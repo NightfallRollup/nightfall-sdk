@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createDepositTx,
   createTransferTx,
@@ -94,6 +95,8 @@ describe("Transactions", () => {
         value,
         tokenId,
         fee,
+        [],
+        undefined,
       );
       expect(createSignedTransaction).toHaveBeenCalledWith(
         ownerEthAddress,
@@ -103,6 +106,37 @@ describe("Transactions", () => {
         web3,
       );
       expect(txReceipts).toStrictEqual({ signedTxL1, txReceiptL2 });
+    });
+
+    test("Call deposit with salt", async () => {
+      // Act
+      const salt = '0x12345678';
+      const providedCommitmentsFee: [] = [];
+      await createDepositTx(
+        token,
+        ownerEthAddress,
+        ownerEthPrivateKey,
+        ownerZkpKeys as unknown as NightfallZkpKeys,
+        shieldContractAddress,
+        web3 as unknown as Web3,
+        mockedClient as unknown as Client,
+        value,
+        tokenId,
+        fee,
+        providedCommitmentsFee,
+        salt,
+      );
+
+      // Assert
+      expect(mockedClient.deposit).toHaveBeenCalledWith(
+        token,
+        ownerZkpKeys,
+        value,
+        tokenId,
+        fee,
+        [],
+        salt,
+      );
     });
   });
 
@@ -141,6 +175,7 @@ describe("Transactions", () => {
             fee,
             recipientNightfallAddress,
             isOffChain,
+            []
           ),
       ).rejects.toThrow(NightfallSdkError);
       expect(mockedClient.transfer).toHaveBeenCalledTimes(1);
@@ -176,9 +211,50 @@ describe("Transactions", () => {
         tokenId,
         fee,
         isOffChain,
+        [],
+        [],
+        undefined,
       );
       expect(createSignedTransaction).not.toHaveBeenCalled();
       expect(txReceipts).toStrictEqual({ txReceiptL2 });
+    });
+
+    test("Call transfer with regulator Url", async () => {
+      // Arrange
+      isOffChain = true;
+      const regulatorUrl = 'http://regulator';
+
+      // Act
+      await createTransferTx(
+        token,
+        ownerEthAddress,
+        ownerEthPrivateKey,
+        ownerZkpKeys as unknown as NightfallZkpKeys,
+        shieldContractAddress,
+        web3 as unknown as Web3,
+        mockedClient as unknown as Client,
+        value,
+        tokenId,
+        fee,
+        recipientNightfallAddress,
+        isOffChain,
+        [],
+        [],
+        regulatorUrl,
+      );
+
+      // Assert
+      expect(mockedClient.transfer).toHaveBeenCalledWith(
+        token,
+        ownerZkpKeys,
+        recipientNightfallData,
+        tokenId,
+        fee,
+        isOffChain,
+        [],
+        [],
+        regulatorUrl,
+      );
     });
   });
 
@@ -250,6 +326,8 @@ describe("Transactions", () => {
         fee,
         recipientEthAddress,
         isOffChain,
+        [],
+        [],
       );
       expect(createSignedTransaction).not.toHaveBeenCalled();
       expect(txReceipts).toStrictEqual({ txReceiptL2 });

@@ -151,6 +151,8 @@ class Client {
    * @param {string} value The amount in Wei of the token to be deposited
    * @param {string} tokenId The tokenId of the token to be deposited
    * @param {string} fee Proposer payment in Wei for the tx in L2
+   * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
+   * @param {string} [salt]  Salt to be added to the newly created deposit commitment
    * @throws {NightfallSdkError} Bad response
    * @returns {Promise<TransactionResponseData>}
    */
@@ -160,6 +162,8 @@ class Client {
     value: string,
     tokenId: string,
     fee: string,
+    providedCommitmentsFee: string[] | [],
+    salt?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "deposit";
     const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
@@ -172,6 +176,8 @@ class Client {
       value,
       tokenId,
       fee,
+      providedCommitmentsFee,
+      salt,
     });
     logger.info(
       { status: res.status, data: res.data },
@@ -187,32 +193,35 @@ class Client {
    * @async
    * @method tokenise
    * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
-   * @param {string} tokenAddress Token address to be minted in L2
+   * @param {string} tokenContractAddress Token address to be minted in L2
    * @param {string} value The amount in Wei of the token to be minted
    * @param {string} tokenId The tokenId of the token to be minted
-   * @param {string} salt Random salt
    * @param {string} fee Proposer payment in Wei for the tx in L2
+   * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
+   * @param {string} [salt]  Salt to be added to the newly created commitment
    * @throws {NightfallSdkError} Bad response
    * @returns {Promise<TransactionResponseData>}
    */
   async tokenise(
     ownerZkpKeys: NightfallZkpKeys,
-    tokenAddress: string,
+    tokenContractAddress: string,
     value: string,
     tokenId: string,
-    salt: string,
     fee: string,
+    providedCommitmentsFee: string[] | [],
+    salt?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "tokenise";
     const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
-      ercAddress: tokenAddress,
+      ercAddress: tokenContractAddress,
       rootKey: ownerZkpKeys.rootKey,
       value,
       tokenId,
       salt,
+      providedCommitmentsFee,
       fee,
     });
     logger.info(
@@ -234,6 +243,9 @@ class Client {
    * @param {string} tokenId The tokenId of the token to be transferred
    * @param {string} fee Proposer payment in Wei for the tx in L2
    * @param {boolean} isOffChain If true, tx will be sent to the proposer's API (handled off-chain)
+   * @param {string[] | []} providedCommitments Commitments to be used for transfer
+   * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
+   * @param {string} [regulatorUrl] regulatorUrl
    * @throws {NightfallSdkError} No commitments found or bad response
    * @returns {Promise<TransactionResponseData>}
    */
@@ -244,6 +256,9 @@ class Client {
     tokenId: string,
     fee: string,
     isOffChain: boolean,
+    providedCommitments: string[] | [],
+    providedCommitmentsFee: string[] | [],
+    regulatorUrl?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "transfer";
     const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
@@ -256,6 +271,9 @@ class Client {
       tokenId,
       fee,
       offchain: isOffChain,
+      providedCommitments,
+      providedCommitmentsFee,
+      regulatorUrl,
     });
     if (res.data.error && res.data.error === "No suitable commitments") {
       logger.error(res, "No suitable commitments were found");
@@ -275,31 +293,36 @@ class Client {
    * @async
    * @method burn
    * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
-   * @param {string} tokenAddress Token address of the token to be burnt in L2
+   * @param {string} tokenContractAddress Token address of the token to be burnt in L2
    * @param {string} value The amount in Wei of the token to be burnt
    * @param {string} tokenId The tokenId of the token to be burnt
    * @param {string} fee Proposer payment in Wei for the tx in L2
+   * @param {string[] | []} providedCommitments Commitments to be burnt
+   * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
    * @throws {NightfallSdkError} Bad response
    * @returns {Promise<TransactionResponseData>}
    */
   async burn(
     ownerZkpKeys: NightfallZkpKeys,
-    tokenAddress: string,
+    tokenContractAddress: string,
     value: string,
     tokenId: string,
     fee: string,
+    providedCommitments: string[] | [],
+    providedCommitmentsFee: string[] | [],
   ): Promise<TransactionResponseData> {
     const endpoint = "burn";
     const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
-      ercAddress: tokenAddress,
+      ercAddress: tokenContractAddress,
       rootKey: ownerZkpKeys.rootKey,
       value,
       tokenId,
-      providedCommitments: [],
       fee,
+      providedCommitments,
+      providedCommitmentsFee,
     });
     logger.info(
       { status: res.status, data: res.data },
@@ -320,6 +343,8 @@ class Client {
    * @param {string} tokenId The tokenId of the token to be withdrawn
    * @param {string} fee Proposer payment in Wei for the tx in L2
    * @param {boolean} isOffChain If true, tx will be sent to the proposer's API (handled off-chain)
+   * @param {string[] | []} providedCommitments Commitments to be withdrawn
+   * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
    * @throws {NightfallSdkError} Bad response
    * @returns {Promise<TransactionResponseData>}
    */
@@ -331,6 +356,8 @@ class Client {
     fee: string,
     recipientEthAddress: string,
     isOffChain: boolean,
+    providedCommitments: string[] | [],
+    providedCommitmentsFee: string[] | [],
   ): Promise<TransactionResponseData> {
     const endpoint = "withdraw";
     const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
@@ -345,6 +372,8 @@ class Client {
       tokenId,
       fee,
       offchain: isOffChain,
+      providedCommitments,
+      providedCommitmentsFee,
     });
     logger.info(
       { status: res.status, data: res.data },

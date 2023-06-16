@@ -43,8 +43,9 @@ describe("L2 Transactions", () => {
             l2TokenAddress,
             tokenId,
             value,
-            salt,
             fee,
+            [],
+            salt,
           ),
       ).rejects.toThrow(NightfallSdkError);
       expect(mockedClient.tokenise).toHaveBeenCalledTimes(1);
@@ -67,8 +68,9 @@ describe("L2 Transactions", () => {
         l2TokenAddress,
         tokenId,
         value,
-        salt,
         fee,
+        [],
+        salt,
       );
 
       // Assert
@@ -77,8 +79,9 @@ describe("L2 Transactions", () => {
         l2TokenAddress,
         tokenId,
         value,
-        salt,
         fee,
+        [],
+        salt,
       );
       expect(txReceipts).toStrictEqual({ txReceiptL2 });
     });
@@ -140,6 +143,8 @@ describe("L2 Transactions", () => {
         tokenId,
         value,
         fee,
+        [],
+        [],
       );
       expect(txReceipts).toStrictEqual({ txReceiptL2 });
     });
