@@ -126,7 +126,7 @@ class Client {
     zkpKeys: NightfallZkpKeys,
   ): Promise<string> {
     const endpoint = "incoming-viewing-key";
-    const apiUrl = this.apiBpUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiBpUrl === '' ? this.apiUrl : this.apiBpUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
