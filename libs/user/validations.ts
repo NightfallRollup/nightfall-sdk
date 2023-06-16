@@ -60,8 +60,8 @@ const isValidTokenId = (tokenId: string | number, helpers: CustomHelpers) => {
 const PATTERN_ETH_PRIVATE_KEY = /^0x[0-9a-f]{64}$/;
 export const createOptions = Joi.object({
   clientApiUrl: Joi.string().trim().required(),
-  clientTxApiUrl: Joi.string().trim(),
-  clientBpApiUrl: Joi.string().trim(),
+  clientApiTxUrl: Joi.string().trim(),
+  clientApiBpUrl: Joi.string().trim(),
   blockchainWsUrl: Joi.string().trim(),
   ethereumPrivateKey: Joi.string().trim().pattern(PATTERN_ETH_PRIVATE_KEY),
   nightfallMnemonic: Joi.string().trim(),
