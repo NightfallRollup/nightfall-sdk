@@ -70,6 +70,7 @@
     "test:goerli": "DOTENV_CONFIG_PATH=./examples/scripts/.env.goerli jest --setupFiles dotenv/config",
     "eg:ganache:deposit": "ts-node -r dotenv/config examples/scripts/txDeposit.ts dotenv_config_path=./examples/scripts/.env.ganache dotenv_config_debug=true",
     "eg:ganache:minting": "ts-node -r dotenv/config examples/scripts/l2TokenisationMinting.ts dotenv_config_path=./examples/scripts/.env.ganache",
+    "eg:ganache:cbdc-example": "ts-node -r dotenv/config examples/scripts/cbdc/l2cbdc.ts dotenv_config_path=./examples/scripts/.env.ganache",    
     "eg:ganache:transfer": "ts-node -r dotenv/config examples/scripts/txTransfer.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:burning": "ts-node -r dotenv/config examples/scripts/l2TokenisationBurning.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawal.ts dotenv_config_path=./examples/scripts/.env.ganache",
