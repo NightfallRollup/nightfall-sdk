@@ -193,7 +193,7 @@ const main = async () => {
     await waitForTime(25000);
     
     // # 5 Mint token rCBDC to commercialBank1 rCBDC account after locking wCBDC tokens
-    console.warn(`Minting rCBDC commitment to commercialBank1 rCBDC account ${commercialBank1rCBDC.getNightfallAddress()}`)
+    console.log(`Minting rCBDC commitment to commercialBank1 rCBDC account ${commercialBank1rCBDC.getNightfallAddress()}`)
     const rCBDCTokens: Token = { batch: "11", qty: 10, type: TokenType.rCBDC };
     console.log("rCBDCTokens:", rCBDCTokens);
     const serialisedInfoRCDBC = serialiseToken(rCBDCTokens, generalise('1'.padStart(255,'0')).toString(16));
