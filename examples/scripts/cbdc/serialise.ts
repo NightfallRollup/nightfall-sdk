@@ -7,7 +7,7 @@ const zeroes = (n: number) => ''.padStart(n,'0');
 /**
  * Returns a serialised { tokenId, ercAddress } from the token t.
  *
- * @param {wCBDC | rCBDC} t  token to serialise
+ * @param {Token} t  token to serialise
  * @param {string} sigR  Signature of the receiver
  *
  * @returns { string, string } tokenId, ercAddress

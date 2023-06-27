@@ -24,7 +24,7 @@ const waitForTime = async (time:number) => {
 }
 
 /**
- * Get commitments for user and user2
+ * Get commitments for banks
  */
 const getUnspentCommitments = async (user: any, client: Client) : Promise<Commitment[]> => {
   const commitments = await client.getCommitmentsByCompressedZkpPublicKey([user.getNightfallAddress()]);
@@ -32,7 +32,7 @@ const getUnspentCommitments = async (user: any, client: Client) : Promise<Commit
 }
 
 /**
- * Get commitments for user and user2
+ * Get commitments for banks
  */
 const getTokens = (commitments: Commitment[]) : TokenInfo[] => {
   return getTokensFromCommitments(commitments);
@@ -42,41 +42,55 @@ const getTokens = (commitments: Commitment[]) : TokenInfo[] => {
  * Main function to run the script for L2 tokenisation
  */
 const main = async () => {
-  let user;
-  let user2;
+  let centralBankwCBDC;
+  let commercialBank1wCBDC;
+  let commercialBank1LockedwCBDC;
+  let commercialBank1rCBDC;
 
   try {
-    // # 1 Create an instance of User and User2
-    user = await UserFactory.create({
+    // # 1 Create an instance of centralBank and commercialBank
+    centralBankwCBDC = await UserFactory.create({
       clientApiUrl: config.clientApiUrl,
       nightfallMnemonic: config.nightfallMnemonic,
       ethereumPrivateKey: config.ethereumPrivateKey,
       blockchainWsUrl: config.blockchainWsUrl,
     });
-    user2 = await UserFactory.create({
+    commercialBank1wCBDC = await UserFactory.create({
       clientApiUrl: config.clientApiUrl,
       nightfallMnemonic: "game mother news olive harbor elephant come eager junior finger better quiz",
       ethereumPrivateKey: config.ethereumPrivateKey,
       blockchainWsUrl: config.blockchainWsUrl,
     });
+    commercialBank1LockedwCBDC = await UserFactory.create({
+      clientApiUrl: config.clientApiUrl,
+      nightfallMnemonic: "practice pottery connect tank walnut anchor focus umbrella desk outdoor other guess",
+      ethereumPrivateKey: config.ethereumPrivateKey,
+      blockchainWsUrl: config.blockchainWsUrl,
+    });
+    commercialBank1rCBDC = await UserFactory.create({
+      clientApiUrl: config.clientApiUrl,
+      nightfallMnemonic: "any health broken measure main friend unfold act promote fatigue bulb domain",
+      ethereumPrivateKey: config.ethereumPrivateKey,
+      blockchainWsUrl: config.blockchainWsUrl,
+    });
 
     const client = new Client(config.clientApiUrl);
-    // #2 Create PO and serialise it
-    console.warn(`Minting wCBDC commitment to ${user.getNightfallAddress()}`)
-    const wCBDCTokens: Token = { batch: "1", qty: 32, type: TokenType.wCBDC };
+    // #2 Create wCBDC and serialise it
+    console.warn(`Minting wCBDC commitment to centralBank ${centralBankwCBDC.getNightfallAddress()}`)
+    const wCBDCTokens: Token = { batch: "1", qty: 40, type: TokenType.wCBDC };
     console.log("wCBDCTokens:", wCBDCTokens);
-    const serialisedInfo = serialiseToken(wCBDCTokens, generalise('1'.padStart(255,'0')).toString(16));
+    const serialisedInfoWCDBC = serialiseToken(wCBDCTokens, generalise('1'.padStart(255,'0')).toString(16));
     /* console.log("SERIALIZED INFO:", po, serialisedInfo);
      const deserialisedInfo = deserialiseToken(serialisedInfo.tokenId, serialisedInfo.ercAddress);
      console.log("DESERIALIZED INFO:", serialisedInfo, deserialisedInfo);
     */
 
-    // # 3 Mint token of the purchase order within L2
-    const salt = await randomSalt();
-    const { txHashL2 } = await user.mintL2Token({
-      tokenContractAddress: serialisedInfo.ercAddress,
+    // # Mint token wCBDC to centralBank
+    let salt = await randomSalt();
+    let { txHashL2 } = await centralBankwCBDC.mintL2Token({
+      tokenContractAddress: serialisedInfoWCDBC.ercAddress,
       value: wCBDCTokens.qty.toString(),
-      tokenId: serialisedInfo.tokenId,
+      tokenId: serialisedInfoWCDBC.tokenId,
       salt, // optional
       feeWei: config.feeWei,
     });
@@ -86,26 +100,43 @@ const main = async () => {
     // TODO: wait 25 seconds to make a block
     await waitForTime(25000);
   
-    let commitments = await getUnspentCommitments(user, client);
-    let commitments2 = await getUnspentCommitments(user2, client);
+    let commitments = await getUnspentCommitments(centralBankwCBDC, client);
+    let commitments2 = await getUnspentCommitments(commercialBank1wCBDC, client);
+    let commitments3 = await getUnspentCommitments(commercialBank1LockedwCBDC, client);
+    let commitments4 = await getUnspentCommitments(commercialBank1rCBDC, client);
     let tokens = getTokens(commitments);
     let tokens2 = getTokens(commitments2);
-    console.log("Tokens for user1:", tokens);
-    console.log("Tokens for user2:", tokens2);
+    let tokens3 = getTokens(commitments3);
+    let tokens4 = getTokens(commitments4);
+    console.log("Tokens for centralBank wCBDC:", tokens);
+    console.log("Tokens for commercialBank1 wCBDC:", tokens2);
+    console.log("Tokens for commercialBank1 Locked wCBDC:", tokens2);
+    console.log("Tokens for commercialBank1 rCBDC:", tokens2);
 
-    // # 4 transfer
-    const recipientNightfallData = {
-      recipientCompressedZkpPublicKeys: [
-        user2.getNightfallAddress(),
-      ],
-      values: ["1"],
-    };
-
-    console.log(`Transferring wCBDC commitment ${commitments[commitments.length - 1]._id} to ${user2.getNightfallAddress()}`)
+    // # 4 transfer wCBDC from centralBank to commercialBank1
+    console.log(`Transferring wCBDC 10 value of commitment ${commitments[commitments.length - 1]._id} to ${commercialBank1wCBDC.getNightfallAddress()}`);
     
-    const res = await axios.post(`${client.apiUrl}/transfer`, {
+    /*({ txHashL2 } = await user.makeTransfer({
+      tokenContractAddress: commitments[commitments.length - 1].preimage.ercAddress,
+      value: '10',
+      tokenId: commitments[commitments.length - 1].preimage.tokenId,
+      recipientNightfallAddress: user2.getNightfallAddress(),
+      isOffChain: true,
+      feeWei: '0',
+      providedCommitments: [commitments[commitments.length - 1]._id],    
+    }));
+    console.log(">>>>> Transaction hash L2", txHashL2); */
+ 
+    let recipientNightfallData = {
+      recipientCompressedZkpPublicKeys: [
+        commercialBank1wCBDC.getNightfallAddress(),
+      ],
+      values: ["10"],
+    };
+    
+    let res = await axios.post(`${client.apiUrl}/transfer`, {
       ercAddress: commitments[commitments.length - 1].preimage.ercAddress,
-      rootKey: user.zkpKeys.rootKey,
+      rootKey: centralBankwCBDC.zkpKeys.rootKey,
       recipientData: recipientNightfallData,
       tokenId: commitments[commitments.length - 1].preimage.tokenId,
       fee: '0',
@@ -116,6 +147,51 @@ const main = async () => {
       ">>>>> Transaction hash L2",
       res.data.transaction.transactionHash,
     );
+    await makeBlock();
+    // TODO: wait 25 seconds to make a block
+    await waitForTime(25000);
+
+    // # 5 transfer wCBDC from commercialBank1 to commercialBank1Locked
+    recipientNightfallData = {
+      recipientCompressedZkpPublicKeys: [
+        commercialBank1LockedwCBDC.getNightfallAddress(),
+      ],
+      values: ["10"],
+    };
+    
+    res = await axios.post(`${client.apiUrl}/transfer`, {
+      ercAddress: commitments[commitments.length - 1].preimage.ercAddress,
+      rootKey: commercialBank1wCBDC.zkpKeys.rootKey,
+      recipientData: recipientNightfallData,
+      tokenId: commitments[commitments.length - 1].preimage.tokenId,
+      fee: '0',
+      offchain: true,
+      providedCommitments: [commitments[commitments.length - 1]._id],
+    });
+    console.log(
+      ">>>>> Transaction hash L2",
+      res.data.transaction.transactionHash,
+    );
+
+    await makeBlock();
+    // TODO: wait 25 seconds to make a block
+    await waitForTime(25000);
+    
+    // # Mint token rCBDC to commercialBank1
+    console.warn(`Minting rCBDC commitment to commercialBank1 ${commercialBank1rCBDC.getNightfallAddress()}`)
+    const rCBDCTokens: Token = { batch: "12", qty: 20, type: TokenType.rCBDC };
+    console.log("rCBDCTokens:", rCBDCTokens);
+    const serialisedInfoRCDBC = serialiseToken(rCBDCTokens, generalise('1'.padStart(255,'0')).toString(16));
+    salt = await randomSalt();
+    ({ txHashL2 } = await commercialBank1rCBDC.mintL2Token({
+      tokenContractAddress: serialisedInfoRCDBC.ercAddress,
+      value: rCBDCTokens.qty.toString(),
+      tokenId: serialisedInfoRCDBC.tokenId,
+      salt, // optional
+      feeWei: config.feeWei,
+    }));
+    console.log(">>>>> Transaction hash L2", txHashL2);
+
     /*
     const { txHashL1, txHashL2 } = await user.makeTransfer({
       tokenContractAddress: unspentCommitmentsDetails[0][0].ercAddress ,
@@ -130,18 +206,24 @@ const main = async () => {
     // TODO: wait 25 seconds to make a block
     await waitForTime(25000);
 
-    commitments = await getUnspentCommitments(user, client);
-    commitments2 = await getUnspentCommitments(user2, client);
+    commitments = await getUnspentCommitments(centralBankwCBDC, client);
+    commitments2 = await getUnspentCommitments(commercialBank1wCBDC, client);
+    commitments3 = await getUnspentCommitments(commercialBank1LockedwCBDC, client);
+    commitments4 = await getUnspentCommitments(commercialBank1rCBDC, client);
     tokens = getTokens(commitments);
     tokens2 = getTokens(commitments2);
-    console.log("Tokens for user1:", tokens);
-    console.log("Tokens for user2:", tokens2);
+    tokens3 = getTokens(commitments3);
+    tokens4 = getTokens(commitments4);
+    console.log("Tokens for centralBank wCBDC:", tokens);
+    console.log("Tokens for commercialBank1 wCBDC:", tokens2);
+    console.log("Tokens for commercialBank1 Locked wCBDC:", tokens3);
+    console.log("Tokens for commercialBank1 rCBDC:", tokens4);
   } catch (error) {
     console.error(error);
     process.exit(1);
   } finally {
-    user.close();
-    user2.close();
+    centralBankwCBDC.close();
+    commercialBank1wCBDC.close();
     console.log(">>>>> Bye bye");
   }
 };
