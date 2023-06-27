@@ -62,8 +62,8 @@ const main = async () => {
 
     const client = new Client(config.clientApiUrl);
     // #2 Create PO and serialise it
-    console.warn(`Minting PurchaseOrder commitment to ${user.getNightfallAddress()}`)
-    const wCBDCTokens: Token = { description: "First minted tokens", qty: 32, type: TokenType.wCBDC };
+    console.warn(`Minting wCBDC commitment to ${user.getNightfallAddress()}`)
+    const wCBDCTokens: Token = { batch: "1", qty: 32, type: TokenType.wCBDC };
     console.log("wCBDCTokens:", wCBDCTokens);
     const serialisedInfo = serialiseToken(wCBDCTokens, generalise('1'.padStart(255,'0')).toString(16));
     /* console.log("SERIALIZED INFO:", po, serialisedInfo);
@@ -75,7 +75,7 @@ const main = async () => {
     const salt = await randomSalt();
     const { txHashL2 } = await user.mintL2Token({
       tokenContractAddress: serialisedInfo.ercAddress,
-      value: '1',
+      value: wCBDCTokens.qty.toString(),
       tokenId: serialisedInfo.tokenId,
       salt, // optional
       feeWei: config.feeWei,

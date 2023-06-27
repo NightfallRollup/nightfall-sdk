@@ -11,7 +11,7 @@ export enum TokenType {
  * Asset representation of token minted by banks
  */
 export interface Token {
-  description: string,  // Description of the token minted
+  batch: string,  // Description of the token minted
   qty: number,          // Quantity of token minted
   type: number,         // Type of token
 }

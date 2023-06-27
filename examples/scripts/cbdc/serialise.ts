@@ -13,11 +13,11 @@ const zeroes = (n: number) => ''.padStart(n,'0');
  * @returns { string, string } tokenId, ercAddress
  */
 export const serialiseToken = (t: Token, sigR: string) : { tokenId: string, ercAddress: string} => {
-  const { description, type } = t;
+  const { batch, type } = t;
   // TokenId Info -> sigR, description
   const sigRBytes = generalise(sigR).limbs(32, 8); 
-  const descriptionBytes = generalise(description).limbs(32, 8);
-  const tokenId = generalise(stitchLimbs(descriptionBytes.slice(-2).concat(sigRBytes.slice(-6)),32));
+  const batchBytes = generalise(batch).limbs(32, 8);
+  const tokenId = generalise(stitchLimbs(batchBytes.slice(-2).concat(sigRBytes.slice(-6)),32));
 
   // ercAddress Info -> sigBits, qty, tokenType
   const tokenTypeBits = generalise(type).binary.padStart(2,'0'); // TokenType
@@ -44,7 +44,7 @@ export const serialiseToken = (t: Token, sigR: string) : { tokenId: string, ercA
 const deserialiseToken = (tokenId: string, ercAddress: string, value: number): TokenInfo => {
   const tokenIdBytes = generalise(tokenId).limbs(32, 8);
   const bottomSigRBytes = tokenIdBytes.slice(2);
-  const descriptionBytes = tokenIdBytes.slice(0,2);
+  const batchBytes = tokenIdBytes.slice(0,2);
 
   const ercAddressBits = generalise(ercAddress).binary;
   const tokenTypeBits = ercAddressBits.slice(-2);
@@ -56,7 +56,7 @@ const deserialiseToken = (tokenId: string, ercAddress: string, value: number): T
 
   const sigR = generalise(BigInt('0b'+ topSigRBits + generalise(stitchLimbs(bottomSigRBytes,32)).binary.padStart(192,'0'))).hex(32);
   const t : Token = { 
-    description: generalise(stitchLimbs(descriptionBytes,32)).integer,
+    batch: generalise(stitchLimbs(batchBytes,32)).integer,
     qty:  value,
     type: tokenType,
   }
