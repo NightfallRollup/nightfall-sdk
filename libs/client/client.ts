@@ -126,7 +126,7 @@ class Client {
     zkpKeys: NightfallZkpKeys,
   ): Promise<string> {
     const endpoint = "incoming-viewing-key";
-    const apiUrl = this.apiBpUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiBpUrl === '' ? this.apiUrl : this.apiBpUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -166,7 +166,7 @@ class Client {
     salt?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "deposit";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -212,7 +212,7 @@ class Client {
     salt?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "tokenise";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -261,7 +261,7 @@ class Client {
     regulatorUrl?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "transfer";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -312,7 +312,7 @@ class Client {
     providedCommitmentsFee: string[] | [],
   ): Promise<TransactionResponseData> {
     const endpoint = "burn";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -360,7 +360,7 @@ class Client {
     providedCommitmentsFee: string[] | [],
   ): Promise<TransactionResponseData> {
     const endpoint = "withdraw";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -422,7 +422,7 @@ class Client {
     tokenContractAddresses: string[],
   ) {
     const endpoint = "commitment/pending-deposit";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
@@ -441,7 +441,7 @@ class Client {
 
   async getNightfallBalances(zkpKeys: NightfallZkpKeys) {
     const endpoint = "commitment/balance";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
@@ -459,7 +459,7 @@ class Client {
 
   async getPendingTransfers(zkpKeys: NightfallZkpKeys) {
     const endpoint = "commitment/pending-spent";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
@@ -487,7 +487,7 @@ class Client {
     listOfCompressedZkpPublicKey: string[],
   ): Promise<Commitment[]> {
     const endpoint = "commitment/compressedZkpPublicKeys";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     if (!listOfCompressedZkpPublicKey.length) {
@@ -526,7 +526,7 @@ class Client {
     listOfErcAddresses?: string[],
   ): Promise<Commitment[]> {
     const endpoint = "commitment/commitments";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
@@ -555,7 +555,7 @@ class Client {
    */
   async saveCommitments(listOfCommitments: Commitment[]) {
     const endpoint = "commitment/save";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiUrl;
+    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(
