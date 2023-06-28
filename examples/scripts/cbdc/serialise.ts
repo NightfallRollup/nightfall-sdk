@@ -66,7 +66,7 @@ export const deserialiseToken = (
   const t: Token = {
     qty: value,
     type: tokenType,
-    decimals: generalise(BigInt("0b" + decimalsBits)).integer,
+    decimals: Number(generalise(BigInt("0b" + decimalsBits)).integer),
     symbol: Buffer.from(
       generalise(BigInt("0b" + symbolBits)).bigInt.toString(16),
       "hex",
