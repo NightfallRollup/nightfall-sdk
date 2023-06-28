@@ -8,7 +8,15 @@ import erc165Abi from "./abis/ERC165.json";
 import erc721Abi from "./abis/ERC721.json";
 import erc1155Abi from "./abis/ERC1155.json";
 import type { AbiItem } from "web3-utils";
-import { ERC20, ERC721, ERC1155, ERC721_INTERFACE_ID } from "./constants";
+import {
+  CUSTOM_ERC,
+  ERC20,
+  ERC721,
+  ERC1155,
+  ERC721_INTERFACE_ID,
+  ERC1155_INTERFACE_ID,
+} from "./constants";
+
 /**
  * Detects ERC standard for a given contract address using ERC165
  *
@@ -26,8 +34,10 @@ export async function whichTokenStandard(
   try {
     const abi = erc165Abi as unknown as AbiItem;
     const erc165 = new web3.eth.Contract(abi, contractAddress);
-    
-    const funcSelector = web3.utils.keccak256('supportsInterface(bytes4)').slice(2,10);
+
+    const funcSelector = web3.utils
+      .keccak256("supportsInterface(bytes4)")
+      .slice(2, 10);
     const bytecode = await web3.eth.getCode(contractAddress);
 
     if (!bytecode.includes(funcSelector)) return ERC20;
@@ -39,11 +49,17 @@ export async function whichTokenStandard(
       logger.debug("ERC721 interface detected");
       return ERC721;
     }
-    logger.debug("ERC1155 interface detected");
-    return ERC1155;
+
+    const interface1155 = await erc165.methods
+      .supportsInterface(ERC1155_INTERFACE_ID)
+      .call();
+    if (interface1155) {
+      logger.debug("ERC1155 interface detected");
+      return ERC1155;
+    }
   } catch {
-    logger.debug("ERC165 reverted tx, assume interface ERC20");
-    return ERC20;
+    logger.debug("Assume interface Nightfall native tx");
+    return CUSTOM_ERC;
   }
 }
 
@@ -93,7 +109,9 @@ class Token {
     this.contractAddress = options.contractAddress;
     this.ercStandard = options.ercStandard.toUpperCase();
 
-    this.setTokenContract();
+    if (this.ercStandard !== CUSTOM_ERC) {
+      this.setTokenContract();
+    }
   }
 
   getContractAbi() {
