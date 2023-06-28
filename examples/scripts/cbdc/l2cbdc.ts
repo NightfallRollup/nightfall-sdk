@@ -1,9 +1,8 @@
 import { UserFactory, randomSalt } from "../../../libs";
 import { config } from "../appConfig";
 import { getTokensFromCommitments, serialiseToken } from "./serialise";
-import { Token, TokenInfo, TokenType } from "./types";
+import { Token, TokenType } from "./types";
 import { Client } from "../../../libs/client";
-import { generalise } from "general-number";
 import axios from "axios";
 import { Commitment } from "../../../libs/nightfall/types";
 
@@ -39,7 +38,7 @@ const getUnspentCommitments = async (
 /**
  * Get commitments for banks
  */
-const getTokens = (commitments: Commitment[]): TokenInfo[] => {
+const getTokens = (commitments: Commitment[]): Token[] => {
   return getTokensFromCommitments(commitments);
 };
 
@@ -88,19 +87,19 @@ const main = async () => {
       `Minting wCBDC commitment for centralBank ${centralBankwCBDC.getNightfallAddress()}`,
     );
     const wCBDCTokens: Token = {
-      batch: "1",
-      qty: 40,
+      qty: 4000,
       type: TokenType.wCBDC,
       decimals: 2,
       symbol: "wCBDC",
     };
     console.log("wCBDC tokens:", wCBDCTokens);
-    const serialisedInfoWCDBC = serialiseToken(
-      wCBDCTokens,
-      generalise("1".padStart(255, "0")).toString(16),
-    );
+    const serialisedInfoWCDBC = serialiseToken(wCBDCTokens);
     /* console.log("SERIALIZED INFO:", wCBDCTokens, serialisedInfoWCDBC);
-    const deserialisedInfo = deserialiseToken(serialisedInfoWCDBC.tokenId, serialisedInfoWCDBC.ercAddress, wCBDCTokens.qty);
+    const deserialisedInfo = deserialiseToken(
+      serialisedInfoWCDBC.tokenId,
+      serialisedInfoWCDBC.ercAddress,
+      wCBDCTokens.qty,
+    );
     console.log("DESERIALIZED INFO:", serialisedInfoWCDBC, deserialisedInfo); */
 
     let salt = await randomSalt();
@@ -141,7 +140,7 @@ const main = async () => {
 
     // # 3 transfer some wCBDC tokens from centralBank to commercialBank1
     console.log(
-      `Transferring wCBDC 10 value of commitment ${
+      `Transferring wCBDC 1000 value of commitment ${
         commitments[commitments.length - 1]._id
       } to commercialBank1 wCBDC account ${commercialBank1wCBDC.getNightfallAddress()}`,
     );
@@ -149,7 +148,7 @@ const main = async () => {
     ({ txHashL2 } = await centralBankwCBDC.makeTransfer({
       tokenContractAddress:
         commitments[commitments.length - 1].preimage.ercAddress,
-      value: "10",
+      value: "1000",
       tokenId: commitments[commitments.length - 1].preimage.tokenId,
       recipientNightfallAddress: commercialBank1wCBDC.getNightfallAddress(),
       isOffChain: true,
@@ -181,7 +180,7 @@ const main = async () => {
     // # 4 transfer wCBDC tokens from commercialBank1 to commercialBank1Locked
     // for minting rCBDC tokens so they are backed by wCBDC tokens
     console.log(
-      `Transferring wCBDC 10 value of commitment ${
+      `Transferring wCBDC 1000 value of commitment ${
         commitments2[commitments2.length - 1]._id
       } from commercialBank1 wCBDC account ${commercialBank1wCBDC.getNightfallAddress()} to commercialBank1 Locked wCBDC account ${commercialBank1LockedwCBDC.getNightfallAddress()}`,
     );
@@ -189,7 +188,7 @@ const main = async () => {
     ({ txHashL2 } = await commercialBank1wCBDC.makeTransfer({
       tokenContractAddress:
         commitments2[commitments2.length - 1].preimage.ercAddress,
-      value: "10",
+      value: "1000",
       tokenId: commitments2[commitments2.length - 1].preimage.tokenId,
       recipientNightfallAddress:
         commercialBank1LockedwCBDC.getNightfallAddress(),
@@ -208,17 +207,13 @@ const main = async () => {
       `Minting rCBDC commitment to commercialBank1 rCBDC account ${commercialBank1rCBDC.getNightfallAddress()}`,
     );
     const rCBDCTokens: Token = {
-      batch: "11",
-      qty: 10,
+      qty: 1000,
       type: TokenType.rCBDC,
       decimals: 2,
       symbol: "rCBDC",
     };
     console.log("rCBDCTokens:", rCBDCTokens);
-    const serialisedInfoRCDBC = serialiseToken(
-      rCBDCTokens,
-      generalise("1".padStart(255, "0")).toString(16),
-    );
+    const serialisedInfoRCDBC = serialiseToken(rCBDCTokens);
     salt = await randomSalt();
     ({ txHashL2 } = await commercialBank1rCBDC.mintL2Token({
       tokenContractAddress: serialisedInfoRCDBC.ercAddress,

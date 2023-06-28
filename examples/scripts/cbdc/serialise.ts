@@ -1,8 +1,8 @@
-import { generalise, stitchLimbs } from "general-number"
-import { TokenType, Token, TokenInfo } from "./types";
+import { generalise } from "general-number";
+import { TokenType, Token } from "./types";
 import { Commitment } from "../../../libs/nightfall/types";
 
-const zeroes = (n: number) => ''.padStart(n,'0');
+const zeroes = (n: number) => "".padStart(n, "0");
 
 /**
  * Returns a serialised { tokenId, ercAddress } from the token t.
@@ -12,30 +12,34 @@ const zeroes = (n: number) => ''.padStart(n,'0');
  *
  * @returns { string, string } tokenId, ercAddress
  */
-export const serialiseToken = (t: Token, sigR: string) : { tokenId: string, ercAddress: string} => {
-  const { batch, type, decimals, symbol } = t;
-  // TokenId Info -> sigR, description
-  const sigRBytes = generalise(sigR).limbs(32, 8); 
-  const batchBytes = generalise(batch).limbs(32, 8);
-  const tokenId = generalise(stitchLimbs(batchBytes.slice(-2).concat(sigRBytes.slice(-6)),32));
+export const serialiseToken = (
+  t: Token,
+): { tokenId: string; ercAddress: string } => {
+  const { type, decimals, symbol } = t;
+  // TokenId Info -> nothing
+  const tokenId = generalise("0x0");
 
-  // ercAddress Info -> sigBits, qty, tokenType
-  const tokenTypeBits = generalise(type).binary.padStart(2,'0'); // TokenType
-  const decimalsBits = generalise(decimals).binary.padStart(16,'0'); // Decimals
-  const symbolBits = generalise(symbol).binary.padStart(64,'0'); // Symbol
-  const sigBits = generalise(sigR).binary.padStart(255, '0');
+  // ercAddress Info -> symbol, decimals, tokenType
+  const tokenTypeBits = generalise(type).binary.padStart(32, "0"); // TokenType
+  const decimalsBits = generalise(decimals).binary.padStart(5, "0"); // Decimals
+  const symbolBits = generalise(symbol).binary.padStart(64, "0"); // Symbol
 
-  const ercAddressBits = '11' + sigBits.slice(0,64) + zeroes(32) + '11' + zeroes(72) + symbolBits.slice(0,64) + 
-    decimalsBits.slice(0,16) + tokenTypeBits.slice(0,2);
+  const ercAddressBits =
+    "11" +
+    zeroes(96) +
+    "11" +
+    zeroes(53) +
+    symbolBits.slice(0, 64) +
+    decimalsBits.slice(0, 5) +
+    tokenTypeBits.slice(0, 32);
 
-  const ercAddress = generalise(BigInt('0b' + ercAddressBits));
+  const ercAddress = generalise(BigInt("0b" + ercAddressBits));
 
   return {
     tokenId: tokenId.hex(32),
-    ercAddress: ercAddress.hex(32)
+    ercAddress: ercAddress.hex(32),
   };
-
-}
+};
 
 /**
  * Returns a deserialised token t from the tokenId and ercAddress serialised info.
@@ -45,35 +49,32 @@ export const serialiseToken = (t: Token, sigR: string) : { tokenId: string, ercA
  *
  * @returns { Token, sigR } t, sigR Token and signature of the receiver
  */
-export const deserialiseToken = (tokenId: string, ercAddress: string, value: number): TokenInfo => {
-  const tokenIdBytes = generalise(tokenId).limbs(32, 8);
-  const bottomSigRBytes = tokenIdBytes.slice(2);
-  const batchBytes = tokenIdBytes.slice(0,2);
-
+export const deserialiseToken = (
+  tokenId: string,
+  ercAddress: string,
+  value: number,
+): Token => {
   const ercAddressBits = generalise(ercAddress).binary;
-  const tokenTypeBits = ercAddressBits.slice(-2);
-  const decimalsBits = ercAddressBits.slice(236, 252);
-  const symbolBits = ercAddressBits.slice(172, 236);
-  const topSigRBits = ercAddressBits.slice(2, 66);
+  const tokenTypeBits = ercAddressBits.slice(-32);
+  const decimalsBits = ercAddressBits.slice(217, 222);
+  const symbolBits = ercAddressBits.slice(154, 217);
+  const tokenType = Number(generalise(BigInt("0b" + tokenTypeBits)).integer);
 
-  const tokenType = Number(generalise(BigInt('0b'+ tokenTypeBits)).integer);
+  if (tokenType != TokenType.wCBDC && tokenType != TokenType.rCBDC)
+    throw new Error(`Invalid token type for (${tokenType})`);
 
-  if (tokenType != TokenType.wCBDC && tokenType != TokenType.rCBDC) throw new Error(`Invalid token type for (${tokenType})`);
-
-  const sigR = generalise(BigInt('0b'+ topSigRBits + generalise(stitchLimbs(bottomSigRBytes,32)).binary.padStart(192,'0'))).hex(32);
-  const t : Token = { 
-    batch: generalise(stitchLimbs(batchBytes,32)).integer,
-    qty:  value,
+  const t: Token = {
+    qty: value,
     type: tokenType,
-    decimals: generalise(BigInt('0b'+ decimalsBits)).integer,
-    symbol: Buffer.from(generalise(BigInt('0b'+ symbolBits)).bigInt.toString(16), 'hex').toString(),
-  }
-
-  return {
-    token: t,
-    sigR,
+    decimals: generalise(BigInt("0b" + decimalsBits)).integer,
+    symbol: Buffer.from(
+      generalise(BigInt("0b" + symbolBits)).bigInt.toString(16),
+      "hex",
+    ).toString(),
   };
-}
+
+  return t;
+};
 
 /**
  * Returns the TokenType of the ercAddress deserialized token
@@ -82,14 +83,15 @@ export const deserialiseToken = (tokenId: string, ercAddress: string, value: num
  *
  * @returns { TokenType } TokenType of the token
  */
-const getTokenType = (ercAddress: string) : TokenType => {
+const getTokenType = (ercAddress: string): TokenType => {
   const ercAddressBits = generalise(ercAddress).binary;
-  const tokenTypeBits = ercAddressBits.slice(-2);
-  const tokenType = Number(generalise(BigInt('0b'+ tokenTypeBits)).integer);
-  if (TokenType[tokenType] === 'undefined') throw new Error(`No TokenType defined for ${tokenType}`);
+  const tokenTypeBits = ercAddressBits.slice(-32);
+  const tokenType = Number(generalise(BigInt("0b" + tokenTypeBits)).integer);
+  if (TokenType[tokenType] === "undefined")
+    throw new Error(`No TokenType defined for ${tokenType}`);
 
-  return tokenType; 
-}
+  return tokenType;
+};
 
 /**
  * Returns an array of tokens from the commitments
@@ -98,15 +100,22 @@ const getTokenType = (ercAddress: string) : TokenType => {
  *
  * @returns { any[] } Array of tokens deserialised
  */
-export const getTokensFromCommitments = (commitments: Commitment[]) : TokenInfo[] => {
-  const tokens:TokenInfo[] = [];
+export const getTokensFromCommitments = (
+  commitments: Commitment[],
+): Token[] => {
+  const tokens: Token[] = [];
 
-  for(const com of commitments) {
-    if (com.preimage.ercAddress.length > 42) { // ercAddress Ethereum 20 bytes -> 40 chars + '0x' = 42 chars
-      const deserialisedToken = deserialiseToken(com.preimage.tokenId, com.preimage.ercAddress, Number(generalise(com.preimage.value).bigInt))
+  for (const com of commitments) {
+    if (com.preimage.ercAddress.length > 42) {
+      // ercAddress Ethereum 20 bytes -> 40 chars + '0x' = 42 chars
+      const deserialisedToken = deserialiseToken(
+        com.preimage.tokenId,
+        com.preimage.ercAddress,
+        Number(generalise(com.preimage.value).bigInt),
+      );
       tokens.push(deserialisedToken);
     }
   }
 
   return tokens;
-}
+};
