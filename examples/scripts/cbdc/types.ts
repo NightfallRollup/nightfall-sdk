@@ -1,4 +1,3 @@
-
 /**
  * Token type for bank token
  */
@@ -11,15 +10,17 @@ export enum TokenType {
  * Asset representation of token minted by banks
  */
 export interface Token {
-  batch: string,  // Description of the token minted
-  qty: number,          // Quantity of token minted
-  type: number,         // Type of token
+  batch: string; // Batch number of the token minted
+  qty: number; // Quantity of token minted
+  type: number; // Type of token
+  decimals: number; // Number of decimals
+  symbol: string; // Symbol of the token
 }
 
 /**
  * Token information
  */
 export interface TokenInfo {
-  token: Token,
-  sigR: string,
+  token: Token;
+  sigR: string;
 }
