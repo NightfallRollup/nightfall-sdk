@@ -26,9 +26,7 @@ export const serialiseToken = (
 
   const ercAddressBits =
     "11" +
-    zeroes(96) +
-    "11" +
-    zeroes(53) +
+    zeroes(151) +
     symbolBits.slice(0, 64) +
     decimalsBits.slice(0, 5) +
     tokenTypeBits.slice(0, 32);
