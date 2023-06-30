@@ -29,7 +29,7 @@ const main = async () => {
 
     // # 3 Burn
     const { txHashL2 } = await user.burnL2Token({
-      tokenAddress: commitmentsToBurn[0].ercAddress,
+      tokenContractAddress: commitmentsToBurn[0].ercAddress,
       value: String(commitmentsToBurn[0].balance),
       tokenId: commitmentsToBurn[0].tokenId,
       feeWei: config.feeWei,

@@ -15,10 +15,10 @@ const main = async () => {
     });
 
     // # 2 Mint token within L2
-    const tokenAddress = await randomL2TokenAddress();
+    const tokenContractAddress = await randomL2TokenAddress();
     const salt = await randomSalt();
     const { txHashL2 } = await user.mintL2Token({
-      tokenAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       salt, // optional

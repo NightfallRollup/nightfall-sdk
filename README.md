@@ -34,11 +34,13 @@ Run a local Client by [running the Nightfall project](https://github.com/EYBlock
 ./bin/start-nightfall -g -d
 ```
 
-When running Nightfall locally, a local Proposer application is also needed to produce blocks:
+When running Nightfall locally, a local Proposer is also needed to produce blocks:
 
 ```bash
-# From Nightfall dir root
-./bin/start-apps
+# From terminal, after starting Nightfall
+curl -k -X POST -d "url=http://optimist" http://localhost:8081/proposer/register
+# FYI this is how to require proposer to produce L2 block
+curl -k -X POST http://localhost:8081/block/make-now
 ```
 
 ## Play with the SDK repository
@@ -142,7 +144,6 @@ Learn how to:
 
 :bulb: Balance on Nightfall will update as soon as funds settle, i.e. soon as an L2 block is produced.
 
-
 ```bash
 npm run eg:[network]:deposit
 ```
@@ -158,7 +159,6 @@ Learn how to:
 - Check spent balances not yet included in an L2 block
 
 :bulb: For making a transfer an already existing account in L2 with balance is required. This can be achieved by saving the mnemonic used for previous deposits and adding it to the .env file.
-
 
 ```bash
 npm run eg:[network]:transfer

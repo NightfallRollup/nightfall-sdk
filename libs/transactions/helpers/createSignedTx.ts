@@ -44,12 +44,6 @@ export async function createSignedTransaction(
   logger.debug("Create transaction object...");
   let signedTx;
   await nonceMutex.runExclusive(async () => {
-    // Update nonce if necessary
-    const web3Nonce = await web3.eth.getTransactionCount(senderEthAddress);
-    if (nonce < web3Nonce) {
-      nonce = web3Nonce;
-    }
-
     // Estimate gasPrice
     const gasPrice = await estimateGasPrice(web3);
 
@@ -62,13 +56,19 @@ export async function createSignedTransaction(
       gasPrice,
     };
 
-    // Increment nonce
-    nonce++;
-
     // Estimate tx gas
-    const gas = await estimateGas(tx, web3);
-    logger.debug(`Transaction gas set at ${gas}`);
-    tx.gas = gas;
+    tx.gas = await estimateGas(tx, web3);
+
+    // Update nonce if necessary, increment local nonce
+    const web3Nonce = await web3.eth.getTransactionCount(
+      senderEthAddress,
+      "pending",
+    );
+    if (nonce < web3Nonce) {
+      nonce = web3Nonce;
+    }
+    tx.nonce = nonce;
+    nonce++;
 
     // If no private key is given, SDK tries to submit tx via MetaMask
     if (!senderEthPrivateKey) {
