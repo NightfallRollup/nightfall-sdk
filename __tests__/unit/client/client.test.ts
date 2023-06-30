@@ -9,16 +9,16 @@ describe("Client", () => {
   const client = new Client(dummyUrl);
   const zkpKeys = {
     compressedZkpPublicKey:
-      "0x00781eab9bd94da3eb84c7a1b085f162f5eb58f9c189efef788a5176982a07e1",
+      "0x1b28c15d62dd0e837a227e7644c20cd4f96f7d4edca3bd5e544b24dfaabf9c8b",
     nullifierKey:
-      "0x1ec80c50b816fff74890a5d08bc95c1c749d955201b8a9ada0f99a117b8ccc8a",
+      "0xef9123f8fa4046940a79b6915e11ebe84f5c7ae60023423f7a0f47b96d32a34",
     rootKey:
-      "0x2366fc5530da8bc6618f01b2ac8fee17489cdef28ee8c21a0b945ba883d0da7c",
+      "0x1765c51ea2da66a362a6507dd64572694d6b31fbc1524c7b8e2bed5e514c979a",
     zkpPrivateKey:
-      "0xd9f1e813a2c10559620ad3fba2050c13898d1250776f27b9e7f35de5f973788",
+      "0x668d89fd55437fe7440de835599a75d70c846c0cb40aacfdd0af02d44cb5a6a",
     zkpPublicKey: [
-      "0x39cf22690edcc4d25eb1121a8d583e566b03463ef2defc8703670878ddca0ce",
-      "0x781eab9bd94da3eb84c7a1b085f162f5eb58f9c189efef788a5176982a07e1",
+      "0x28dbdb83efde29f2757add6807cbb301831fabfb89a85d3f69beb5f6bc78ba2",
+      "0x1b28c15d62dd0e837a227e7644c20cd4f96f7d4edca3bd5e544b24dfaabf9c8b",
     ],
   };
 
