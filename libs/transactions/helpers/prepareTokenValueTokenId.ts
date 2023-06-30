@@ -11,10 +11,12 @@ import { logger } from "../../utils";
  * Create an instance of Token
  * Convert value to Wei if needed
  *
- * @function whichTokenStandard
+ * @function prepareTokenValueTokenId
  * @param {string} contractAddress
+ * @param {string} value
+ * @param {string} tokenId
  * @param {Web3} web3
- * @returns {string} "ERC20" | "ERC721" | "ERC1155"
+ * @returns {Promise<*>}
  */
 export async function prepareTokenValueTokenId(
   contractAddress: string,
