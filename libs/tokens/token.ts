@@ -9,7 +9,7 @@ import erc721Abi from "./abis/ERC721.json";
 import erc1155Abi from "./abis/ERC1155.json";
 import type { AbiItem } from "web3-utils";
 import {
-  CUSTOM_ERC,
+  ERC_CUSTOM,
   ERC20,
   ERC721,
   ERC1155,
@@ -59,7 +59,7 @@ export async function whichTokenStandard(
     }
   } catch {
     logger.debug("Assume interface Nightfall native tx");
-    return CUSTOM_ERC;
+    return ERC_CUSTOM;
   }
 }
 
@@ -109,7 +109,7 @@ class Token {
     this.contractAddress = options.contractAddress;
     this.ercStandard = options.ercStandard.toUpperCase();
 
-    if (this.ercStandard !== CUSTOM_ERC) {
+    if (this.ercStandard !== ERC_CUSTOM) {
       this.setTokenContract();
     }
   }
