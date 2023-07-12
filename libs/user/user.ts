@@ -236,7 +236,13 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "makeDeposit formatted parameters");
 
-    const { tokenContractAddress, value, feeWei, providedCommitmentsFee = [], salt } = joiValue;
+    const {
+      tokenContractAddress,
+      value,
+      feeWei,
+      providedCommitmentsFee = [],
+      salt,
+    } = joiValue;
     let { tokenId } = joiValue;
 
     // Determine ERC standard, set value/tokenId defaults,
@@ -314,7 +320,14 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "mintL2Token formatted parameters");
 
-    const { tokenContractAddress, value, tokenId, feeWei, providedCommitmentsFee = [], salt } = joiValue;
+    const {
+      tokenContractAddress,
+      value,
+      tokenId,
+      feeWei,
+      providedCommitmentsFee = [],
+      salt,
+    } = joiValue;
 
     // Mint (aka Tokenise)
     const { txReceiptL2 } = await createTokeniseTx(
@@ -440,7 +453,14 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "burnL2Token formatted parameters");
 
-    const { tokenContractAddress, value, tokenId, feeWei, providedCommitments = [], providedCommitmentsFee = [] } = joiValue;
+    const {
+      tokenContractAddress,
+      value,
+      tokenId,
+      feeWei,
+      providedCommitments = [],
+      providedCommitmentsFee = [],
+    } = joiValue;
 
     // Burn
     const { txReceiptL2 } = await createBurnTx(
@@ -614,15 +634,15 @@ class User {
   }
 
   /**
-   * Allow user to check the balance of the pending spent commitments on Layer2
+   * Allow user to check the transfers and withdrawals that haven't been processed yet
    *
    * @async
-   * @method checkPendingTransfers
+   * @method checkPendingTransfersAndWithdrawals
    * @returns {Promise<*>}
    */
-  async checkPendingTransfers() {
-    logger.debug("User :: checkPendingTransfers");
-    return this.client.getPendingTransfers(this.zkpKeys);
+  async checkPendingTransfersAndWithdrawals() {
+    logger.debug("User :: checkPendingTransfersAndWithdrawals");
+    return this.client.getPendingSpent(this.zkpKeys);
   }
 
   /**

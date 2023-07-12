@@ -37,7 +37,8 @@ const main = async () => {
     // TODO
 
     // # 4 [OPTIONAL] You can check transfers that are not yet in a block
-    const pendingTransfers = await userSender.checkPendingTransfers();
+    const pendingTransfers =
+      await userSender.checkPendingTransfersAndWithdrawals();
     console.log(">>>>> Pending balances", pendingTransfers);
 
     // # 5 [EXTRA] Check that L1 tx was mined before closing the websocket in `finally` clause
