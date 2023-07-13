@@ -1,10 +1,14 @@
 import { UserFactory } from "../../libs";
-import { Client } from "../../libs/client";
 import { config } from "./appConfig";
+export interface UnspentCommitment {
+  compressedZkpPublicKey: string;
+  ercAddress: string;
+  balance: string; // ie value
+  tokenId: string;
+}
 
 const main = async () => {
   let user;
-  const client = new Client(config.clientApiUrl);
 
   try {
     // # 1 Create an instance of User
@@ -15,23 +19,20 @@ const main = async () => {
       nightfallMnemonic: config.nightfallMnemonic,
     });
 
-    // # 2 Get my unspent commitments, then
-    // pick one commitment to burn (for now, at most 1 commitment can be burnt)
-    const myNightfallAddress = user.getNightfallAddress();
-    const unspentCommitments = await client.getUnspentCommitments([
-      myNightfallAddress,
-    ]);
+    // # 2 Get my unspent commitments, then pick a commitment to burn
+    const availableCommitments = await user.checkAvailableCommitments();
 
-    const commitmentsToBurn = Object.values(
-      unspentCommitments[myNightfallAddress as keyof object],
-    )[0];
-    console.log(">>>> commitmentToBurn", commitmentsToBurn);
+    const [tokenContractAddress] = Object.keys(availableCommitments);
+    const [commitmentToBurn] = Object.values(
+      availableCommitments[tokenContractAddress],
+    ) as UnspentCommitment[];
+    console.log(">>>> commitmentToBurn", commitmentToBurn);
 
-    // # 3 Burn
+    // # 3 Burn the commitment
     const { txHashL2 } = await user.burnL2Token({
-      tokenContractAddress: commitmentsToBurn[0].ercAddress,
-      value: String(commitmentsToBurn[0].balance),
-      tokenId: commitmentsToBurn[0].tokenId,
+      tokenContractAddress,
+      value: String(commitmentToBurn.balance),
+      tokenId: commitmentToBurn.tokenId,
       feeWei: config.feeWei,
     });
     console.log(">>>>> Transaction hash L2", txHashL2);

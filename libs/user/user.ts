@@ -626,11 +626,29 @@ class User {
    *
    * @async
    * @method checkNightfallBalances
+   * @param {UserCheckBalances} [options]
+   * @param {string[]} [options.tokenContractAddresses] A list of token addresses
    * @returns {Promise<*>} Should resolve into an object containing the aggregated value per token, for commitments available in Layer2
    */
-  async checkNightfallBalances() {
+  async checkNightfallBalances(options?: UserCheckBalances) {
     logger.debug("User :: checkNightfallBalances");
-    return this.client.getNightfallBalances(this.zkpKeys);
+
+    let tokenContractAddresses: string[] = [];
+
+    // If options were passed, validate and format
+    if (options) {
+      const { error, value } = checkBalancesOptions.validate(options);
+      isInputValid(error);
+      tokenContractAddresses = value.tokenContractAddresses;
+    }
+    logger.debug(
+      { tokenContractAddresses },
+      "Get pending deposits for token addresses",
+    );
+    return this.client.getNightfallBalances(
+      this.zkpKeys,
+      tokenContractAddresses,
+    );
   }
 
   /**
@@ -638,11 +656,56 @@ class User {
    *
    * @async
    * @method checkPendingTransfersAndWithdrawals
+   * @param {UserCheckBalances} [options]
+   * @param {string[]} [options.tokenContractAddresses] A list of token addresses
    * @returns {Promise<*>}
    */
-  async checkPendingTransfersAndWithdrawals() {
+  async checkPendingTransfersAndWithdrawals(options?: UserCheckBalances) {
     logger.debug("User :: checkPendingTransfersAndWithdrawals");
-    return this.client.getPendingSpent(this.zkpKeys);
+
+    let tokenContractAddresses: string[] = [];
+
+    // If options were passed, validate and format
+    if (options) {
+      const { error, value } = checkBalancesOptions.validate(options);
+      isInputValid(error);
+      tokenContractAddresses = value.tokenContractAddresses;
+    }
+    logger.debug(
+      { tokenContractAddresses },
+      "Get pending deposits for token addresses",
+    );
+    return this.client.getPendingSpent(this.zkpKeys, tokenContractAddresses);
+  }
+
+  /**
+   * Allow user to get all unspent commitments
+   *
+   * @async
+   * @method checkAvailableCommitments
+   * @param {UserCheckBalances} [options]
+   * @param {string[]} [options.tokenContractAddresses] A list of token addresses
+   * @returns {Promise<*>}
+   */
+  async checkAvailableCommitments(options?: UserCheckBalances) {
+    logger.debug("User :: checkAvailableCommitments");
+
+    let tokenContractAddresses: string[] = [];
+
+    // If options were passed, validate and format
+    if (options) {
+      const { error, value } = checkBalancesOptions.validate(options);
+      isInputValid(error);
+      tokenContractAddresses = value.tokenContractAddresses;
+    }
+    logger.debug(
+      { tokenContractAddresses },
+      "Get pending deposits for token addresses",
+    );
+    return this.client.getUnspentCommitments(
+      this.zkpKeys,
+      tokenContractAddresses,
+    );
   }
 
   /**

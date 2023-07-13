@@ -29,7 +29,12 @@ export interface Commitment {
   nullifier: string;
   blockNumber: number;
 }
-
+export interface UnspentCommitment {
+  compressedZkpPublicKey: string;
+  ercAddress: string;
+  balance: string; // ie value
+  tokenId: string;
+}
 export interface TransactionReceiptL2 {
   value: string;
   fee: string;

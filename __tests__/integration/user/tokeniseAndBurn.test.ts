@@ -2,7 +2,6 @@
 import axios from "axios";
 import { UserFactory } from "../../../libs/user";
 import { randomSalt } from "../../../libs/utils/random";
-import { Client } from "../../../libs/client";
 
 // launch proposer as PROPOSER_HOST=nightfall_3-proposer-1 PROPOSER_PORT=8092 ./bin/start-apps
 const options = {
@@ -24,7 +23,6 @@ describe.skip("Suit of integration tests tokenisation", () => {
   let nUnspentCommitmentsStart: number;
   let nUnspentCommitmentsEnd: number;
   const tokenId1 = 2345;
-  const client = new Client(`${process.env.APP_CLIENT_API_URL}`);
 
   const makeBlock = async () => {
     // TODO: For now, i am assuming this works only on localhost, not on testnet
@@ -117,7 +115,7 @@ describe.skip("Suit of integration tests tokenisation", () => {
     });
   });
 
-  test("Burn innexistent token", async () => {
+  test("Burn inexistent token", async () => {
     const value = Number(process.env.APP_TX_VALUE) || 10;
     const feeWei = "0";
 
@@ -135,10 +133,9 @@ describe.skip("Suit of integration tests tokenisation", () => {
     const feeWei = "0";
 
     const myNightfallAddress = user.getNightfallAddress();
-    unspentCommitmentsStart = await client.getUnspentCommitments(
-      [myNightfallAddress],
-      [tokenAddress1],
-    );
+    unspentCommitmentsStart = await user.checkAvailableCommitments({
+      tokenContractAddresses: [tokenAddress1],
+    });
     nUnspentCommitmentsStart =
       unspentCommitmentsStart[myNightfallAddress][tokenAddress1].length;
     expect(unspentCommitmentsStart).toHaveProperty([myNightfallAddress]);
@@ -164,10 +161,9 @@ describe.skip("Suit of integration tests tokenisation", () => {
     // TODO: wait 25 seconds to make a block
     await new Promise((resolve) => setTimeout(resolve, 25000));
 
-    unspentCommitmentsEnd = await client.getUnspentCommitments(
-      [myNightfallAddress],
-      [tokenAddress1],
-    );
+    unspentCommitmentsEnd = await user.checkAvailableCommitments({
+      tokenContractAddresses: [tokenAddress1],
+    });
     nUnspentCommitmentsEnd = 0;
     if (
       myNightfallAddress in unspentCommitmentsEnd &&

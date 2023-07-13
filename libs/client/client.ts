@@ -275,10 +275,6 @@ class Client {
       providedCommitmentsFee,
       regulatorUrl,
     });
-    if (res.data.error && res.data.error === "No suitable commitments") {
-      logger.error(res, "No suitable commitments were found");
-      throw new NightfallSdkError("No suitable commitments were found");
-    }
     logger.info(
       { status: res.status, data: res.data },
       `Client at ${endpoint} responded`,
@@ -439,7 +435,20 @@ class Client {
     return res.data.balance?.[zkpKeys.compressedZkpPublicKey];
   }
 
-  async getNightfallBalances(zkpKeys: NightfallZkpKeys) {
+  /**
+   * Make GET request to ...
+   *
+   * @async
+   * @method getNightfallBalances
+   * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
+   * @param {string[]} tokenContractAddresses A list of token addresses
+   * @throws {NightfallSdkError} Bad response
+   * @returns {*}
+   */
+  async getNightfallBalances(
+    zkpKeys: NightfallZkpKeys,
+    tokenContractAddresses: string[],
+  ) {
     const endpoint = "commitment/balance";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
@@ -447,6 +456,7 @@ class Client {
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
+        ercList: tokenContractAddresses,
       },
     });
     logger.info(
@@ -457,7 +467,20 @@ class Client {
     return res.data.balance;
   }
 
-  async getPendingSpent(zkpKeys: NightfallZkpKeys) {
+  /**
+   * Make GET request to get aggregated value for transfers and withdrawals that have not settled in L2 yet
+   *
+   * @async
+   * @method getPendingSpent
+   * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
+   * @param {string[]} tokenContractAddresses A list of token addresses
+   * @throws {NightfallSdkError} Bad response
+   * @returns {*}
+   */
+  async getPendingSpent(
+    zkpKeys: NightfallZkpKeys,
+    tokenContractAddresses: string[],
+  ) {
     const endpoint = "commitment/pending-spent";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
@@ -465,6 +488,7 @@ class Client {
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
+        ercList: tokenContractAddresses,
       },
     });
     logger.info(
@@ -473,6 +497,38 @@ class Client {
     );
 
     return res.data.balance?.[zkpKeys.compressedZkpPublicKey];
+  }
+
+  /**
+   * Make GET request to get all unspent commitments filtered by Nightfall addresses and
+   * commitment erc address
+   *
+   * @method getUnspentCommitments
+   * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
+   * @param {string[]} tokenContractAddresses A list of token addresses
+   * @throws {NightfallSdkError} No compressedZkpPublicKey given or bad response
+   * @returns {Promise<*>} Should resolve into list of commitments, grouped by erc, if request is successful
+   */
+  async getUnspentCommitments(
+    zkpKeys: NightfallZkpKeys,
+    tokenContractAddresses: string[],
+  ) {
+    const endpoint = "commitment/commitments";
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
+    logger.debug({ endpoint }, "Calling client at");
+
+    const res = await axios.get(`${apiUrl}/${endpoint}`, {
+      params: {
+        compressedZkpPublicKey: [zkpKeys.compressedZkpPublicKey], // Nightfall route seems to take 1, but service takes []
+        ercList: tokenContractAddresses,
+      },
+    });
+    logger.info(
+      { status: res.status, data: res.data },
+      `Client at ${endpoint} responded`,
+    );
+
+    return res.data.commitments?.[zkpKeys.compressedZkpPublicKey];
   }
 
   /**
@@ -509,38 +565,6 @@ class Client {
     );
 
     return res.data.commitmentsByListOfCompressedZkpPublicKey;
-  }
-
-  /**
-   * Make GET request to get all unspent commitments filtered by Nightfall addresses and
-   * commitment erc address
-   *
-   * @method getUnspentCommitments
-   * @param {string[]} listOfCompressedZkpPublicKey list of compressedZkpPublicKeys (Nightfall address)
-   * @param {string[]} listOfERCAddresses list of ERC Addresses
-   * @throws {NightfallSdkError} No compressedZkpPublicKey given or bad response
-   * @returns {Promise<Commitment[]>} Should resolve into a list of all existing commitments if request is successful
-   */
-  async getUnspentCommitments(
-    listOfCompressedZkpPublicKey: string[],
-    listOfErcAddresses?: string[],
-  ): Promise<Commitment[]> {
-    const endpoint = "commitment/commitments";
-    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
-    logger.debug({ endpoint }, "Calling client at");
-
-    const res = await axios.get(`${apiUrl}/${endpoint}`, {
-      params: {
-        listOfCompressedZkpPublicKey,
-        listOfErcAddresses,
-      },
-    });
-    logger.info(
-      { status: res.status, data: res.data },
-      `Client at ${endpoint} responded`,
-    );
-
-    return res.data.commitments;
   }
 
   /**
