@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Client } from "../../../libs/client";
 import { NightfallSdkError } from "../../../libs/utils/error";
-import type { Commitment } from "../../../libs/nightfall/types";
 
 jest.mock("axios");
 

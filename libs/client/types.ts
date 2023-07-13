@@ -10,6 +10,6 @@ export interface BalancePerTokenId {
   tokenId: string;
 }
 
-export type BalancePerAddress = number | BalancePerTokenId[];
+export type BalancePerAddress = (number | BalancePerTokenId)[];
 
 export type Balance = Record<string, BalancePerAddress>;
