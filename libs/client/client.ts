@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-import type { Commitment } from "../nightfall/types";
+import type { Commitment, UnspentCommitment } from "../nightfall/types";
 import { logger, NightfallSdkError } from "../utils";
 import type { NightfallZkpKeys } from "../nightfall/types";
 import type { RecipientNightfallData } from "libs/transactions/types";
-import { TransactionResponseData } from "./types";
+import type {
+  Balance,
+  BalancePerTokenId,
+  TransactionResponseData,
+} from "./types";
 
 axios.interceptors.response.use(
   (response) => response,
@@ -411,12 +415,12 @@ class Client {
    * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
    * @param {string[]} tokenContractAddresses A list of token addresses
    * @throws {NightfallSdkError} Bad response
-   * @returns {*}
+   * @returns {Promise<Balance>}
    */
   async getPendingDeposits(
     zkpKeys: NightfallZkpKeys,
     tokenContractAddresses: string[],
-  ) {
+  ): Promise<Balance> {
     const endpoint = "commitment/pending-deposit";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
@@ -443,12 +447,12 @@ class Client {
    * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
    * @param {string[]} tokenContractAddresses A list of token addresses
    * @throws {NightfallSdkError} Bad response
-   * @returns {*}
+   * @returns {Promise<Record<string, BalancePerTokenId>>}
    */
   async getNightfallBalances(
     zkpKeys: NightfallZkpKeys,
     tokenContractAddresses: string[],
-  ) {
+  ): Promise<Record<string, BalancePerTokenId>> {
     const endpoint = "commitment/balance";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
@@ -475,12 +479,12 @@ class Client {
    * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
    * @param {string[]} tokenContractAddresses A list of token addresses
    * @throws {NightfallSdkError} Bad response
-   * @returns {*}
+   * @returns {Promise<Balance>}
    */
   async getPendingSpent(
     zkpKeys: NightfallZkpKeys,
     tokenContractAddresses: string[],
-  ) {
+  ): Promise<Balance> {
     const endpoint = "commitment/pending-spent";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
@@ -507,12 +511,12 @@ class Client {
    * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
    * @param {string[]} tokenContractAddresses A list of token addresses
    * @throws {NightfallSdkError} No compressedZkpPublicKey given or bad response
-   * @returns {Promise<*>} Should resolve into list of commitments, grouped by erc, if request is successful
+   * @returns {Promise<Record<string, UnspentCommitment>>}
    */
   async getUnspentCommitments(
     zkpKeys: NightfallZkpKeys,
     tokenContractAddresses: string[],
-  ) {
+  ): Promise<Record<string, UnspentCommitment>> {
     const endpoint = "commitment/commitments";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");

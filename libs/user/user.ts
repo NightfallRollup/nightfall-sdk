@@ -48,8 +48,13 @@ import type {
   UserExportCommitments,
   UserImportCommitments,
 } from "./types";
-import type { Commitment, NightfallZkpKeys } from "../nightfall/types";
+import type {
+  Commitment,
+  NightfallZkpKeys,
+  UnspentCommitment,
+} from "../nightfall/types";
 import type { NightfallSDKTransactionReceipt } from "../transactions/types";
+import type { Balance, BalancePerTokenId } from "../client/types";
 
 /** Class to create Nightfall transactors (ie instances of User) */
 class UserFactory {
@@ -371,7 +376,7 @@ class User {
    * @param {string[] | []} [options.providedCommitments] Commitments to be used for transfer
    * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
    * @param {string} [options.regulatorUrl] regulatorUrl
-   * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async makeTransfer(
     options: UserMakeTransfer,
@@ -503,7 +508,7 @@ class User {
    * @param {Boolean} [options.isOffChain]
    * @param {string[] | []} [options.providedCommitments] Commitments to be withdrawn
    * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
-   * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async makeWithdrawal(
     options: UserMakeWithdrawal,
@@ -612,9 +617,9 @@ class User {
    * @method checkPendingDeposits
    * @param {UserCheckBalances} [options]
    * @param {string[]} [options.tokenContractAddresses] A list of token addresses
-   * @returns {Promise<*>} Should resolve into an object containing the aggregated value per token, for deposit tx that have not been included yet in a Layer2 block
+   * @returns {Promise<Balance>}
    */
-  async checkPendingDeposits(options?: UserCheckBalances) {
+  async checkPendingDeposits(options?: UserCheckBalances): Promise<Balance> {
     logger.debug({ options }, "User :: checkPendingDeposits");
 
     let tokenContractAddresses: string[] = [];
@@ -639,9 +644,11 @@ class User {
    * @method checkNightfallBalances
    * @param {UserCheckBalances} [options]
    * @param {string[]} [options.tokenContractAddresses] A list of token addresses
-   * @returns {Promise<*>} Should resolve into an object containing the aggregated value per token, for commitments available in Layer2
+   * @returns {Promise<Record<string, BalancePerTokenId>>}
    */
-  async checkNightfallBalances(options?: UserCheckBalances) {
+  async checkNightfallBalances(
+    options?: UserCheckBalances,
+  ): Promise<Record<string, BalancePerTokenId>> {
     logger.debug("User :: checkNightfallBalances");
 
     let tokenContractAddresses: string[] = [];
@@ -669,9 +676,11 @@ class User {
    * @method checkPendingTransfersAndWithdrawals
    * @param {UserCheckBalances} [options]
    * @param {string[]} [options.tokenContractAddresses] A list of token addresses
-   * @returns {Promise<*>}
+   * @returns {Promise<Balance>}
    */
-  async checkPendingTransfersAndWithdrawals(options?: UserCheckBalances) {
+  async checkPendingTransfersAndWithdrawals(
+    options?: UserCheckBalances,
+  ): Promise<Balance> {
     logger.debug("User :: checkPendingTransfersAndWithdrawals");
 
     let tokenContractAddresses: string[] = [];
@@ -696,9 +705,11 @@ class User {
    * @method checkAvailableCommitments
    * @param {UserCheckBalances} [options]
    * @param {string[]} [options.tokenContractAddresses] A list of token addresses
-   * @returns {Promise<*>}
+   * @returns {Promise<Record<string, UnspentCommitment>>}
    */
-  async checkAvailableCommitments(options?: UserCheckBalances) {
+  async checkAvailableCommitments(
+    options?: UserCheckBalances,
+  ): Promise<Record<string, UnspentCommitment>> {
     logger.debug("User :: checkAvailableCommitments");
 
     let tokenContractAddresses: string[] = [];
