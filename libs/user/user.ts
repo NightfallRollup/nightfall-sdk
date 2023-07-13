@@ -198,6 +198,17 @@ class User {
   }
 
   /**
+   * Allow user to register their set of zero-knowledge proof keys with the Client
+   *
+   * @method registerNightfallKeysWithClient
+   * @returns {Promise<string>}
+   */
+  registerNightfallKeysWithClient(): Promise<string> {
+    logger.debug("User :: registerNightfallKeysWithClient");
+    return this.client.subscribeToIncomingViewingKeys(this.zkpKeys);
+  }
+
+  /**
    * [Browser + MetaMask only] Update Ethereum account address
    *
    * @async

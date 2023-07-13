@@ -436,7 +436,7 @@ class Client {
   }
 
   /**
-   * Make GET request to ...
+   * Make GET request to retrieve Nightfall Layer2 balance
    *
    * @async
    * @method getNightfallBalances
