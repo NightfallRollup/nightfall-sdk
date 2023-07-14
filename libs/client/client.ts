@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-import type { Commitment } from "../nightfall/types";
+import type { Commitment, UnspentCommitment } from "../nightfall/types";
 import { logger, NightfallSdkError } from "../utils";
 import type { NightfallZkpKeys } from "../nightfall/types";
 import type { RecipientNightfallData } from "libs/transactions/types";
-import { TransactionResponseData } from "./types";
+import type {
+  Balance,
+  BalancePerTokenId,
+  TransactionResponseData,
+} from "./types";
 
 axios.interceptors.response.use(
   (response) => response,
@@ -38,8 +42,8 @@ class Client {
     logger.debug({ apiUrl }, "new Client at");
     this.apiUrl = apiUrl;
     // Set optional worker addresses if provided
-    this.apiTxUrl = typeof apiTxUrl === 'undefined' ? '' : apiTxUrl;
-    this.apiBpUrl = typeof apiBpUrl === 'undefined' ? '' : apiBpUrl;
+    this.apiTxUrl = typeof apiTxUrl === "undefined" ? "" : apiTxUrl;
+    this.apiBpUrl = typeof apiBpUrl === "undefined" ? "" : apiBpUrl;
   }
 
   /**
@@ -126,7 +130,7 @@ class Client {
     zkpKeys: NightfallZkpKeys,
   ): Promise<string> {
     const endpoint = "incoming-viewing-key";
-    const apiUrl = this.apiBpUrl === '' ? this.apiUrl : this.apiBpUrl;
+    const apiUrl = this.apiBpUrl === "" ? this.apiUrl : this.apiBpUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -166,7 +170,7 @@ class Client {
     salt?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "deposit";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -212,7 +216,7 @@ class Client {
     salt?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "tokenise";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -261,7 +265,7 @@ class Client {
     regulatorUrl?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "transfer";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -275,10 +279,6 @@ class Client {
       providedCommitmentsFee,
       regulatorUrl,
     });
-    if (res.data.error && res.data.error === "No suitable commitments") {
-      logger.error(res, "No suitable commitments were found");
-      throw new NightfallSdkError("No suitable commitments were found");
-    }
     logger.info(
       { status: res.status, data: res.data },
       `Client at ${endpoint} responded`,
@@ -312,7 +312,7 @@ class Client {
     providedCommitmentsFee: string[] | [],
   ): Promise<TransactionResponseData> {
     const endpoint = "burn";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -360,7 +360,7 @@ class Client {
     providedCommitmentsFee: string[] | [],
   ): Promise<TransactionResponseData> {
     const endpoint = "withdraw";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
@@ -415,14 +415,14 @@ class Client {
    * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
    * @param {string[]} tokenContractAddresses A list of token addresses
    * @throws {NightfallSdkError} Bad response
-   * @returns {*}
+   * @returns {Promise<Balance>}
    */
   async getPendingDeposits(
     zkpKeys: NightfallZkpKeys,
     tokenContractAddresses: string[],
-  ) {
+  ): Promise<Balance> {
     const endpoint = "commitment/pending-deposit";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
@@ -439,14 +439,28 @@ class Client {
     return res.data.balance?.[zkpKeys.compressedZkpPublicKey];
   }
 
-  async getNightfallBalances(zkpKeys: NightfallZkpKeys) {
+  /**
+   * Make GET request to retrieve Nightfall Layer2 balance
+   *
+   * @async
+   * @method getNightfallBalances
+   * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
+   * @param {string[]} tokenContractAddresses A list of token addresses
+   * @throws {NightfallSdkError} Bad response
+   * @returns {Promise<Record<string, BalancePerTokenId>>}
+   */
+  async getNightfallBalances(
+    zkpKeys: NightfallZkpKeys,
+    tokenContractAddresses: string[],
+  ): Promise<Record<string, BalancePerTokenId>> {
     const endpoint = "commitment/balance";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
+        ercList: tokenContractAddresses,
       },
     });
     logger.info(
@@ -457,14 +471,28 @@ class Client {
     return res.data.balance;
   }
 
-  async getPendingTransfers(zkpKeys: NightfallZkpKeys) {
+  /**
+   * Make GET request to get aggregated value for transfers and withdrawals that have not settled in L2 yet
+   *
+   * @async
+   * @method getPendingSpent
+   * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
+   * @param {string[]} tokenContractAddresses A list of token addresses
+   * @throws {NightfallSdkError} Bad response
+   * @returns {Promise<Balance>}
+   */
+  async getPendingSpent(
+    zkpKeys: NightfallZkpKeys,
+    tokenContractAddresses: string[],
+  ): Promise<Balance> {
     const endpoint = "commitment/pending-spent";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.get(`${apiUrl}/${endpoint}`, {
       params: {
         compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
+        ercList: tokenContractAddresses,
       },
     });
     logger.info(
@@ -473,6 +501,38 @@ class Client {
     );
 
     return res.data.balance?.[zkpKeys.compressedZkpPublicKey];
+  }
+
+  /**
+   * Make GET request to get all unspent commitments filtered by Nightfall addresses and
+   * commitment erc address
+   *
+   * @method getUnspentCommitments
+   * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
+   * @param {string[]} tokenContractAddresses A list of token addresses
+   * @throws {NightfallSdkError} No compressedZkpPublicKey given or bad response
+   * @returns {Promise<Record<string, UnspentCommitment[]>>}
+   */
+  async getUnspentCommitments(
+    zkpKeys: NightfallZkpKeys,
+    tokenContractAddresses: string[],
+  ): Promise<Record<string, UnspentCommitment[]>> {
+    const endpoint = "commitment/commitments";
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
+    logger.debug({ endpoint }, "Calling client at");
+
+    const res = await axios.get(`${apiUrl}/${endpoint}`, {
+      params: {
+        compressedZkpPublicKey: [zkpKeys.compressedZkpPublicKey], // Nightfall route seems to take 1, but service takes []
+        ercList: tokenContractAddresses,
+      },
+    });
+    logger.info(
+      { status: res.status, data: res.data },
+      `Client at ${endpoint} responded`,
+    );
+
+    return res.data.commitments?.[zkpKeys.compressedZkpPublicKey];
   }
 
   /**
@@ -487,7 +547,7 @@ class Client {
     listOfCompressedZkpPublicKey: string[],
   ): Promise<Commitment[]> {
     const endpoint = "commitment/compressedZkpPublicKeys";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
     if (!listOfCompressedZkpPublicKey.length) {
@@ -512,38 +572,6 @@ class Client {
   }
 
   /**
-   * Make GET request to get all unspent commitments filtered by Nightfall addresses and
-   * commitment erc address
-   *
-   * @method getUnspentCommitments
-   * @param {string[]} listOfCompressedZkpPublicKey list of compressedZkpPublicKeys (Nightfall address)
-   * @param {string[]} listOfERCAddresses list of ERC Addresses
-   * @throws {NightfallSdkError} No compressedZkpPublicKey given or bad response
-   * @returns {Promise<Commitment[]>} Should resolve into a list of all existing commitments if request is successful
-   */
-  async getUnspentCommitments(
-    listOfCompressedZkpPublicKey: string[],
-    listOfErcAddresses?: string[],
-  ): Promise<Commitment[]> {
-    const endpoint = "commitment/commitments";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
-    logger.debug({ endpoint }, "Calling client at");
-
-    const res = await axios.get(`${apiUrl}/${endpoint}`, {
-      params: {
-        listOfCompressedZkpPublicKey,
-        listOfErcAddresses,
-      },
-    });
-    logger.info(
-      { status: res.status, data: res.data },
-      `Client at ${endpoint} responded`,
-    );
-
-    return res.data.commitments;
-  }
-
-  /**
    *
    * Make POST request to import a list of commitments
    *
@@ -555,13 +583,10 @@ class Client {
    */
   async saveCommitments(listOfCommitments: Commitment[]) {
     const endpoint = "commitment/save";
-    const apiUrl = this.apiTxUrl === '' ? this.apiUrl : this.apiTxUrl;
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
 
-    const res = await axios.post(
-      `${apiUrl}/${endpoint}`,
-      listOfCommitments,
-    );
+    const res = await axios.post(`${apiUrl}/${endpoint}`, listOfCommitments);
     logger.info(
       { status: res.status, data: res.data },
       `Client at ${endpoint} responded`,

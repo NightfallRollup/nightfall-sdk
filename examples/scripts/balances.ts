@@ -13,15 +13,17 @@ const main = async () => {
       nightfallMnemonic: config.nightfallMnemonic,
     });
 
-    // # 2 Check Nightfall balances
-    const balances = await user.checkNightfallBalances();
-    console.log("Balances", balances);
+    // # 2 Check Nightfall balances - allows filtering by tokenContractAddresses
+    const balances = await user.checkNightfallBalances({
+      tokenContractAddresses: [config.tokenContractAddress],
+    });
+    console.log(">>>>> Balances", balances);
   } catch (error) {
     console.log(error);
     process.exit(1);
   } finally {
     user.close();
-    console.log("Bye bye");
+    console.log(">>>>> Bye bye");
   }
 };
 

@@ -48,8 +48,13 @@ import type {
   UserExportCommitments,
   UserImportCommitments,
 } from "./types";
-import type { Commitment, NightfallZkpKeys } from "../nightfall/types";
+import type {
+  Commitment,
+  NightfallZkpKeys,
+  UnspentCommitment,
+} from "../nightfall/types";
 import type { NightfallSDKTransactionReceipt } from "../transactions/types";
+import type { Balance, BalancePerTokenId } from "../client/types";
 
 /** Class to create Nightfall transactors (ie instances of User) */
 class UserFactory {
@@ -198,6 +203,17 @@ class User {
   }
 
   /**
+   * Allow user to register their set of zero-knowledge proof keys with the Client
+   *
+   * @method registerNightfallKeysWithClient
+   * @returns {Promise<string>}
+   */
+  registerNightfallKeysWithClient(): Promise<string> {
+    logger.debug("User :: registerNightfallKeysWithClient");
+    return this.client.subscribeToIncomingViewingKeys(this.zkpKeys);
+  }
+
+  /**
    * [Browser + MetaMask only] Update Ethereum account address
    *
    * @async
@@ -236,7 +252,13 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "makeDeposit formatted parameters");
 
-    const { tokenContractAddress, value, feeWei, providedCommitmentsFee = [], salt } = joiValue;
+    const {
+      tokenContractAddress,
+      value,
+      feeWei,
+      providedCommitmentsFee = [],
+      salt,
+    } = joiValue;
     let { tokenId } = joiValue;
 
     // Determine ERC standard, set value/tokenId defaults,
@@ -314,7 +336,14 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "mintL2Token formatted parameters");
 
-    const { tokenContractAddress, value, tokenId, feeWei, providedCommitmentsFee = [], salt } = joiValue;
+    const {
+      tokenContractAddress,
+      value,
+      tokenId,
+      feeWei,
+      providedCommitmentsFee = [],
+      salt,
+    } = joiValue;
 
     // Mint (aka Tokenise)
     const { txReceiptL2 } = await createTokeniseTx(
@@ -347,7 +376,7 @@ class User {
    * @param {string[] | []} [options.providedCommitments] Commitments to be used for transfer
    * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
    * @param {string} [options.regulatorUrl] regulatorUrl
-   * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async makeTransfer(
     options: UserMakeTransfer,
@@ -440,7 +469,14 @@ class User {
     isInputValid(error);
     logger.debug({ joiValue }, "burnL2Token formatted parameters");
 
-    const { tokenContractAddress, value, tokenId, feeWei, providedCommitments = [], providedCommitmentsFee = [] } = joiValue;
+    const {
+      tokenContractAddress,
+      value,
+      tokenId,
+      feeWei,
+      providedCommitments = [],
+      providedCommitmentsFee = [],
+    } = joiValue;
 
     // Burn
     const { txReceiptL2 } = await createBurnTx(
@@ -472,7 +508,7 @@ class User {
    * @param {Boolean} [options.isOffChain]
    * @param {string[] | []} [options.providedCommitments] Commitments to be withdrawn
    * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
-   * @returns {Promise<OnChainTransactionReceipts | OffChainTransactionReceipt>}
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async makeWithdrawal(
     options: UserMakeWithdrawal,
@@ -581,9 +617,9 @@ class User {
    * @method checkPendingDeposits
    * @param {UserCheckBalances} [options]
    * @param {string[]} [options.tokenContractAddresses] A list of token addresses
-   * @returns {Promise<*>} Should resolve into an object containing the aggregated value per token, for deposit tx that have not been included yet in a Layer2 block
+   * @returns {Promise<Balance>}
    */
-  async checkPendingDeposits(options?: UserCheckBalances) {
+  async checkPendingDeposits(options?: UserCheckBalances): Promise<Balance> {
     logger.debug({ options }, "User :: checkPendingDeposits");
 
     let tokenContractAddresses: string[] = [];
@@ -606,23 +642,92 @@ class User {
    *
    * @async
    * @method checkNightfallBalances
-   * @returns {Promise<*>} Should resolve into an object containing the aggregated value per token, for commitments available in Layer2
+   * @param {UserCheckBalances} [options]
+   * @param {string[]} [options.tokenContractAddresses] A list of token addresses
+   * @returns {Promise<Record<string, BalancePerTokenId>>}
    */
-  async checkNightfallBalances() {
+  async checkNightfallBalances(
+    options?: UserCheckBalances,
+  ): Promise<Record<string, BalancePerTokenId>> {
     logger.debug("User :: checkNightfallBalances");
-    return this.client.getNightfallBalances(this.zkpKeys);
+
+    let tokenContractAddresses: string[] = [];
+
+    // If options were passed, validate and format
+    if (options) {
+      const { error, value } = checkBalancesOptions.validate(options);
+      isInputValid(error);
+      tokenContractAddresses = value.tokenContractAddresses;
+    }
+    logger.debug(
+      { tokenContractAddresses },
+      "Get pending deposits for token addresses",
+    );
+    return this.client.getNightfallBalances(
+      this.zkpKeys,
+      tokenContractAddresses,
+    );
   }
 
   /**
-   * Allow user to check the balance of the pending spent commitments on Layer2
+   * Allow user to check the transfers and withdrawals that haven't been processed yet
    *
    * @async
-   * @method checkPendingTransfers
-   * @returns {Promise<*>}
+   * @method checkPendingTransfersAndWithdrawals
+   * @param {UserCheckBalances} [options]
+   * @param {string[]} [options.tokenContractAddresses] A list of token addresses
+   * @returns {Promise<Balance>}
    */
-  async checkPendingTransfers() {
-    logger.debug("User :: checkPendingTransfers");
-    return this.client.getPendingTransfers(this.zkpKeys);
+  async checkPendingTransfersAndWithdrawals(
+    options?: UserCheckBalances,
+  ): Promise<Balance> {
+    logger.debug("User :: checkPendingTransfersAndWithdrawals");
+
+    let tokenContractAddresses: string[] = [];
+
+    // If options were passed, validate and format
+    if (options) {
+      const { error, value } = checkBalancesOptions.validate(options);
+      isInputValid(error);
+      tokenContractAddresses = value.tokenContractAddresses;
+    }
+    logger.debug(
+      { tokenContractAddresses },
+      "Get pending deposits for token addresses",
+    );
+    return this.client.getPendingSpent(this.zkpKeys, tokenContractAddresses);
+  }
+
+  /**
+   * Allow user to get all unspent commitments
+   *
+   * @async
+   * @method checkAvailableCommitments
+   * @param {UserCheckBalances} [options]
+   * @param {string[]} [options.tokenContractAddresses] A list of token addresses
+   * @returns {Promise<Record<string, UnspentCommitment[]>>}
+   */
+  async checkAvailableCommitments(
+    options?: UserCheckBalances,
+  ): Promise<Record<string, UnspentCommitment[]>> {
+    logger.debug("User :: checkAvailableCommitments");
+
+    let tokenContractAddresses: string[] = [];
+
+    // If options were passed, validate and format
+    if (options) {
+      const { error, value } = checkBalancesOptions.validate(options);
+      isInputValid(error);
+      tokenContractAddresses = value.tokenContractAddresses;
+    }
+    logger.debug(
+      { tokenContractAddresses },
+      "Get pending deposits for token addresses",
+    );
+    return this.client.getUnspentCommitments(
+      this.zkpKeys,
+      tokenContractAddresses,
+    );
   }
 
   /**

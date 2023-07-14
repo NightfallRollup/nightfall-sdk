@@ -130,19 +130,23 @@ describe("Client", () => {
     const value = "0.01";
     const fee = "11000000000";
     const tokenId = "0x00";
+    const providedCommitmentsFee: string[] = [];
 
     test("Should return an instance of <TransactionResponseData> if client app responds successfully", async () => {
       // Arrange
-      const txDataToSign = {};
-      const transaction = {};
-      const data = { txDataToSign, transaction };
+      const data = { txDataToSign: {}, transaction: {} };
       const res = { data };
       (axios.post as jest.Mock).mockResolvedValue(res);
 
       // Act
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const result = await client.deposit(token, zkpKeys, value, tokenId, fee);
+      const result = await client.deposit(
+        token,
+        zkpKeys,
+        value,
+        tokenId,
+        fee,
+        providedCommitmentsFee,
+      );
 
       // Assert
       expect(axios.post).toHaveBeenCalledWith(url, {
@@ -152,6 +156,44 @@ describe("Client", () => {
         value,
         rootKey: zkpKeys.rootKey,
         fee,
+        providedCommitmentsFee,
+      });
+      expect(result).toBe(data);
+    });
+  });
+
+  describe("Method tokenise", () => {
+    const url = dummyUrl + "/tokenise";
+    const tokenContractAddress = "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae";
+    const value = "10";
+    const fee = "0";
+    const tokenId = "0x00";
+    const providedCommitmentsFee: string[] = [];
+
+    test("Should return an instance of <TransactionResponseData> if client app responds successfully", async () => {
+      // Arrange
+      const data = { txDataToSign: {}, transaction: {} };
+      const res = { data };
+      (axios.post as jest.Mock).mockResolvedValue(res);
+
+      // Act
+      const result = await client.tokenise(
+        zkpKeys,
+        tokenContractAddress,
+        value,
+        tokenId,
+        fee,
+        providedCommitmentsFee,
+      );
+
+      // Assert
+      expect(axios.post).toHaveBeenCalledWith(url, {
+        ercAddress: tokenContractAddress,
+        rootKey: zkpKeys.rootKey,
+        value,
+        tokenId,
+        fee,
+        providedCommitmentsFee,
       });
       expect(result).toBe(data);
     });
@@ -171,18 +213,16 @@ describe("Client", () => {
     const fee = "11000000000";
     const isOffChain = false;
     const tokenId = "0x00";
+    const providedCommitments: string[] = [];
+    const providedCommitmentsFee: string[] = [];
 
     test("Should return an instance of <TransactionResponseData> if client app responds successfully", async () => {
       // Arrange
-      const txDataToSign = {};
-      const transaction = {};
-      const data = { txDataToSign, transaction };
+      const data = { txDataToSign: {}, transaction: {} };
       const res = { data };
       (axios.post as jest.Mock).mockResolvedValue(res);
 
       // Act
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       const result = await client.transfer(
         token,
         zkpKeys,
@@ -190,6 +230,8 @@ describe("Client", () => {
         tokenId,
         fee,
         isOffChain,
+        providedCommitments,
+        providedCommitmentsFee,
       );
 
       // Assert
@@ -200,33 +242,50 @@ describe("Client", () => {
         tokenId: "0x00",
         fee,
         offchain: isOffChain,
+        providedCommitments,
+        providedCommitmentsFee,
       });
       expect(result).toBe(data);
     });
+  });
 
-    test("Should throw an error when no suitable commitments are found", () => {
+  describe("Method burn", () => {
+    const url = dummyUrl + "/burn";
+    const tokenContractAddress = "0x499d11E0b6eAC7c0593d8Fb292DCBbF815Fb29Ae";
+    const value = "10";
+    const fee = "0";
+    const tokenId = "0x00";
+    const providedCommitments: string[] = [];
+    const providedCommitmentsFee: string[] = [];
+
+    test("Should return an instance of <TransactionResponseData> if client app responds successfully", async () => {
       // Arrange
-      const data = { error: "No suitable commitments" };
+      const data = { txDataToSign: {}, transaction: {} };
       const res = { data };
       (axios.post as jest.Mock).mockResolvedValue(res);
 
-      // Act, Assert
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      expect(
-        async () =>
-          await client.transfer(
-            token,
-            zkpKeys,
-            recipientNightfallData,
-            tokenId,
-            fee,
-            isOffChain,
-            [],
-            [],
-          ),
-      ).rejects.toThrow(NightfallSdkError);
-      expect(axios.post).toHaveBeenCalledTimes(1);
+      // Act
+      const result = await client.burn(
+        zkpKeys,
+        tokenContractAddress,
+        value,
+        tokenId,
+        fee,
+        providedCommitments,
+        providedCommitmentsFee,
+      );
+
+      // Assert
+      expect(axios.post).toHaveBeenCalledWith(url, {
+        ercAddress: tokenContractAddress,
+        rootKey: zkpKeys.rootKey,
+        value,
+        tokenId,
+        fee,
+        providedCommitments,
+        providedCommitmentsFee,
+      });
+      expect(result).toBe(data);
     });
   });
 
@@ -241,18 +300,16 @@ describe("Client", () => {
     const recipientEthAddress = "0x0recipientEthAddress";
     const isOffChain = false;
     const tokenId = "0x00";
+    const providedCommitments: string[] = [];
+    const providedCommitmentsFee: string[] = [];
 
     test("Should return an instance of <TransactionResponseData> if client app responds successfully", async () => {
       // Arrange
-      const txDataToSign = {};
-      const transaction = {};
-      const data = { txDataToSign, transaction };
+      const data = { txDataToSign: {}, transaction: {} };
       const res = { data };
       (axios.post as jest.Mock).mockResolvedValue(res);
 
       // Act
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       const result = await client.withdraw(
         token,
         zkpKeys,
@@ -261,6 +318,8 @@ describe("Client", () => {
         fee,
         recipientEthAddress,
         isOffChain,
+        providedCommitments,
+        providedCommitmentsFee,
       );
 
       // Assert
@@ -273,6 +332,8 @@ describe("Client", () => {
         value,
         fee,
         offchain: isOffChain,
+        providedCommitments,
+        providedCommitmentsFee,
       });
       expect(result).toBe(data);
     });
@@ -338,6 +399,7 @@ describe("Client", () => {
 
   describe("Method getNightfallBalances", () => {
     const url = dummyUrl + "/commitment/balance";
+    const tokenContractAddresses: string[] = [];
 
     test("Should return object if client app responds successfully", async () => {
       // Arrange
@@ -355,15 +417,98 @@ describe("Client", () => {
       (axios.get as jest.Mock).mockResolvedValue(res);
 
       // Act
-      const result = await client.getNightfallBalances(zkpKeys);
+      const result = await client.getNightfallBalances(
+        zkpKeys,
+        tokenContractAddresses,
+      );
 
       // Assert
       expect(axios.get).toHaveBeenCalledWith(url, {
         params: {
           compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
+          ercList: tokenContractAddresses,
         },
       });
       expect(result).toBe(tokenBalances);
+    });
+  });
+
+  describe("Method getPendingSpent", () => {
+    const url = dummyUrl + "/commitment/pending-spent";
+    const tokenContractAddresses: string[] = [];
+
+    test("Should return object if client app responds successfully", async () => {
+      // Arrange
+      const tokenBalances = {
+        "0xa8473bef03cbe50229a39718cbdc1fdee2f26b1a": [
+          200000,
+          {
+            balance: 200000,
+            tokenId:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+          },
+        ],
+      };
+      const balance = { [zkpKeys.compressedZkpPublicKey]: tokenBalances };
+      const res = { data: { balance } };
+      (axios.get as jest.Mock).mockResolvedValue(res);
+
+      // Act
+      const result = await client.getPendingSpent(
+        zkpKeys,
+        tokenContractAddresses,
+      );
+
+      // Assert
+      expect(axios.get).toHaveBeenCalledWith(url, {
+        params: {
+          compressedZkpPublicKey: zkpKeys.compressedZkpPublicKey,
+          ercList: tokenContractAddresses,
+        },
+      });
+      expect(result).toBe(tokenBalances);
+    });
+  });
+
+  describe("Method getUnspentCommitments", () => {
+    const url = dummyUrl + "/commitment/commitments";
+    const tokenContractAddresses: string[] = [];
+
+    test("Should return object if client app responds successfully", async () => {
+      // Arrange
+      const availableCommitments = {
+        "0x88902a6e2689e0c5b040733f3cbf7404e9298e39": [
+          {
+            compressedZkpPublicKey:
+              "0x202542de47f94c16e05222a3ee899103e948f2bc326a0f0a248e769586694062",
+            ercAddress: "0x88902a6e2689e0c5b040733f3cbf7404e9298e39",
+            balance: 10000000000,
+            tokenId:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+            hash: "0x11c482c2a7b66cfa13ff9e7df7304a04b70426a8de96881ba6d11b8b63e87307",
+          },
+        ],
+      };
+      const commitments = {
+        [zkpKeys.compressedZkpPublicKey]: availableCommitments,
+      };
+      const res = { data: { commitments } };
+      (axios.get as jest.Mock).mockResolvedValue(res);
+
+      // Act
+      const result = await client.getUnspentCommitments(
+        zkpKeys,
+        tokenContractAddresses,
+      );
+
+      // Assert
+      expect(axios.get).toHaveBeenCalledWith(url, {
+        params: {
+          compressedZkpPublicKey: [zkpKeys.compressedZkpPublicKey],
+          ercList: tokenContractAddresses,
+        },
+      });
+      expect(result).toBe(availableCommitments);
     });
   });
 });

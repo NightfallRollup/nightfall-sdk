@@ -29,10 +29,14 @@ const main = async () => {
     );
     console.log(">>>>> Transaction hash L2", txHashL2);
 
-    // # 3 [TODO] You can check transfers that are not yet in a block
-    const pendingTransfers = await user.checkPendingTransfers();
+    // # 3 [OPTIONAL] You can check the transaction hash
+    // TODO
 
-    // # 4 [EXTRA] Check that L1 tx was mined before closing the websocket in `finally` clause
+    // # 4 [OPTIONAL] You can check withdrawals that are not yet in a block
+    const pendingWithdrawals = await user.checkPendingTransfersAndWithdrawals();
+    console.log(">>>>> Pending ***", pendingWithdrawals);
+
+    // # 5 [EXTRA] Check that L1 tx was mined before closing the websocket in `finally` clause
     if (!isOffChain) {
       let isTxL1Mined = await user.web3Websocket.web3.eth.getTransactionReceipt(
         txHashL1,
@@ -45,7 +49,6 @@ const main = async () => {
         );
       }
     }
-    console.log(">>>>> Pending ***", pendingTransfers);
   } catch (error) {
     console.error(error);
     process.exit(1);
