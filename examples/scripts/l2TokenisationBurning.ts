@@ -1,5 +1,4 @@
 import { UserFactory } from "../../libs";
-import { UnspentCommitment } from "../../libs/nightfall/types";
 import { config } from "./appConfig";
 
 const main = async () => {
@@ -18,9 +17,7 @@ const main = async () => {
     const availableCommitments = await user.checkAvailableCommitments();
 
     const [tokenContractAddress] = Object.keys(availableCommitments);
-    const [commitmentToBurn] = Object.values(
-      availableCommitments[tokenContractAddress],
-    ) as UnspentCommitment[];
+    const [commitmentToBurn] = availableCommitments[tokenContractAddress];
     console.log(">>>> commitmentToBurn", commitmentToBurn);
 
     // # 3 Burn the commitment
