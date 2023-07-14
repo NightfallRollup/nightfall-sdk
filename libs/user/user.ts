@@ -705,11 +705,11 @@ class User {
    * @method checkAvailableCommitments
    * @param {UserCheckBalances} [options]
    * @param {string[]} [options.tokenContractAddresses] A list of token addresses
-   * @returns {Promise<Record<string, UnspentCommitment>>}
+   * @returns {Promise<Record<string, UnspentCommitment[]>>}
    */
   async checkAvailableCommitments(
     options?: UserCheckBalances,
-  ): Promise<Record<string, UnspentCommitment>> {
+  ): Promise<Record<string, UnspentCommitment[]>> {
     logger.debug("User :: checkAvailableCommitments");
 
     let tokenContractAddresses: string[] = [];

@@ -1,11 +1,6 @@
 import { UserFactory } from "../../libs";
+import { UnspentCommitment } from "../../libs/nightfall/types";
 import { config } from "./appConfig";
-export interface UnspentCommitment {
-  compressedZkpPublicKey: string;
-  ercAddress: string;
-  balance: string; // ie value
-  tokenId: string;
-}
 
 const main = async () => {
   let user;

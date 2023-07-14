@@ -511,12 +511,12 @@ class Client {
    * @param {NightfallZkpKeys} zkpKeys Sender's set of zero-knowledge proof keys
    * @param {string[]} tokenContractAddresses A list of token addresses
    * @throws {NightfallSdkError} No compressedZkpPublicKey given or bad response
-   * @returns {Promise<Record<string, UnspentCommitment>>}
+   * @returns {Promise<Record<string, UnspentCommitment[]>>}
    */
   async getUnspentCommitments(
     zkpKeys: NightfallZkpKeys,
     tokenContractAddresses: string[],
-  ): Promise<Record<string, UnspentCommitment>> {
+  ): Promise<Record<string, UnspentCommitment[]>> {
     const endpoint = "commitment/commitments";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
     logger.debug({ endpoint }, "Calling client at");
