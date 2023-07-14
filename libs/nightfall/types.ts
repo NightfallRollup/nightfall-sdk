@@ -34,6 +34,7 @@ export interface UnspentCommitment {
   ercAddress: string;
   balance: string; // ie value
   tokenId: string;
+  hash: string;
 }
 export interface TransactionReceiptL2 {
   value: string;
