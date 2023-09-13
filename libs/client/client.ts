@@ -250,6 +250,9 @@ class Client {
    * @param {string[] | []} providedCommitments Commitments to be used for transfer
    * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
    * @param {string} [regulatorUrl] regulatorUrl
+   * @param {string} [atomicHash] Hash of the atomic transaction
+   * @param {string} [atomicTimestamp] Expiration timestamp of the atomic transaction
+   * @param {string} [salt] salt for the commitment to generate
    * @throws {NightfallSdkError} No commitments found or bad response
    * @returns {Promise<TransactionResponseData>}
    */
@@ -263,6 +266,9 @@ class Client {
     providedCommitments: string[] | [],
     providedCommitmentsFee: string[] | [],
     regulatorUrl?: string,
+    atomicHash?: string,
+    atomicTimestamp?: number,
+    salt?: string,
   ): Promise<TransactionResponseData> {
     const endpoint = "transfer";
     const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
@@ -278,6 +284,9 @@ class Client {
       providedCommitments,
       providedCommitmentsFee,
       regulatorUrl,
+      atomicHash,
+      atomicTimestamp,
+      salt,
     });
     logger.info(
       { status: res.status, data: res.data },

@@ -26,6 +26,9 @@ import type { RecipientNightfallData, TransactionResult } from "./types";
  * @param {string[] | []} [providedCommitments] Commitments to be used for transfer
  * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
  * @param {string} [regulatorUrl] regulatorUrl
+ * @param {string} [atomicHash] Hash of the atomic transaction
+ * @param {string} [atomicTimestamp] Expiration timestamp of the atomic transaction
+ * @param {string} [salt] salt for the commitment to generate
  * @throws {NightfallSdkError} Error while broadcasting on-chain tx
  * @returns {Promise<TransactionResult>}
  */
@@ -45,6 +48,9 @@ export async function createTransferTx(
   providedCommitments?: string[] | [],
   providedCommitmentsFee?: string[] | [],
   regulatorUrl?: string,
+  atomicHash?: string,
+  atomicTimestamp?: number,
+  salt?: string,
 ): Promise<TransactionResult> {
   logger.debug("createTransferTx");
 
@@ -63,6 +69,9 @@ export async function createTransferTx(
     providedCommitments ?? [],
     providedCommitmentsFee ?? [],
     regulatorUrl,
+    atomicHash,
+    atomicTimestamp,
+    salt,
   );
   const txReceiptL2 = resData.transaction;
 

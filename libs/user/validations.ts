@@ -94,11 +94,14 @@ export const mintL2Token = l2TokenisationTransaction.append({
 });
 
 export const makeTransferOptions = makeTransaction.append({
-  providedCommitments: Joi.array().items(Joi.string()), 
-  regulatorUrl: Joi.string().trim(),
   recipientNightfallAddress: Joi.string().trim().required(),
   isOffChain: Joi.boolean().default(false),
-});
+  providedCommitments: Joi.array().items(Joi.string()), 
+  regulatorUrl: Joi.string().trim(),
+  atomicHash: Joi.string().trim(),
+  atomicTimestamp: Joi.date().timestamp("unix"), // for unix timestamp (seconds)
+  salt: Joi.string().trim(),
+}).with("atomicHash", ["atomicTimestamp"]);
 
 export const burnL2Token = makeTransaction.append({
   providedCommitments: Joi.array().items(Joi.string()),

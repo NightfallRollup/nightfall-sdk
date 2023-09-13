@@ -51,6 +51,9 @@ export interface UserMakeTransfer extends UserMakeTransaction {
   isOffChain?: boolean;
   providedCommitments?: string[] | [];
   regulatorUrl?: string;
+  atomicHash?: string;
+  atomicTimestamp?: EpochTimeStamp;
+  salt?: string;
 }
 
 export interface UserBurnL2Token extends UserL2TokenisationTransaction {

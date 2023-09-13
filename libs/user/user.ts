@@ -379,6 +379,9 @@ class User {
    * @param {string[] | []} [options.providedCommitments] Commitments to be used for transfer
    * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
    * @param {string} [options.regulatorUrl] regulatorUrl
+   * @param {string} [options.atomicHash] Hash of the atomic transaction
+   * @param {string} [options.atomicTimestamp] Expiration timestamp of the atomic transaction
+   * @param {string} [options.salt] salt for the commitment to generate
    * @returns {Promise<NightfallSDKTransactionReceipt>}
    */
   async makeTransfer(
@@ -400,6 +403,9 @@ class User {
       providedCommitments = [],
       providedCommitmentsFee = [],
       regulatorUrl,
+      atomicHash,
+      atomicTimestamp,
+      salt,
     } = joiValue;
     let { tokenId } = joiValue;
 
@@ -431,6 +437,9 @@ class User {
       providedCommitments,
       providedCommitmentsFee,
       regulatorUrl,
+      atomicHash,
+      atomicTimestamp,
+      salt,
     );
 
     if (isOffChain) {
