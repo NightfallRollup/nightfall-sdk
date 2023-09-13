@@ -118,6 +118,10 @@ export const checkBalancesOptions = Joi.object({
   tokenContractAddresses: Joi.array().items(Joi.string().trim()),
 });
 
+export const transactionHashesOptions = Joi.object({
+  transactionHashes: Joi.array().items(Joi.string().trim()),
+});
+
 export function isInputValid(error: ValidationError | undefined) {
   if (error !== undefined) {
     const message = error.details.map((e) => e.message).join();

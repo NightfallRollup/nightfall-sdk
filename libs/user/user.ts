@@ -11,6 +11,7 @@ import {
   finaliseWithdrawalOptions,
   checkBalancesOptions,
   isInputValid,
+  transactionHashesOptions,
 } from "./validations";
 import { Client } from "../client";
 import {
@@ -47,10 +48,12 @@ import type {
   UserCheckBalances,
   UserExportCommitments,
   UserImportCommitments,
+  UserGetTransactionsInfo,
 } from "./types";
 import type {
   Commitment,
   NightfallZkpKeys,
+  TransactionInfo,
   UnspentCommitment,
 } from "../nightfall/types";
 import type { NightfallSDKTransactionReceipt } from "../transactions/types";
@@ -796,6 +799,38 @@ class User {
     return successMessage;
   }
 
+
+    /**
+   * Allow user to get all transactions info from settled l2  commitments
+   *
+   * @async
+   * @method getTransactionsInfo
+   * @param {UserGetTransactionsInfo} [options]
+   * @param {string[]} [options.tokenContractAddresses] A list of token addresses
+   * @returns {Promise<Record<string, TransactionInfo[]>>}
+   */
+    async getTransactionsInfo(
+      options?: UserGetTransactionsInfo,
+    ): Promise<TransactionInfo[]> {
+      logger.debug("User :: getTransactionsInfo");
+  
+      let transactionHashes: string[] = [];
+  
+      // If options were passed, validate and format
+      if (options) {
+        const { error, value } = transactionHashesOptions.validate(options);
+        isInputValid(error);
+        transactionHashes = value.transactionHashes;
+      }
+      logger.debug(
+        { transactionHashes },
+        "Get transaction info for transaction hashes",
+      );
+      return this.client.getTransactionsInfo(
+        transactionHashes,
+      );
+    }
+  
   /**
    * Close user blockchain ws connection
    * Use carefully: closing the ws too soon can result in errors,
