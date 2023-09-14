@@ -611,11 +611,7 @@ class Client {
       const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
       logger.debug({ endpoint }, "Calling client at");
   
-      const res = await axios.get(`${apiUrl}/${endpoint}`, {
-        params: {
-          transactionHashes       
-        },
-      });
+      const res = await axios.post(`${apiUrl}/${endpoint}`, { transactionHashes });
       logger.info(
         { status: res.status, data: res.data },
         `Client at ${endpoint} responded`,

@@ -8,10 +8,12 @@ const main = async () => {
   try {
     // # 1 Create an instance of User
     userSender = await UserFactory.create({
+      blockchainWsUrl: config.blockchainWsUrl,
       clientApiUrl: config.clientApiUrl,
+      clientApiBpUrl: config.clientApiBpUrl,
+      clientApiTxUrl: config.clientApiTxUrl,
       ethereumPrivateKey: config.ethereumPrivateKey,
       nightfallMnemonic: config.nightfallMnemonic,
-      blockchainWsUrl: config.blockchainWsUrl,
     });
 
     // # 2 Make transfer

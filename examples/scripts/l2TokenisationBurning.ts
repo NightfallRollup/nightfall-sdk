@@ -9,6 +9,8 @@ const main = async () => {
     user = await UserFactory.create({
       blockchainWsUrl: config.blockchainWsUrl,
       clientApiUrl: config.clientApiUrl,
+      clientApiBpUrl: config.clientApiBpUrl,
+      clientApiTxUrl: config.clientApiTxUrl,
       ethereumPrivateKey: config.ethereumPrivateKey,
       nightfallMnemonic: config.nightfallMnemonic,
     });
