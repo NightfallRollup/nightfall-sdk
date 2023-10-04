@@ -7,10 +7,12 @@ const main = async () => {
   try {
     // # 1 Create an instance of User
     user = await UserFactory.create({
-      clientApiUrl: config.clientApiUrl,
-      nightfallMnemonic: config.nightfallMnemonic,
       blockchainWsUrl: config.blockchainWsUrl,
+      clientApiUrl: config.clientApiUrl,
+      clientApiBpUrl: config.clientApiBpUrl,
+      clientApiTxUrl: config.clientApiTxUrl,
       ethereumPrivateKey: config.ethereumPrivateKey,
+      nightfallMnemonic: config.nightfallMnemonic,
     });
 
     // # 2 Make withdrawal

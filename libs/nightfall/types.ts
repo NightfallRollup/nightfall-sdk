@@ -36,6 +36,13 @@ export interface UnspentCommitment {
   tokenId: string;
   hash: string;
 }
+
+export interface TransactionInfo {
+  blockNumber: string;
+  blockNumberL2: string;
+  transactionHash: string;
+  transactionHashL1: string;
+}
 export interface TransactionReceiptL2 {
   value: string;
   fee: string;

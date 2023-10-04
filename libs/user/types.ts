@@ -71,6 +71,10 @@ export interface UserCheckBalances {
   tokenContractAddresses?: string[];
 }
 
+export interface UserGetTransactionsInfo {
+  transactionHashes?: string[];
+}
+
 export interface UserExportCommitments {
   listOfCompressedZkpPublicKey: string[];
   pathToExport: string;

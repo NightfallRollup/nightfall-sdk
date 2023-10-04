@@ -9,10 +9,12 @@ const main = async () => {
     // # 1 Create an instance of User (bip39 mnemonic is optional)
     // Will generate a new bip39 mnemonic if you don't pass one and derive a new set of zero-knowledge proof keys
     user = await UserFactory.create({
-      clientApiUrl: config.clientApiUrl,
-      nightfallMnemonic: config.nightfallMnemonic,
-      ethereumPrivateKey: config.ethereumPrivateKey,
       blockchainWsUrl: config.blockchainWsUrl,
+      clientApiUrl: config.clientApiUrl,
+      clientApiBpUrl: config.clientApiBpUrl,
+      clientApiTxUrl: config.clientApiTxUrl,
+      ethereumPrivateKey: config.ethereumPrivateKey,
+      nightfallMnemonic: config.nightfallMnemonic,
     });
 
     // # 2 [OPTIONAL] If you did not pass a mnemonic, make sure to retrieve it
