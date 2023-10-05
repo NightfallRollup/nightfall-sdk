@@ -72,6 +72,7 @@
     "eg:ganache:minting": "ts-node -r dotenv/config examples/scripts/l2TokenisationMinting.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:transfer": "ts-node -r dotenv/config examples/scripts/txTransfer.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:transactions-info": "ts-node -r dotenv/config examples/scripts/transactionsInfo.ts dotenv_config_path=./examples/scripts/.env.ganache",
+    "eg:ganache:atomic-transaction": "ts-node -r dotenv/config examples/scripts/atomicTransaction.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:burning": "ts-node -r dotenv/config examples/scripts/l2TokenisationBurning.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawal.ts dotenv_config_path=./examples/scripts/.env.ganache",
     "eg:ganache:finalise-withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawalFinalise.ts dotenv_config_path=./examples/scripts/.env.ganache",
