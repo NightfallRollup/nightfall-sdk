@@ -268,7 +268,7 @@ describe("Transactions", () => {
       isOffChain = true;
 
       const atomicHash = '0x0123456000000000000000000000000000000000000000000000000000000111';
-      const atomicTimestamp = '0x01';
+      const atomicTimestamp = 1;
 
       const salt = '0x251543af6a222378665a76fe38dbceae4871a070b7fdaf5c6c30cf758dc33cc0';
 
