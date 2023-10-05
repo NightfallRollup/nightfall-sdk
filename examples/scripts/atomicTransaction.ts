@@ -5,13 +5,27 @@ import { BalancePerTokenId } from "../../libs/client/types";
 
 const makeBlock = async () => {
   // TODO: For now, i am assuming this works only on localhost with optimist workers, not on testnet
-  await axios.post(`${config.optimistApiTxUrl}/block/make-now`);
+  await axios.post(`${config.optimistApiBawUrl}/block/make-now`);
+};
+
+const getBalance = async (user: any, tokenContractAddress: string) => {
+  const balancesUser: Record<string, BalancePerTokenId> =
+    await user.checkNightfallBalances({
+      tokenContractAddresses: [tokenContractAddress],
+    });
+  if (Object.keys(balancesUser).length === 0) {
+    return 0;
+  }
+  return (Object.values(balancesUser)[0] as unknown as BalancePerTokenId[])[0]
+    .balance;
 };
 
 // Script
 const main = async () => {
   let user1;
   let user2;
+
+  const tokenContractAddress = config.tokenContractAddress ?? "";
 
   try {
     // # 1 Create an instance of User
@@ -32,65 +46,57 @@ const main = async () => {
       ethereumPrivateKey: config.ethereumPrivateKey,
     });
 
-    let txHashL1;
+    const balancesUser1Before = await getBalance(user1, tokenContractAddress);
+    const balancesUser2Before = await getBalance(user2, tokenContractAddress);
+
     let txHashL2;
 
     // # 2 Make deposit
     for (let i = 0; i < 8; i += 1) {
-      ({ txHashL1, txHashL2 } = await user1.makeDeposit({
-        tokenContractAddress: config.tokenContractAddress,
+      ({ txHashL2 } = await user1.makeDeposit({
+        tokenContractAddress,
         value: config.value,
         tokenId: config.tokenId,
         feeWei: config.feeWei,
       }));
-      console.log(">>>>> Transaction hash L1", txHashL1);
       console.log(">>>>> Transaction hash L2", txHashL2);
     }
 
-    ({ txHashL1, txHashL2 } = await user2.makeDeposit({
+    ({ txHashL2 } = await user2.makeDeposit({
       tokenContractAddress: config.tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       feeWei: config.feeWei,
     }));
-    console.log(">>>>> Transaction hash L1", txHashL1);
     console.log(">>>>> Transaction hash L2", txHashL2);
 
     console.log(">>>>> Making block manually..");
     await makeBlock();
 
-    // # 7 [EXTRA] Check that L1 tx was mined before closing the websocket in `finally` clause
-    let isTxL1Mined = await user2.web3Websocket.web3.eth.getTransactionReceipt(
-      txHashL1,
-    );
-    while (isTxL1Mined === null) {
-      console.log(">>>>> Waiting for L1 transaction to be mined..");
+    let balancesUser1After = await getBalance(user1, tokenContractAddress);
+    let balancesUser2After = await getBalance(user2, tokenContractAddress);
+
+    while (
+      balancesUser1After <
+        balancesUser1Before + 8 * Number(config.value) * 10 ** 9 &&
+      balancesUser2After < balancesUser2Before + Number(config.value) * 10 ** 9
+    ) {
       await new Promise((resolve) => setTimeout(resolve, 5000));
-      isTxL1Mined = await user2.web3Websocket.web3.eth.getTransactionReceipt(
-        txHashL1,
+
+      balancesUser1After = await getBalance(user1, tokenContractAddress);
+      balancesUser2After = await getBalance(user2, tokenContractAddress);
+
+      console.log(
+        ">>>>> Balance user1",
+        balancesUser1After,
+        balancesUser1Before + 8 * Number(config.value) * 10 ** 9,
+      );
+      console.log(
+        ">>>>> Balance user2",
+        balancesUser2After,
+        balancesUser2Before + Number(config.value) * 10 ** 9,
       );
     }
-
-    const balancesUser1: Record<string, BalancePerTokenId> =
-      await user1.checkNightfallBalances({
-        tokenContractAddresses: [config.tokenContractAddress],
-      });
-
-    const balancesUser2: Record<string, BalancePerTokenId> =
-      await user2.checkNightfallBalances({
-        tokenContractAddresses: [config.tokenContractAddress],
-      });
-
-    console.log(
-      ">>>>> Balances user1",
-      (Object.values(balancesUser1)[0] as unknown as BalancePerTokenId[])[0]
-        .balance,
-    );
-    console.log(
-      ">>>>> Balances user2",
-      (Object.values(balancesUser2)[0] as unknown as BalancePerTokenId[])[0]
-        .balance,
-    );
   } catch (error) {
     console.log(error);
     process.exit(1);

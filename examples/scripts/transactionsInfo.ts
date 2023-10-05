@@ -4,7 +4,7 @@ import { config } from "./appConfig";
 
 const makeBlock = async () => {
   // TODO: For now, i am assuming this works only on localhost with optimist workers, not on testnet
-  await axios.post(`${config.optimistApiTxUrl}/block/make-now`);
+  await axios.post(`${config.optimistApiBawUrl}/block/make-now`);
 };
 
 // Script
@@ -53,7 +53,7 @@ const main = async () => {
       isTxL1Mined = await user.web3Websocket.web3.eth.getTransactionReceipt(
         txHashL1,
       );
-    }    
+    }
 
     // # 2 Make transfer
     // For this example, we generate a L2 address to receive the transfer
@@ -78,21 +78,20 @@ const main = async () => {
     // TODO
 
     // # 4 [OPTIONAL] You can check transfers that are not yet in a block
-    const pendingTransfers =
-      await user.checkPendingTransfersAndWithdrawals();
+    const pendingTransfers = await user.checkPendingTransfersAndWithdrawals();
     console.log(">>>>> Pending balances", pendingTransfers);
 
     // # 5 [EXTRA] Check that L1 tx was mined before closing the websocket in `finally` clause
     if (!isOffChain) {
-      let isTxL1Mined =
-        await user.web3Websocket.web3.eth.getTransactionReceipt(txHashL1);
+      let isTxL1Mined = await user.web3Websocket.web3.eth.getTransactionReceipt(
+        txHashL1,
+      );
       while (isTxL1Mined === null) {
         console.log(">>>>> Waiting for L1 transaction to be mined..");
         await new Promise((resolve) => setTimeout(resolve, 5000));
-        isTxL1Mined =
-          await user.web3Websocket.web3.eth.getTransactionReceipt(
-            txHashL1,
-          );
+        isTxL1Mined = await user.web3Websocket.web3.eth.getTransactionReceipt(
+          txHashL1,
+        );
       }
     } else {
       // # 5 [EXTRA] Wait for a block to be mined
@@ -109,7 +108,7 @@ const main = async () => {
           transactionHashes: [txHashL2],
         });
       }
-      console.log(">>>>> transactions info", transactionsInfo);       
+      console.log(">>>>> transactions info", transactionsInfo);
     }
   } catch (error) {
     console.log(error);

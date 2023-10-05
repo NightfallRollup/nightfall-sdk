@@ -2,7 +2,8 @@ export const config = {
   clientApiUrl: process.env.APP_CLIENT_API_URL || "http://localhost:8080",
   clientApiBpUrl: process.env.APP_CLIENT_API_BP_URL || "http://localhost:3020",
   clientApiTxUrl: process.env.APP_CLIENT_API_TX_URL || "http://localhost:3010",
-  optimistApiTxUrl: process.env.APP_OPTIMIST_API_TX_URL || "http://localhost:3030",
+  optimistApiBawUrl:
+    process.env.APP_OPTIMIST_API_BAW_URL || "http://localhost:3030",
   nightfallMnemonic: process.env.APP_NIGHTFALL_MNEMONIC,
   ethereumPrivateKey: process.env.APP_ETH_PRIVATE_KEY,
   blockchainWsUrl: process.env.APP_BLOCKCHAIN_WEBSOCKET_URL,
