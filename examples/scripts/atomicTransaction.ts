@@ -102,8 +102,10 @@ const main = async () => {
     }
 
     const blockNumber = await user1.web3Websocket.web3.eth.getBlockNumber();
-    const timestamp = (await user1.web3Websocket.web3.eth.getBlock(blockNumber))
-      .timestamp;
+    const timestamp =
+      Number(
+        (await user1.web3Websocket.web3.eth.getBlock(blockNumber)).timestamp,
+      ) + 3600;
 
     let salt = await randomSalt();
     let salt2 = await randomSalt();
@@ -182,7 +184,12 @@ const main = async () => {
       commitment: commitment.hash._hex,
       commitment2: commitment2.hash._hex,
       commitment3: commitment3.hash._hex,
+      commitmentBigInt: BigInt(commitment.hash._hex),
+      commitment2BigInt: BigInt(commitment2.hash._hex),
+      commitment3BigInt: BigInt(commitment3.hash._hex),
+      timestampBigInt: BigInt(timestamp),
       atomicHash,
+      timestamp,
     });
 
     console.log(
