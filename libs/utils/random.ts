@@ -1,10 +1,8 @@
 import gen from "general-number";
 import crypto from "crypto";
+import { BN128_GROUP_ORDER } from "../commitment/constants";
 
 const { GN, generalise } = gen;
-
-const BN128_GROUP_ORDER =
-  "21888242871839275222246405745257275088548364400416034343698204186575808495617";
 
 /**
  * Simple routine to create a cryptographically sound random
@@ -24,13 +22,13 @@ async function rand(bytes: number): Promise<bigint> {
  *
  * @async
  * @function randValueLT
- * @param {string} maxValue Maximum possible value
+ * @param {bigint} maxValue Maximum possible value
  * @returns {Promise<string>}
  */
-async function randValueLT(maxValue: string): Promise<string> {
+async function randValueLT(maxValue: bigint): Promise<string> {
   let genVal = BigInt(0);
   const zero = BigInt(0);
-  const bigIntValue = BigInt(maxValue);
+  const bigIntValue = maxValue;
   const MAX_ATTEMPTS = 10000;
   const minimumBytes = Math.ceil(new GN(bigIntValue).binary.length / 8);
   let counter = 0;
@@ -58,14 +56,12 @@ async function randValueLT(maxValue: string): Promise<string> {
 export async function randomL2TokenAddress(): Promise<string> {
   // random address is less than 1 << 160
   const randomAddress = await randValueLT(
-    "1461501637330902918203684832716283019655932542976",
+    1461501637330902918203684832716283019655932542976n,
   );
   // set bits 253 and 252 to 1
   return generalise(
     BigInt(randomAddress) +
-      BigInt(
-        "21711016731996786641919559689128982722488122124807605757398297001483711807488",
-      ),
+      21711016731996786641919559689128982722488122124807605757398297001483711807488n,
   ).hex(32);
 }
 
