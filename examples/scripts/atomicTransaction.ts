@@ -115,7 +115,7 @@ const main = async () => {
       zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
       ercAddress: BigInt(config.tokenContractAddress ?? 0),
       tokenId: BigInt(config.tokenId ?? 0),
-      value: BigInt(config.value ?? 0),
+      value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
       salt: BigInt(salt),
     });
 
@@ -123,7 +123,7 @@ const main = async () => {
       zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
       ercAddress: BigInt(config.tokenContractAddress ?? 0),
       tokenId: BigInt(config.tokenId ?? 0),
-      value: BigInt(config.value ?? 0),
+      value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
       salt: BigInt(salt2),
     });
 
@@ -131,7 +131,7 @@ const main = async () => {
       zkpPublicKey: user1.zkpKeys.zkpPublicKey.map((x) => x),
       ercAddress: BigInt(config.tokenContractAddress ?? 0),
       tokenId: BigInt(config.tokenId ?? 0),
-      value: BigInt(config.value ?? 0),
+      value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
       salt: BigInt(salt3),
     });
 
@@ -152,7 +152,7 @@ const main = async () => {
         zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
         ercAddress: BigInt(config.tokenContractAddress ?? 0),
         tokenId: BigInt(config.tokenId ?? 0),
-        value: BigInt(config.value ?? 0),
+        value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
         salt: BigInt(salt),
       });
 
@@ -160,7 +160,7 @@ const main = async () => {
         zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
         ercAddress: BigInt(config.tokenContractAddress ?? 0),
         tokenId: BigInt(config.tokenId ?? 0),
-        value: BigInt(config.value ?? 0),
+        value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
         salt: BigInt(salt2),
       });
 
@@ -168,7 +168,7 @@ const main = async () => {
         zkpPublicKey: user1.zkpKeys.zkpPublicKey.map((x) => x),
         ercAddress: BigInt(config.tokenContractAddress ?? 0),
         tokenId: BigInt(config.tokenId ?? 0),
-        value: BigInt(config.value ?? 0),
+        value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
         salt: BigInt(salt3),
       });
 
@@ -196,7 +196,7 @@ const main = async () => {
       `Adding first transaction of the atomic transaction ${atomicHash}...`,
     );
 
-    const isOffChain = true;
+    const isOffChain = false;
 
     // Send the first atomic transaction
     ({ txHashL2 } = await user1.makeTransfer({
