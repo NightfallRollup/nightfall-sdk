@@ -1,5 +1,5 @@
 import axios from "axios";
-import { UserFactory, randomSalt } from "../../libs";
+import { UserFactory, randomSalt, getContractAddress } from "../../libs";
 import { config } from "./appConfig";
 import { BalancePerTokenId } from "../../libs/client/types";
 import { Commitment } from "../../libs";
@@ -28,7 +28,11 @@ const main = async () => {
   let user1;
   let user2;
 
-  const tokenContractAddress = config.tokenContractAddress ?? "";
+  const ERC20Mock = "ERC20Mock";
+  const tokenContractAddress = await getContractAddress(
+    config.clientApiUrl,
+    ERC20Mock,
+  );
 
   try {
     // # 1 Create an instance of User
@@ -196,7 +200,7 @@ const main = async () => {
       `Adding first transaction of the atomic transaction ${atomicHash}...`,
     );
 
-    const isOffChain = false;
+    const isOffChain = true;
 
     // Send the first atomic transaction
     ({ txHashL2 } = await user1.makeTransfer({
