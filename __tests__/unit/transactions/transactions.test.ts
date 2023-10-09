@@ -214,6 +214,9 @@ describe("Transactions", () => {
         [],
         [],
         undefined,
+        undefined,
+        undefined,
+        undefined,
       );
       expect(createSignedTransaction).not.toHaveBeenCalled();
       expect(txReceipts).toStrictEqual({ txReceiptL2 });
@@ -254,8 +257,59 @@ describe("Transactions", () => {
         [],
         [],
         regulatorUrl,
+        undefined,
+        undefined,
+        undefined,
       );
     });
+
+    test("Call transfer with atomic transaction", async () => {
+      // Arrange
+      isOffChain = true;
+
+      const atomicHash = '0x0123456000000000000000000000000000000000000000000000000000000111';
+      const atomicTimestamp = 1;
+
+      const salt = '0x251543af6a222378665a76fe38dbceae4871a070b7fdaf5c6c30cf758dc33cc0';
+
+      // Act
+      await createTransferTx(
+        token,
+        ownerEthAddress,
+        ownerEthPrivateKey,
+        ownerZkpKeys as unknown as NightfallZkpKeys,
+        shieldContractAddress,
+        web3 as unknown as Web3,
+        mockedClient as unknown as Client,
+        value,
+        tokenId,
+        fee,
+        recipientNightfallAddress,
+        isOffChain,
+        [],
+        [],
+        undefined,
+        atomicHash,
+        atomicTimestamp,
+        salt,
+      );
+
+      // Assert
+      expect(mockedClient.transfer).toHaveBeenCalledWith(
+        token,
+        ownerZkpKeys,
+        recipientNightfallData,
+        tokenId,
+        fee,
+        isOffChain,
+        [],
+        [],
+        undefined,
+        atomicHash,
+        atomicTimestamp,
+        salt,
+      );
+    });    
   });
 
   describe("Withdrawal", () => {

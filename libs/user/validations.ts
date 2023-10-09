@@ -22,7 +22,7 @@ const isValidL2TokenAddress = (
 };
 
 const isValidSalt = (salt: string | undefined, helpers: CustomHelpers) => {
-  const isValid = 
+  const isValid =
     BigInt(salt ?? "0") <
     BigInt(
       "21888242871839275222246405745257275088548364400416034343698204186575808495617",
@@ -72,7 +72,7 @@ const makeTransaction = Joi.object({
   value: Joi.string(),
   tokenId: Joi.string(),
   feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),
-  providedCommitmentsFee: Joi.array().items(Joi.string()), 
+  providedCommitmentsFee: Joi.array().items(Joi.string()),
 }).or("value", "tokenId"); // these cannot have default
 
 const l2TokenisationTransaction = Joi.object({
@@ -93,12 +93,17 @@ export const mintL2Token = l2TokenisationTransaction.append({
   salt: Joi.string().trim().custom(isValidSalt, "custom validation"),
 });
 
-export const makeTransferOptions = makeTransaction.append({
-  providedCommitments: Joi.array().items(Joi.string()), 
-  regulatorUrl: Joi.string().trim(),
-  recipientNightfallAddress: Joi.string().trim().required(),
-  isOffChain: Joi.boolean().default(false),
-});
+export const makeTransferOptions = makeTransaction
+  .append({
+    recipientNightfallAddress: Joi.string().trim().required(),
+    isOffChain: Joi.boolean().default(false),
+    providedCommitments: Joi.array().items(Joi.string()),
+    regulatorUrl: Joi.string().trim(),
+    atomicHash: Joi.string().trim(),
+    atomicTimestamp: Joi.number(),
+    salt: Joi.string().trim(),
+  })
+  .with("atomicHash", ["atomicTimestamp"]);
 
 export const burnL2Token = makeTransaction.append({
   providedCommitments: Joi.array().items(Joi.string()),

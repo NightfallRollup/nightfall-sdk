@@ -5,8 +5,8 @@ import type { MetaMaskEthereumProvider } from "../ethereum/types";
 
 export interface UserFactoryCreate {
   clientApiUrl: string;
-  clientApiTxUrl?: string;   // optional client Transaction Handler Worker
-  clientApiBpUrl?: string;   // optional client Block Proposed Worker
+  clientApiTxUrl?: string; // optional client Transaction Handler Worker
+  clientApiBpUrl?: string; // optional client Block Proposed Worker
   blockchainWsUrl?: string;
   ethereumPrivateKey?: string;
   nightfallMnemonic?: string;
@@ -51,6 +51,9 @@ export interface UserMakeTransfer extends UserMakeTransaction {
   isOffChain?: boolean;
   providedCommitments?: string[] | [];
   regulatorUrl?: string;
+  atomicHash?: string;
+  atomicTimestamp?: number;
+  salt?: string;
 }
 
 export interface UserBurnL2Token extends UserL2TokenisationTransaction {

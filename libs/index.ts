@@ -6,6 +6,7 @@ import {
   randomL2TokenAddress,
   randomSalt,
 } from "./utils";
+import { Commitment } from "./commitment";
 
 export {
   UserFactory,
@@ -14,4 +15,5 @@ export {
   NightfallSdkError,
   randomL2TokenAddress,
   randomSalt,
+  Commitment,
 };
