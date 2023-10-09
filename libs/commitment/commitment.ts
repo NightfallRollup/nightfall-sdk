@@ -20,11 +20,11 @@ export class Commitment {
     zkpPublicKey,
     salt,
   }: {
-    ercAddress: any;
-    tokenId: any;
-    value: any;
-    zkpPublicKey: any;
-    salt: any;
+    ercAddress: bigint;
+    tokenId: bigint;
+    value: bigint;
+    zkpPublicKey: bigint[];
+    salt: bigint;
   }) {
     const items = { ercAddress, tokenId, value, zkpPublicKey, salt };
 

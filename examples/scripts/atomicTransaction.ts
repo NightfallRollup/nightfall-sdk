@@ -70,7 +70,7 @@ const main = async () => {
     }
 
     ({ txHashL2 } = await user2.makeDeposit({
-      tokenContractAddress: config.tokenContractAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       feeWei: config.feeWei,
@@ -80,13 +80,17 @@ const main = async () => {
     console.log(">>>>> Making block manually..");
     await makeBlock(10000);
 
+    let nRetries = 20;
+
     let balancesUser1After = await getBalance(user1, tokenContractAddress);
     let balancesUser2After = await getBalance(user2, tokenContractAddress);
 
     while (
       balancesUser1After <
         balancesUser1Before + 8 * Number(config.value) * 10 ** 9 &&
-      balancesUser2After < balancesUser2Before + Number(config.value) * 10 ** 9
+      balancesUser2After <
+        balancesUser2Before + Number(config.value) * 10 ** 9 &&
+      nRetries > 0
     ) {
       await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -103,6 +107,7 @@ const main = async () => {
         balancesUser2After,
         balancesUser2Before + Number(config.value) * 10 ** 9,
       );
+      nRetries--;
     }
 
     const blockNumber = await user1.web3Websocket.web3.eth.getBlockNumber();
@@ -116,24 +121,24 @@ const main = async () => {
     let salt3 = await randomSalt();
 
     let commitment = new Commitment({
-      zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
-      ercAddress: BigInt(config.tokenContractAddress ?? 0),
+      zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => BigInt(x)),
+      ercAddress: BigInt(tokenContractAddress ?? 0),
       tokenId: BigInt(config.tokenId ?? 0),
       value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
       salt: BigInt(salt),
     });
 
     let commitment2 = new Commitment({
-      zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
-      ercAddress: BigInt(config.tokenContractAddress ?? 0),
+      zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => BigInt(x)),
+      ercAddress: BigInt(tokenContractAddress ?? 0),
       tokenId: BigInt(config.tokenId ?? 0),
       value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
       salt: BigInt(salt2),
     });
 
     let commitment3 = new Commitment({
-      zkpPublicKey: user1.zkpKeys.zkpPublicKey.map((x) => x),
-      ercAddress: BigInt(config.tokenContractAddress ?? 0),
+      zkpPublicKey: user1.zkpKeys.zkpPublicKey.map((x) => BigInt(x)),
+      ercAddress: BigInt(tokenContractAddress ?? 0),
       tokenId: BigInt(config.tokenId ?? 0),
       value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
       salt: BigInt(salt3),
@@ -153,24 +158,24 @@ const main = async () => {
       salt3 = await randomSalt();
 
       commitment = new Commitment({
-        zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
-        ercAddress: BigInt(config.tokenContractAddress ?? 0),
+        zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => BigInt(x)),
+        ercAddress: BigInt(tokenContractAddress ?? 0),
         tokenId: BigInt(config.tokenId ?? 0),
         value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
         salt: BigInt(salt),
       });
 
       commitment2 = new Commitment({
-        zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => x),
-        ercAddress: BigInt(config.tokenContractAddress ?? 0),
+        zkpPublicKey: user2.zkpKeys.zkpPublicKey.map((x) => BigInt(x)),
+        ercAddress: BigInt(tokenContractAddress ?? 0),
         tokenId: BigInt(config.tokenId ?? 0),
         value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
         salt: BigInt(salt2),
       });
 
       commitment3 = new Commitment({
-        zkpPublicKey: user1.zkpKeys.zkpPublicKey.map((x) => x),
-        ercAddress: BigInt(config.tokenContractAddress ?? 0),
+        zkpPublicKey: user1.zkpKeys.zkpPublicKey.map((x) => BigInt(x)),
+        ercAddress: BigInt(tokenContractAddress ?? 0),
         tokenId: BigInt(config.tokenId ?? 0),
         value: BigInt(config.value ?? 0) * BigInt(10 ** 9),
         salt: BigInt(salt3),
@@ -188,10 +193,6 @@ const main = async () => {
       commitment: commitment.hash._hex,
       commitment2: commitment2.hash._hex,
       commitment3: commitment3.hash._hex,
-      commitmentBigInt: BigInt(commitment.hash._hex),
-      commitment2BigInt: BigInt(commitment2.hash._hex),
-      commitment3BigInt: BigInt(commitment3.hash._hex),
-      timestampBigInt: BigInt(timestamp),
       atomicHash,
       timestamp,
     });
@@ -204,7 +205,7 @@ const main = async () => {
 
     // Send the first atomic transaction
     ({ txHashL2 } = await user1.makeTransfer({
-      tokenContractAddress: config.tokenContractAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       recipientNightfallAddress: user2.zkpKeys.compressedZkpPublicKey,
@@ -218,7 +219,7 @@ const main = async () => {
 
     // Send another transaction to build a block because atomic transaction is not still completed to be included in a block
     ({ txHashL2 } = await user1.makeTransfer({
-      tokenContractAddress: config.tokenContractAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       recipientNightfallAddress: user1.zkpKeys.compressedZkpPublicKey,
@@ -233,7 +234,7 @@ const main = async () => {
     );
     // Send the second atomic transaction
     ({ txHashL2 } = await user1.makeTransfer({
-      tokenContractAddress: config.tokenContractAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       recipientNightfallAddress: user2.zkpKeys.compressedZkpPublicKey,
@@ -247,7 +248,7 @@ const main = async () => {
 
     // Send another transaction to build a block because atomic transaction is not still completed to be included in a block
     ({ txHashL2 } = await user1.makeTransfer({
-      tokenContractAddress: config.tokenContractAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       recipientNightfallAddress: user1.zkpKeys.compressedZkpPublicKey,
@@ -264,7 +265,7 @@ const main = async () => {
     // Send the third atomic transaction
     // Send the second atomic transaction
     ({ txHashL2 } = await user2.makeTransfer({
-      tokenContractAddress: config.tokenContractAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       recipientNightfallAddress: user1.zkpKeys.compressedZkpPublicKey,
@@ -278,7 +279,7 @@ const main = async () => {
 
     // Send another transaction to build a block because atomic transaction is not still completed to be included in a block
     ({ txHashL2 } = await user1.makeTransfer({
-      tokenContractAddress: config.tokenContractAddress,
+      tokenContractAddress,
       value: config.value,
       tokenId: config.tokenId,
       recipientNightfallAddress: user1.zkpKeys.compressedZkpPublicKey,
