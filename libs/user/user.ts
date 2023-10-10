@@ -520,7 +520,7 @@ class User {
     const { token, valueWei } = result;
     tokenId = result.tokenId;
 
-    // Transfer
+    // transformTransfer
     const { signedTxL1, txReceiptL2 } = await createTransformTransferTx(
       token,
       this.ethAddress,
