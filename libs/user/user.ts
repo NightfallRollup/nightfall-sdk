@@ -6,6 +6,7 @@ import {
   makeDepositOptions,
   mintL2Token,
   makeTransferOptions,
+  makeTransformTransferOptions,
   burnL2Token,
   makeWithdrawalOptions,
   finaliseWithdrawalOptions,
@@ -29,6 +30,7 @@ import {
   createDepositTx,
   createTokeniseTx,
   createTransferTx,
+  createTransformTransferTx,
   createBurnTx,
   createWithdrawalTx,
   createFinaliseWithdrawalTx,
@@ -42,6 +44,7 @@ import type {
   UserMakeDeposit,
   UserMintL2Token,
   UserMakeTransfer,
+  UserMakeTransformTransfer,
   UserBurnL2Token,
   UserMakeWithdrawal,
   UserFinaliseWithdrawal,
@@ -449,6 +452,105 @@ class User {
 
     // Submit L1 transaction
     logger.info({ signedTxL1, txReceiptL2 }, "Transfer created");
+    enqueueSendingSignedTxs(this.txsQueue, signedTxL1, this.web3Websocket.web3);
+
+    return {
+      txHashL1: signedTxL1.transactionHash,
+      txHashL2: txReceiptL2.transactionHash,
+    };
+  }
+
+  /**
+   * execute transformTransfer within Layer 2
+   *
+   * @async
+   * @method makeTransformTransfer
+   * @param {UserMakeTransformTransfer} options
+   * @param {string} options.tokenContractAddress
+   * @param {string} [options.value]
+   * @param {string} [options.tokenId]
+   * @param {string} [options.feeWei]
+   * @param {string} options.recipientNightfallAddress
+   * @param {Boolean} [options.isOffChain]
+   * @param {string[] | []} [options.providedCommitments] Commitments to be used for transfer
+   * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
+   * @param {string} [options.regulatorUrl] regulatorUrl
+   * @param {string} [options.atomicHash] Hash of the atomic transaction
+   * @param {string} [options.atomicTimestamp] Expiration timestamp of the atomic transaction
+   * @param {string} [options.salt] salt for the commitment to generate
+   * @param {string[]} [options.inputTokens] Tokens to be used as input for the transformTransfer
+   * @param {string[]} [options.outputTokens] Tokens to be used as output for the transformTransfer
+   * @returns {Promise<NightfallSDKTransactionReceipt>}
+   */
+  async makeTransformTransfer(
+    options: UserMakeTransformTransfer,
+  ): Promise<NightfallSDKTransactionReceipt> {
+    logger.debug(options, "User :: makeTransformTransfer");
+
+    // Validate and format options
+    const { error, value: joiValue } = makeTransformTransferOptions.validate(options);
+    isInputValid(error);
+    logger.debug({ joiValue }, "makeTransformTransfer formatted parameters");
+
+    const {
+      tokenContractAddress,
+      value,
+      feeWei,
+      recipientNightfallAddress,
+      isOffChain,
+      providedCommitments = [],
+      providedCommitmentsFee = [],
+      regulatorUrl,
+      atomicHash,
+      atomicTimestamp,
+      salt,
+      inputTokens,
+      outputTokens
+    } = joiValue;
+    let { tokenId } = joiValue;
+
+    // Determine ERC standard, set value/tokenId defaults,
+    // create an instance of Token, convert value to Wei if needed
+    const result = await prepareTokenValueTokenId(
+      tokenContractAddress,
+      value,
+      tokenId,
+      this.web3Websocket.web3,
+    );
+    const { token, valueWei } = result;
+    tokenId = result.tokenId;
+
+    // Transfer
+    const { signedTxL1, txReceiptL2 } = await createTransformTransferTx(
+      token,
+      this.ethAddress,
+      this.ethPrivateKey,
+      this.zkpKeys,
+      this.shieldContractAddress,
+      this.web3Websocket.web3,
+      this.client,
+      valueWei,
+      tokenId,
+      feeWei,
+      recipientNightfallAddress,
+      isOffChain,
+      inputTokens,
+      outputTokens,
+      providedCommitments,
+      providedCommitmentsFee,
+      regulatorUrl,
+      atomicHash,
+      atomicTimestamp,
+      salt,
+    );
+
+    if (isOffChain) {
+      logger.info({ signedTxL1, txReceiptL2 }, "transformTransfer completed!");
+      return { txHashL2: txReceiptL2.transactionHash };
+    }
+
+    // Submit L1 transaction
+    logger.info({ signedTxL1, txReceiptL2 }, "transformTransfer created");
     enqueueSendingSignedTxs(this.txsQueue, signedTxL1, this.web3Websocket.web3);
 
     return {
