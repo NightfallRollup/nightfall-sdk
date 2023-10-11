@@ -301,12 +301,9 @@ class Client {
    *
    * @async
    * @method transformTransfer
-   * @param {*} token An instance of Token holding token data such as contract address
    * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
-   * @param {RecipientNightfallData} recipientNightfallData An object with [valueWei], [recipientCompressedZkpPublicKey]
-   * @param {string} tokenId The tokenId of the token to be transferred
+   * @param {recipientCompressedZkpPublicKey} recipientCompressedZkpPublicKey compressedZkpPublicKey of the recipient
    * @param {string} fee Proposer payment in Wei for the tx in L2
-   * @param {boolean} isOffChain If true, tx will be sent to the proposer's API (handled off-chain)
    * @param {string[] | []} providedCommitments Commitments to be used for transformTransfer
    * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
    * @param {string} [regulatorUrl] regulatorUrl
@@ -317,12 +314,9 @@ class Client {
    * @returns {Promise<TransactionResponseData>}
    */
   async transformTransfer(
-    token: any,
     ownerZkpKeys: NightfallZkpKeys,
-    recipientNightfallData: RecipientNightfallData,
-    tokenId: string,
+    recipientCompressedZkpPublicKey: string,
     fee: string,
-    isOffChain: boolean,
     providedCommitments: string[] | [],
     providedCommitmentsFee: string[] | [],
     inputTokens: string[] | [],
@@ -337,20 +331,17 @@ class Client {
     logger.debug({ endpoint }, "Calling client at");
 
     const res = await axios.post(`${apiUrl}/${endpoint}`, {
-      ercAddress: token.contractAddress,
       rootKey: ownerZkpKeys.rootKey,
-      recipientData: recipientNightfallData,
-      tokenId,
+      inputTokens,
+      outputTokens,
+      recipientCompressedZkpPublicKey,
       fee,
-      offchain: isOffChain,
+      salt,
       providedCommitments,
       providedCommitmentsFee,
       regulatorUrl,
       atomicHash,
       atomicTimestamp,
-      salt,
-      inputTokens,
-      outputTokens,
     });
     logger.info(
       { status: res.status, data: res.data },

@@ -466,12 +466,8 @@ class User {
    * @async
    * @method makeTransformTransfer
    * @param {UserMakeTransformTransfer} options
-   * @param {string} options.tokenContractAddress
-   * @param {string} [options.value]
-   * @param {string} [options.tokenId]
    * @param {string} [options.feeWei]
    * @param {string} options.recipientNightfallAddress
-   * @param {Boolean} [options.isOffChain]
    * @param {string[] | []} [options.providedCommitments] Commitments to be used for transfer
    * @param {string[] | []} [options.providedCommitmentsFee] Commitments to be used to pay fee
    * @param {string} [options.regulatorUrl] regulatorUrl
@@ -493,11 +489,8 @@ class User {
     logger.debug({ joiValue }, "makeTransformTransfer formatted parameters");
 
     const {
-      tokenContractAddress,
-      value,
       feeWei,
       recipientNightfallAddress,
-      isOffChain,
       providedCommitments = [],
       providedCommitmentsFee = [],
       regulatorUrl,
@@ -507,33 +500,17 @@ class User {
       inputTokens,
       outputTokens
     } = joiValue;
-    let { tokenId } = joiValue;
-
-    // Determine ERC standard, set value/tokenId defaults,
-    // create an instance of Token, convert value to Wei if needed
-    const result = await prepareTokenValueTokenId(
-      tokenContractAddress,
-      value,
-      tokenId,
-      this.web3Websocket.web3,
-    );
-    const { token, valueWei } = result;
-    tokenId = result.tokenId;
 
     // transformTransfer
     const { signedTxL1, txReceiptL2 } = await createTransformTransferTx(
-      token,
       this.ethAddress,
       this.ethPrivateKey,
       this.zkpKeys,
       this.shieldContractAddress,
       this.web3Websocket.web3,
       this.client,
-      valueWei,
-      tokenId,
       feeWei,
       recipientNightfallAddress,
-      isOffChain,
       inputTokens,
       outputTokens,
       providedCommitments,
@@ -543,11 +520,6 @@ class User {
       atomicTimestamp,
       salt,
     );
-
-    if (isOffChain) {
-      logger.info({ signedTxL1, txReceiptL2 }, "transformTransfer completed!");
-      return { txHashL2: txReceiptL2.transactionHash };
-    }
 
     // Submit L1 transaction
     logger.info({ signedTxL1, txReceiptL2 }, "transformTransfer created");
