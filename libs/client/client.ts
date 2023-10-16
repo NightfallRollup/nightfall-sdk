@@ -297,6 +297,61 @@ class Client {
   }
 
   /**
+   * Make POST request to create a transformTransfer transaction (tx)
+   *
+   * @async
+   * @method transformTransfer
+   * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of zero-knowledge proof keys
+   * @param {recipientCompressedZkpPublicKey} recipientCompressedZkpPublicKey compressedZkpPublicKey of the recipient
+   * @param {string} fee Proposer payment in Wei for the tx in L2
+   * @param {string[] | []} providedCommitments Commitments to be used for transformTransfer
+   * @param {string[] | []} providedCommitmentsFee Commitments to be used to pay fee
+   * @param {string} [regulatorUrl] regulatorUrl
+   * @param {string} [atomicHash] Hash of the atomic transaction
+   * @param {string} [atomicTimestamp] Expiration timestamp of the atomic transaction
+   * @param {string} [salt] salt for the commitment to generate
+   * @throws {NightfallSdkError} No commitments found or bad response
+   * @returns {Promise<TransactionResponseData>}
+   */
+  async transformTransfer(
+    ownerZkpKeys: NightfallZkpKeys,
+    recipientCompressedZkpPublicKey: string,
+    fee: string,
+    providedCommitments: string[] | [],
+    providedCommitmentsFee: string[] | [],
+    inputTokens: string[] | [],
+    outputTokens: string[] | [],
+    regulatorUrl?: string,
+    atomicHash?: string,
+    atomicTimestamp?: number,
+    salt?: string,
+  ): Promise<TransactionResponseData> {
+    const endpoint = "transformTransfer";
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
+    logger.debug({ endpoint }, "Calling client at");
+
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
+      rootKey: ownerZkpKeys.rootKey,
+      inputTokens,
+      outputTokens,
+      recipientCompressedZkpPublicKey,
+      fee,
+      salt,
+      providedCommitments,
+      providedCommitmentsFee,
+      regulatorUrl,
+      atomicHash,
+      atomicTimestamp,
+    });
+    logger.info(
+      { status: res.status, data: res.data },
+      `Client at ${endpoint} responded`,
+    );
+
+    return res.data;
+  }
+
+  /**
    * Make POST request to create a L2 burn transaction (tx)
    *
    * @async

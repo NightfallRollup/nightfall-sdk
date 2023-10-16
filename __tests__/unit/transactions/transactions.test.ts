@@ -2,6 +2,7 @@
 import {
   createDepositTx,
   createTransferTx,
+  createTransformTransferTx,
   createWithdrawalTx,
   createFinaliseWithdrawalTx,
 } from "../../../libs/transactions";
@@ -9,11 +10,13 @@ import { createSignedTransaction } from "../../../libs/transactions/helpers/crea
 import { NightfallSdkError } from "../../../libs/utils/error";
 import { depositReceipts } from "../../../__mocks__/mockTxDepositReceipts";
 import { transferReceipts } from "../../../__mocks__/mockTxTransferReceipts";
+import { transformTransferReceipts } from "../../../__mocks__/mockTxTransformTransferReceipts";
 import { withdrawalReceipts } from "../../../__mocks__/mockTxWithdrawalReceipts";
 import { txReceipt } from "../../../__mocks__/mockTxWithdrawalFinaliseReceipt";
 import type { NightfallZkpKeys } from "../../../libs/nightfall/types";
 import type Web3 from "web3";
 import type { Client } from "../../../libs/client";
+import { randomL2TokenAddress, randomSalt } from "../../../libs";
 
 jest.mock("../../../libs/transactions/helpers/createSignedTx");
 
@@ -28,6 +31,7 @@ describe("Transactions", () => {
   const mockedClient = {
     deposit: jest.fn(),
     transfer: jest.fn(),
+    transformTransfer: jest.fn(),
     withdraw: jest.fn(),
     finaliseWithdrawal: jest.fn(),
   };
@@ -110,7 +114,7 @@ describe("Transactions", () => {
 
     test("Call deposit with salt", async () => {
       // Act
-      const salt = '0x12345678';
+      const salt = "0x12345678";
       const providedCommitmentsFee: [] = [];
       await createDepositTx(
         token,
@@ -175,7 +179,7 @@ describe("Transactions", () => {
             fee,
             recipientNightfallAddress,
             isOffChain,
-            []
+            [],
           ),
       ).rejects.toThrow(NightfallSdkError);
       expect(mockedClient.transfer).toHaveBeenCalledTimes(1);
@@ -225,7 +229,7 @@ describe("Transactions", () => {
     test("Call transfer with regulator Url", async () => {
       // Arrange
       isOffChain = true;
-      const regulatorUrl = 'http://regulator';
+      const regulatorUrl = "http://regulator";
 
       // Act
       await createTransferTx(
@@ -267,10 +271,12 @@ describe("Transactions", () => {
       // Arrange
       isOffChain = true;
 
-      const atomicHash = '0x0123456000000000000000000000000000000000000000000000000000000111';
+      const atomicHash =
+        "0x0123456000000000000000000000000000000000000000000000000000000111";
       const atomicTimestamp = 1;
 
-      const salt = '0x251543af6a222378665a76fe38dbceae4871a070b7fdaf5c6c30cf758dc33cc0';
+      const salt =
+        "0x251543af6a222378665a76fe38dbceae4871a070b7fdaf5c6c30cf758dc33cc0";
 
       // Act
       await createTransferTx(
@@ -309,7 +315,166 @@ describe("Transactions", () => {
         atomicTimestamp,
         salt,
       );
-    });    
+    });
+  });
+
+  describe("transformTransfer", () => {
+    const fee = "10";
+    const recipientNightfallAddress = "0x0recipientNightfallAddress";
+    const { txReceipt } = transformTransferReceipts;
+
+    test("Should fail if client throws a Nightfall error", () => {
+      // Arrange
+      mockedClient.transformTransfer.mockRejectedValue(
+        new NightfallSdkError("Oops, client failed at transformTransfer"),
+      );
+
+      // Act, Assert
+      expect(
+        async () =>
+          await createTransformTransferTx(
+            ownerEthAddress,
+            ownerEthPrivateKey,
+            ownerZkpKeys as unknown as NightfallZkpKeys,
+            shieldContractAddress,
+            web3 as unknown as Web3,
+            mockedClient as unknown as Client,
+            fee,
+            recipientNightfallAddress,
+            [],
+            [],
+            [],
+            [],
+          ),
+      ).rejects.toThrow(NightfallSdkError);
+      expect(mockedClient.transformTransfer).toHaveBeenCalledTimes(1);
+    });
+
+    test("Call transformTransfer with regulator Url", async () => {
+      const tokenContractAddress = await randomL2TokenAddress();
+      const salt = await randomSalt();
+      const inputTokens = [
+        JSON.stringify({
+          tokenContractAddress,
+          tokenId: 1,
+          value: 6,
+          salt,
+          feeWei: "0",
+        }),
+      ];
+      const outputTokens = [
+        JSON.stringify({
+          tokenContractAddress,
+          tokenId: 2,
+          value: "6",
+          salt,
+          feeWei: "0",
+        }),
+      ];
+      const mockedTransformTransferResData = { transaction: txReceipt };
+      mockedClient.transformTransfer.mockResolvedValue(
+        mockedTransformTransferResData,
+      );
+      // Arrange
+      const regulatorUrl = "http://regulator";
+
+      // Act
+      await createTransformTransferTx(
+        ownerEthAddress,
+        ownerEthPrivateKey,
+        ownerZkpKeys as unknown as NightfallZkpKeys,
+        shieldContractAddress,
+        web3 as unknown as Web3,
+        mockedClient as unknown as Client,
+        fee,
+        recipientNightfallAddress,
+        inputTokens,
+        outputTokens,
+        [],
+        [],
+        regulatorUrl,
+      );
+
+      // Assert
+      expect(mockedClient.transformTransfer).toHaveBeenCalledWith(
+        ownerZkpKeys,
+        recipientNightfallAddress,
+        fee,
+        [],
+        [],
+        inputTokens,
+        outputTokens,
+        regulatorUrl,
+        undefined,
+        undefined,
+        undefined,
+      );
+    });
+
+    test("Call transformTransfer with atomic transaction", async () => {
+      const atomicHash =
+        "0x0123456000000000000000000000000000000000000000000000000000000111";
+      const atomicTimestamp = 1;
+      const tokenContractAddress = await randomL2TokenAddress();
+      const salt = await randomSalt();
+      const inputTokens = [
+        JSON.stringify({
+          tokenContractAddress,
+          tokenId: 1,
+          value: 6,
+          salt,
+          feeWei: "0",
+        }),
+      ];
+      const outputTokens = [
+        JSON.stringify({
+          tokenContractAddress,
+          tokenId: 2,
+          value: "6",
+          salt,
+          feeWei: "0",
+        }),
+      ];
+      const mockedTransformTransferResData = { transaction: txReceipt };
+      mockedClient.transformTransfer.mockResolvedValue(
+        mockedTransformTransferResData,
+      );
+
+      // Act
+      await createTransformTransferTx(
+        ownerEthAddress,
+        ownerEthPrivateKey,
+        ownerZkpKeys as unknown as NightfallZkpKeys,
+        shieldContractAddress,
+        web3 as unknown as Web3,
+        mockedClient as unknown as Client,
+        fee,
+        recipientNightfallAddress,
+        inputTokens,
+        outputTokens,
+        [],
+        [],
+        undefined,
+        atomicHash,
+        atomicTimestamp,
+        salt,
+      );
+
+      // Assert
+      expect(mockedClient.transformTransfer).toHaveBeenCalledWith(
+        ownerZkpKeys,
+        recipientNightfallAddress,
+        fee,
+        [],
+        [],
+        inputTokens,
+        outputTokens,
+        undefined,
+        atomicHash,
+        atomicTimestamp,
+        salt,
+      );
+    });
   });
 
   describe("Withdrawal", () => {

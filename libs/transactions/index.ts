@@ -1,6 +1,7 @@
 import { createAndSubmitApproval } from "./approval";
 import { createDepositTx } from "./deposit";
 import { createTransferTx } from "./transfer";
+import { createTransformTransferTx } from "./transformTransfer";
 import { createWithdrawalTx } from "./withdrawal";
 import { createTokeniseTx } from "./l2Tokenise";
 import { createBurnTx } from "./l2Burn";
@@ -13,6 +14,7 @@ export {
   createAndSubmitApproval,
   createDepositTx,
   createTransferTx,
+  createTransformTransferTx,
   createWithdrawalTx,
   createTokeniseTx,
   createBurnTx,
