@@ -105,19 +105,18 @@ export const makeTransferOptions = makeTransaction
   })
   .with("atomicHash", ["atomicTimestamp"]);
 
-export const makeTransformTransferOptions = makeTransaction
-  .append({
-    recipientNightfallAddress: Joi.string().trim().required(),
-    isOffChain: Joi.boolean().default(false),
-    providedCommitments: Joi.array().items(Joi.string()),
-    regulatorUrl: Joi.string().trim(),
-    atomicHash: Joi.string().trim(),
-    atomicTimestamp: Joi.number(),
-    salt: Joi.string().trim(),
-    inputTokens: Joi.array().items(Joi.string()),
-    outputTokens: Joi.array().items(Joi.string()),
-  })
-  .with("atomicHash", ["atomicTimestamp"]);
+export const makeTransformTransferOptions = Joi.object({
+  tokenContractAddress: Joi.string().trim().required(),
+  feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),
+  recipientNightfallAddress: Joi.string().trim().required(),
+  providedCommitments: Joi.array().items(Joi.string()),
+  regulatorUrl: Joi.string().trim(),
+  atomicHash: Joi.string().trim(),
+  atomicTimestamp: Joi.number(),
+  salt: Joi.string().trim(),
+  inputTokens: Joi.array().items(Joi.string()),
+  outputTokens: Joi.array().items(Joi.string()),
+}).with("atomicHash", ["atomicTimestamp"]);
 
 export const burnL2Token = makeTransaction.append({
   providedCommitments: Joi.array().items(Joi.string()),
