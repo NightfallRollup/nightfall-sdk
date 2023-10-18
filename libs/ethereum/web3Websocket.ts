@@ -26,30 +26,12 @@ class Web3Websocket {
   web3: Web3;
   intervalIds: ReturnType<typeof setInterval>[] = [];
   blocknumber: number;
+  wsUrl: string;
 
   constructor(wsUrl?: string) {
     logger.debug({ wsUrl }, "new Web3Websocket listening at");
-
-    if (!wsUrl) {
-      logger.debug("Web3 ws provider to be <MetaMaskEthereumProvider>");
-      const { ethereum } = window as UserBrowser;
-      this.provider = ethereum;
-      this.web3 = new Web3(this.provider);
-      logger.info("Web3 ws provider is <MetaMaskEthereumProvider>");
-    } else {
-      logger.debug("Web3 ws provider to be <WebsocketProvider>");
-      this.provider = new Web3.providers.WebsocketProvider(
-        wsUrl,
-        WEB3_PROVIDER_OPTIONS,
-      );
-      this.web3 = new Web3(this.provider);
-      logger.info("Web3 ws provider is <WebsocketProvider>");
-    }
-
-    this.setEthConfig();
-    this.addWsEventListeners();
-    this.checkWsConnection();
-    this.refreshWsConnection();
+    this.wsUrl = wsUrl;
+    this.open();
   }
 
   setEthConfig() {
@@ -116,6 +98,33 @@ class Web3Websocket {
     this.clearIntervalIds();
     this.closeWsConnection();
     logger.info("Web3 connection closed");
+  }
+
+  open() {
+    if (this.web3) {
+      this.close();
+    }
+
+    if (!this.wsUrl) {
+      logger.debug("Web3 ws provider to be <MetaMaskEthereumProvider>");
+      const { ethereum } = window as UserBrowser;
+      this.provider = ethereum;
+      this.web3 = new Web3(this.provider);
+      logger.info("Web3 ws provider is <MetaMaskEthereumProvider>");
+    } else {
+      logger.debug("Web3 ws provider to be <WebsocketProvider>");
+      this.provider = new Web3.providers.WebsocketProvider(
+        this.wsUrl,
+        WEB3_PROVIDER_OPTIONS,
+      );
+      this.web3 = new Web3(this.provider);
+      logger.info("Web3 ws provider is <WebsocketProvider>");
+    }
+
+    this.setEthConfig();
+    this.addWsEventListeners();
+    this.checkWsConnection();
+    this.refreshWsConnection();
   }
 
   clearIntervalIds() {

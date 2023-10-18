@@ -6,7 +6,7 @@ import {
   randomL2TokenAddress,
   randomSalt,
 } from "./utils";
-import { Commitment } from "./commitment";
+import { Commitment, BN128_GROUP_ORDER } from "./commitment";
 
 export {
   UserFactory,
@@ -16,4 +16,5 @@ export {
   randomL2TokenAddress,
   randomSalt,
   Commitment,
+  BN128_GROUP_ORDER,
 };
