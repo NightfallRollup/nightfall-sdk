@@ -59,12 +59,12 @@ export interface UserMakeTransfer extends UserMakeTransaction {
 export interface Token {
   id: number;
   address: string;
-  value: string;
+  value: number;
   salt: string;
-  fee: string;
+  commitmentHash?: string;
 }
 
-export interface UserMakeTransformTransfer extends UserMakeTransfer {
+export interface UserMakeTransformTransfer {
   feeWei?: string;
   recipientNightfallAddress: string;
   providedCommitments?: string[] | [];

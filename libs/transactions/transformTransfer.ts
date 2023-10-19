@@ -4,7 +4,8 @@ import { logger, NightfallSdkError } from "../utils";
 import { createSignedTransaction } from "./helpers/createSignedTx";
 import type { Client } from "../client";
 import type { NightfallZkpKeys } from "../nightfall/types";
-import type { RecipientNightfallData, TransactionResult } from "./types";
+import type { TransactionResult } from "./types";
+import { Token } from "libs/user/types";
 
 /**
  * Handle the flow for transformTransfer transaction (tx)
@@ -37,8 +38,8 @@ export async function createTransformTransferTx(
   client: Client,
   fee: string,
   recipientNightfallAddress: string,
-  inputTokens: string[] | [],
-  outputTokens: string[] | [],
+  inputTokens: Token[] | [],
+  outputTokens: Token[] | [],
   providedCommitments?: string[] | [],
   providedCommitmentsFee?: string[] | [],
   regulatorUrl?: string,
@@ -52,32 +53,15 @@ export async function createTransformTransferTx(
     ownerZkpKeys,
     recipientNightfallAddress,
     fee,
-    providedCommitments ?? [],
-    providedCommitmentsFee ?? [],
     inputTokens,
     outputTokens,
+    providedCommitments ?? [],
+    providedCommitmentsFee ?? [],
     regulatorUrl,
     atomicHash,
     atomicTimestamp,
     salt,
   );
   const txReceiptL2 = resData.transaction;
-
-  const unsignedTx = resData.txDataToSign;
-  logger.debug({ unsignedTx }, "transformTransfer tx, unsigned");
-
-  let signedTxL1;
-  try {
-    signedTxL1 = await createSignedTransaction(
-      ownerEthAddress,
-      ownerEthPrivateKey,
-      shieldContractAddress,
-      unsignedTx,
-      web3,
-    );
-  } catch (err) {
-    logger.child({ resData }).error(err, "Error when submitting transaction");
-    throw new NightfallSdkError(err);
-  }
-  return { signedTxL1, txReceiptL2 };
+  return { txReceiptL2 };
 }

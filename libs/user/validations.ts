@@ -106,10 +106,10 @@ export const makeTransferOptions = makeTransaction
   .with("atomicHash", ["atomicTimestamp"]);
 
 export const makeTransformTransferOptions = Joi.object({
-  tokenContractAddress: Joi.string().trim().required(),
   feeWei: Joi.string().default(TX_FEE_WEI_DEFAULT),
   recipientNightfallAddress: Joi.string().trim().required(),
   providedCommitments: Joi.array().items(Joi.string()),
+  providedCommitmentsFee: Joi.array().items(Joi.string()),
   regulatorUrl: Joi.string().trim(),
   atomicHash: Joi.string().trim(),
   atomicTimestamp: Joi.number(),
