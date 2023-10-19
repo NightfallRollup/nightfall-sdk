@@ -8,6 +8,7 @@ import type {
 import { logger, NightfallSdkError } from "../utils";
 import type { NightfallZkpKeys } from "../nightfall/types";
 import type { RecipientNightfallData } from "libs/transactions/types";
+import type { Token } from "libs/user/types";
 import type {
   Balance,
   BalancePerTokenId,
@@ -323,8 +324,8 @@ class Client {
     fee: string,
     providedCommitments: string[] | [],
     providedCommitmentsFee: string[] | [],
-    inputTokens: string[] | [],
-    outputTokens: string[] | [],
+    inputTokens: Token[] | [],
+    outputTokens: Token[] | [],
     regulatorUrl?: string,
     atomicHash?: string,
     atomicTimestamp?: number,

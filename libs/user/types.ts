@@ -56,6 +56,14 @@ export interface UserMakeTransfer extends UserMakeTransaction {
   salt?: string;
 }
 
+export interface Token {
+  id: number;
+  address: string;
+  value: string;
+  salt: string;
+  fee: string;
+}
+
 export interface UserMakeTransformTransfer extends UserMakeTransfer {
   feeWei?: string;
   recipientNightfallAddress: string;
@@ -65,8 +73,8 @@ export interface UserMakeTransformTransfer extends UserMakeTransfer {
   atomicHash?: string;
   atomicTimestamp?: number;
   salt?: string;
-  inputTokens?: string[] | undefined;
-  outputTokens?: string[] | undefined;
+  inputTokens?: Token[] | undefined;
+  outputTokens?: Token[] | undefined;
 }
 
 export interface UserBurnL2Token extends UserL2TokenisationTransaction {

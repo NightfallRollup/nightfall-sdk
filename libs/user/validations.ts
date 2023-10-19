@@ -114,8 +114,22 @@ export const makeTransformTransferOptions = Joi.object({
   atomicHash: Joi.string().trim(),
   atomicTimestamp: Joi.number(),
   salt: Joi.string().trim(),
-  inputTokens: Joi.array().items(Joi.string()),
-  outputTokens: Joi.array().items(Joi.string()),
+  inputTokens: Joi.array().items(
+    Joi.object().custom((value, helpers) => {
+      if (typeof value !== "object" || Array.isArray(value)) {
+        return helpers.error("any.invalid");
+      }
+      return value;
+    }),
+  ),
+  outputTokens: Joi.array().items(
+    Joi.object().custom((value, helpers) => {
+      if (typeof value !== "object" || Array.isArray(value)) {
+        return helpers.error("any.invalid");
+      }
+      return value;
+    }),
+  ),
 }).with("atomicHash", ["atomicTimestamp"]);
 
 export const burnL2Token = makeTransaction.append({
