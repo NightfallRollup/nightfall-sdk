@@ -504,11 +504,7 @@ class User {
 
     // transformTransfer
     const { txReceiptL2 } = await createTransformTransferTx(
-      this.ethAddress,
-      this.ethPrivateKey,
       this.zkpKeys,
-      this.shieldContractAddress,
-      this.web3Websocket.web3,
       this.client,
       feeWei,
       recipientNightfallAddress,

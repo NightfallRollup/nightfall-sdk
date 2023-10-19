@@ -12,11 +12,7 @@ import { Token } from "libs/user/types";
  *
  * @async
  * @function createTransferTx
- * @param {string} ownerEthAddress Eth address sending the contents of the transformTransfer
- * @param {undefined | string} ownerEthPrivateKey Eth private key of the sender to sign the tx
  * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
- * @param {string} shieldContractAddress Address of the Shield smart contract
- * @param {Web3} web3 web3js instance
  * @param {Client} client An instance of Client to interact with the API
  * @param {string} fee Proposer payment in Wei for the tx in L2
  * @param {string} recipientNightfallAddress Recipient zkpKeys.compressedZkpPublicKey
@@ -30,11 +26,7 @@ import { Token } from "libs/user/types";
  * @returns {Promise<TransactionResult>}
  */
 export async function createTransformTransferTx(
-  ownerEthAddress: string,
-  ownerEthPrivateKey: undefined | string,
   ownerZkpKeys: NightfallZkpKeys,
-  shieldContractAddress: string,
-  web3: Web3,
   client: Client,
   fee: string,
   recipientNightfallAddress: string,
