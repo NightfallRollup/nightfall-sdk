@@ -1,21 +1,9 @@
 import { UserFactory, randomSalt, getContractAddress } from "../../libs";
 import { config } from "./appConfig";
-import { BalancePerTokenId } from "../../libs/client/types";
 import { Commitment } from "../../libs";
 import { BN128_GROUP_ORDER } from "../../libs/commitment/constants";
 import makeBlock from "./utils/blocks";
-
-const getBalance = async (user: any, tokenContractAddress: string) => {
-  const balancesUser: Record<string, BalancePerTokenId> =
-    await user.checkNightfallBalances({
-      tokenContractAddresses: [tokenContractAddress],
-    });
-  if (Object.keys(balancesUser).length === 0) {
-    return 0;
-  }
-  return (Object.values(balancesUser)[0] as unknown as BalancePerTokenId[])[0]
-    .balance;
-};
+import getBalance from "./utils/balance";
 
 // Script
 const main = async () => {
