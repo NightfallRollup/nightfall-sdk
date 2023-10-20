@@ -1,27 +1,9 @@
-import axios from "axios";
 import { UserFactory, randomSalt, getContractAddress } from "../../libs";
 import { config } from "./appConfig";
-import { BalancePerTokenId } from "../../libs/client/types";
 import { Commitment } from "../../libs";
 import { BN128_GROUP_ORDER } from "../../libs/commitment/constants";
-
-const makeBlock = async (timeoutms: number) => {
-  await new Promise((resolve) => setTimeout(resolve, timeoutms));
-  // TODO: For now, i am assuming this works only on localhost with optimist workers, not on testnet
-  await axios.post(`${config.optimistApiBawUrl}/block/make-now`);
-};
-
-const getBalance = async (user: any, tokenContractAddress: string) => {
-  const balancesUser: Record<string, BalancePerTokenId> =
-    await user.checkNightfallBalances({
-      tokenContractAddresses: [tokenContractAddress],
-    });
-  if (Object.keys(balancesUser).length === 0) {
-    return 0;
-  }
-  return (Object.values(balancesUser)[0] as unknown as BalancePerTokenId[])[0]
-    .balance;
-};
+import makeBlock from "./utils/blocks";
+import getBalance from "./utils/balance";
 
 // Script
 const main = async () => {

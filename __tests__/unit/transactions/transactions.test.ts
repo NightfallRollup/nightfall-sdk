@@ -333,11 +333,7 @@ describe("Transactions", () => {
       expect(
         async () =>
           await createTransformTransferTx(
-            ownerEthAddress,
-            ownerEthPrivateKey,
             ownerZkpKeys as unknown as NightfallZkpKeys,
-            shieldContractAddress,
-            web3 as unknown as Web3,
             mockedClient as unknown as Client,
             fee,
             recipientNightfallAddress,
@@ -354,22 +350,21 @@ describe("Transactions", () => {
       const tokenContractAddress = await randomL2TokenAddress();
       const salt = await randomSalt();
       const inputTokens = [
-        JSON.stringify({
-          tokenContractAddress,
-          tokenId: 1,
+        {
+          address: tokenContractAddress,
+          id: 1,
           value: 6,
           salt,
-          feeWei: "0",
-        }),
+          commitmentHash: "0",
+        },
       ];
       const outputTokens = [
-        JSON.stringify({
-          tokenContractAddress,
-          tokenId: 2,
-          value: "6",
+        {
+          address: tokenContractAddress,
+          id: 2,
+          value: 6,
           salt,
-          feeWei: "0",
-        }),
+        },
       ];
       const mockedTransformTransferResData = { transaction: txReceipt };
       mockedClient.transformTransfer.mockResolvedValue(
@@ -380,11 +375,7 @@ describe("Transactions", () => {
 
       // Act
       await createTransformTransferTx(
-        ownerEthAddress,
-        ownerEthPrivateKey,
         ownerZkpKeys as unknown as NightfallZkpKeys,
-        shieldContractAddress,
-        web3 as unknown as Web3,
         mockedClient as unknown as Client,
         fee,
         recipientNightfallAddress,
@@ -400,10 +391,10 @@ describe("Transactions", () => {
         ownerZkpKeys,
         recipientNightfallAddress,
         fee,
-        [],
-        [],
         inputTokens,
         outputTokens,
+        [],
+        [],
         regulatorUrl,
         undefined,
         undefined,
@@ -418,22 +409,21 @@ describe("Transactions", () => {
       const tokenContractAddress = await randomL2TokenAddress();
       const salt = await randomSalt();
       const inputTokens = [
-        JSON.stringify({
-          tokenContractAddress,
-          tokenId: 1,
+        {
+          address: tokenContractAddress,
+          id: 1,
           value: 6,
           salt,
-          feeWei: "0",
-        }),
+          commitmentHash: "0",
+        },
       ];
       const outputTokens = [
-        JSON.stringify({
-          tokenContractAddress,
-          tokenId: 2,
-          value: "6",
+        {
+          address: tokenContractAddress,
+          id: 2,
+          value: 6,
           salt,
-          feeWei: "0",
-        }),
+        },
       ];
       const mockedTransformTransferResData = { transaction: txReceipt };
       mockedClient.transformTransfer.mockResolvedValue(
@@ -442,11 +432,7 @@ describe("Transactions", () => {
 
       // Act
       await createTransformTransferTx(
-        ownerEthAddress,
-        ownerEthPrivateKey,
         ownerZkpKeys as unknown as NightfallZkpKeys,
-        shieldContractAddress,
-        web3 as unknown as Web3,
         mockedClient as unknown as Client,
         fee,
         recipientNightfallAddress,
@@ -465,10 +451,10 @@ describe("Transactions", () => {
         ownerZkpKeys,
         recipientNightfallAddress,
         fee,
-        [],
-        [],
         inputTokens,
         outputTokens,
+        [],
+        [],
         undefined,
         atomicHash,
         atomicTimestamp,

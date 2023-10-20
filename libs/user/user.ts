@@ -503,12 +503,8 @@ class User {
     } = joiValue;
 
     // transformTransfer
-    const { signedTxL1, txReceiptL2 } = await createTransformTransferTx(
-      this.ethAddress,
-      this.ethPrivateKey,
+    const { txReceiptL2 } = await createTransformTransferTx(
       this.zkpKeys,
-      this.shieldContractAddress,
-      this.web3Websocket.web3,
       this.client,
       feeWei,
       recipientNightfallAddress,
@@ -522,12 +518,7 @@ class User {
       salt,
     );
 
-    // Submit L1 transaction
-    logger.info({ signedTxL1, txReceiptL2 }, "transformTransfer created");
-    enqueueSendingSignedTxs(this.txsQueue, signedTxL1, this.web3Websocket.web3);
-
     return {
-      txHashL1: signedTxL1.transactionHash,
       txHashL2: txReceiptL2.transactionHash,
     };
   }

@@ -1,24 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type Web3 from "web3";
-import { logger, NightfallSdkError } from "../utils";
-import { createSignedTransaction } from "./helpers/createSignedTx";
+import { logger } from "../utils";
 import type { Client } from "../client";
 import type { NightfallZkpKeys } from "../nightfall/types";
-import type { RecipientNightfallData, TransactionResult } from "./types";
+import type { TransactionResult } from "./types";
+import { L2Token } from "libs/user/types";
 
 /**
  * Handle the flow for transformTransfer transaction (tx)
  *
  * @async
- * @function createTransferTx
- * @param {string} ownerEthAddress Eth address sending the contents of the transformTransfer
- * @param {undefined | string} ownerEthPrivateKey Eth private key of the sender to sign the tx
+ * @function createTransformTransferTx
  * @param {NightfallZkpKeys} ownerZkpKeys Sender's set of Zero-knowledge proof keys
- * @param {string} shieldContractAddress Address of the Shield smart contract
- * @param {Web3} web3 web3js instance
  * @param {Client} client An instance of Client to interact with the API
  * @param {string} fee Proposer payment in Wei for the tx in L2
  * @param {string} recipientNightfallAddress Recipient zkpKeys.compressedZkpPublicKey
+ * @param {string} inputTokens L2 tokens to be transformed
+ * @param {string} outputTokens L2 tokens result from the transformation
  * @param {string[] | []} [providedCommitments] Commitments to be used for transformTransfer
  * @param {string[] | []} [providedCommitmentsFee] Commitments to be used to pay fee
  * @param {string} [regulatorUrl] regulatorUrl
@@ -29,16 +26,12 @@ import type { RecipientNightfallData, TransactionResult } from "./types";
  * @returns {Promise<TransactionResult>}
  */
 export async function createTransformTransferTx(
-  ownerEthAddress: string,
-  ownerEthPrivateKey: undefined | string,
   ownerZkpKeys: NightfallZkpKeys,
-  shieldContractAddress: string,
-  web3: Web3,
   client: Client,
   fee: string,
   recipientNightfallAddress: string,
-  inputTokens: string[] | [],
-  outputTokens: string[] | [],
+  inputTokens: L2Token[] | [],
+  outputTokens: L2Token[] | [],
   providedCommitments?: string[] | [],
   providedCommitmentsFee?: string[] | [],
   regulatorUrl?: string,
@@ -52,32 +45,15 @@ export async function createTransformTransferTx(
     ownerZkpKeys,
     recipientNightfallAddress,
     fee,
-    providedCommitments ?? [],
-    providedCommitmentsFee ?? [],
     inputTokens,
     outputTokens,
+    providedCommitments ?? [],
+    providedCommitmentsFee ?? [],
     regulatorUrl,
     atomicHash,
     atomicTimestamp,
     salt,
   );
   const txReceiptL2 = resData.transaction;
-
-  const unsignedTx = resData.txDataToSign;
-  logger.debug({ unsignedTx }, "transformTransfer tx, unsigned");
-
-  let signedTxL1;
-  try {
-    signedTxL1 = await createSignedTransaction(
-      ownerEthAddress,
-      ownerEthPrivateKey,
-      shieldContractAddress,
-      unsignedTx,
-      web3,
-    );
-  } catch (err) {
-    logger.child({ resData }).error(err, "Error when submitting transaction");
-    throw new NightfallSdkError(err);
-  }
-  return { signedTxL1, txReceiptL2 };
+  return { txReceiptL2 };
 }

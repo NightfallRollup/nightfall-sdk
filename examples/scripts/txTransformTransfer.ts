@@ -1,10 +1,13 @@
-import { UserFactory } from "../../libs";
+import { Commitment, UserFactory } from "../../libs";
 import { createZkpKeys } from "../../libs";
 import { randomL2TokenAddress, randomSalt } from "../../libs";
 import { config } from "./appConfig";
+import getBalance from "./utils/balance";
+import makeBlock from "./utils/blocks";
 
 const main = async () => {
   let userSender;
+  const value = 6;
 
   try {
     // # 1 Create an instance of User
@@ -20,71 +23,63 @@ const main = async () => {
     // # 2 Mint token within L2
     const tokenContractAddress = await randomL2TokenAddress();
     const salt = await randomSalt();
+    const commitment = new Commitment({
+      zkpPublicKey: userSender.zkpKeys.zkpPublicKey.map((x) => BigInt(x)),
+      ercAddress: BigInt(tokenContractAddress),
+      tokenId: BigInt(1),
+      value: BigInt(value),
+      salt: BigInt(salt),
+    });
     const inputTokens = [
-      JSON.stringify({
-        tokenContractAddress,
-        tokenId: 1,
-        value: 6,
+      {
+        id: 1,
+        address: tokenContractAddress,
+        value,
         salt,
-        feeWei: "0",
-      }),
+        commitmentHash: `0x${BigInt(commitment.hash._hex)
+          .toString(16)
+          .padStart(64, "0")}`,
+      },
     ];
     const outputTokens = [
-      JSON.stringify({
-        tokenContractAddress,
-        tokenId: 2,
-        value: "6",
+      {
+        id: 2,
+        address: tokenContractAddress,
+        value,
         salt,
-        feeWei: "0",
-      }),
+      },
     ];
-    await userSender.mintL2Token({
+
+    const { txHashL2: txHashL2mint } = await userSender.mintL2Token({
       tokenContractAddress,
       tokenId: 1,
-      value: "6",
+      value: value.toString(),
       salt,
       feeWei: "0",
     });
+
+    console.log(">>>>> Mint transaction hash L2", txHashL2mint);
+    await makeBlock();
+
+    console.log(">>>>> Wait for minted token to be in a block");
+
+    let balanceToken = await getBalance(userSender, tokenContractAddress);
+    while (balanceToken !== value) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      balanceToken = await getBalance(userSender, tokenContractAddress);
+    }
 
     // # 3 Make transformTransfer
     // For this example, we generate a L2 address to receive the transformTransfer
     const { zkpKeys } = await createZkpKeys(config.clientApiUrl);
 
-    const isOffChain = true;
-    const { txHashL1, txHashL2 } = await userSender.makeTransformTransfer({
-      tokenContractAddress,
-      feeWei: "0",
-      recipientNightfallAddress: zkpKeys.compressedZkpPublicKey,
+    const { txHashL2 } = await userSender.makeTransformTransfer({
       inputTokens,
       outputTokens,
+      recipientNightfallAddress: zkpKeys.compressedZkpPublicKey,
+      feeWei: "0",
     });
-    console.log(
-      ">>>>> Transaction hash L1 (`undefined` if off-chain)",
-      txHashL1,
-    );
-    console.log(">>>>> Transaction hash L2", txHashL2);
-
-    // # 4 [OPTIONAL] You can check the transaction hash
-    // TODO
-
-    // # 5 [OPTIONAL] You can check transfers that are not yet in a block
-    const pendingTransfers =
-      await userSender.checkPendingTransfersAndWithdrawals();
-    console.log(">>>>> Pending balances", pendingTransfers);
-
-    // # 6 [EXTRA] Check that L1 tx was mined before closing the websocket in `finally` clause
-    if (!isOffChain) {
-      let isTxL1Mined =
-        await userSender.web3Websocket.web3.eth.getTransactionReceipt(txHashL1);
-      while (isTxL1Mined === null) {
-        console.log(">>>>> Waiting for L1 transaction to be mined..");
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        isTxL1Mined =
-          await userSender.web3Websocket.web3.eth.getTransactionReceipt(
-            txHashL1,
-          );
-      }
-    }
+    console.log(">>>>> Transaction hash L2 transform transfer", txHashL2);
   } catch (error) {
     console.error(error);
     process.exit(1);

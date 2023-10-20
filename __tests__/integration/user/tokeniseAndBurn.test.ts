@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from "axios";
 import { UserFactory } from "../../../libs/user";
 import { randomSalt } from "../../../libs/utils/random";
+import makeBlock from "../../../examples/scripts/utils/blocks";
 
 // launch proposer as PROPOSER_HOST=nightfall_3-proposer-1 PROPOSER_PORT=8092 ./bin/start-apps
 const options = {
@@ -23,11 +23,6 @@ describe.skip("Suit of integration tests tokenisation", () => {
   let nUnspentCommitmentsStart: number;
   let nUnspentCommitmentsEnd: number;
   const tokenId1 = 2345;
-
-  const makeBlock = async () => {
-    // TODO: For now, i am assuming this works only on localhost, not on testnet
-    await axios.get("http://localhost:8081/block/make-now");
-  };
 
   beforeAll(async () => {
     user = await UserFactory.create(options);

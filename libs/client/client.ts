@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-import type { Commitment, TransactionInfo, UnspentCommitment } from "../nightfall/types";
+import type {
+  Commitment,
+  TransactionInfo,
+  UnspentCommitment,
+} from "../nightfall/types";
 import { logger, NightfallSdkError } from "../utils";
 import type { NightfallZkpKeys } from "../nightfall/types";
 import type { RecipientNightfallData } from "libs/transactions/types";
+import type { L2Token } from "libs/user/types";
 import type {
   Balance,
   BalancePerTokenId,
@@ -317,10 +322,10 @@ class Client {
     ownerZkpKeys: NightfallZkpKeys,
     recipientCompressedZkpPublicKey: string,
     fee: string,
-    providedCommitments: string[] | [],
-    providedCommitmentsFee: string[] | [],
-    inputTokens: string[] | [],
-    outputTokens: string[] | [],
+    inputTokens: L2Token[] | [],
+    outputTokens: L2Token[] | [],
+    providedCommitments?: string[] | [],
+    providedCommitmentsFee?: string[] | [],
     regulatorUrl?: string,
     atomicHash?: string,
     atomicTimestamp?: number,
@@ -659,7 +664,7 @@ class Client {
     return res.data;
   }
 
-    /**
+  /**
    * Make GET request to get info about settled L2 transactions
    *
    * @async
@@ -668,22 +673,23 @@ class Client {
    * @throws {NightfallSdkError} Bad response
    * @returns {Promise<TransactionInfo[]>}
    */
-    async getTransactionsInfo(
-      transactionHashes: string[],
-    ): Promise<TransactionInfo[]> {
-      const endpoint = "transaction/info";
-      const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
-      logger.debug({ endpoint }, "Calling client at");
-  
-      const res = await axios.post(`${apiUrl}/${endpoint}`, { transactionHashes });
-      logger.info(
-        { status: res.status, data: res.data },
-        `Client at ${endpoint} responded`,
-      );
-  
-      return res.data.transactionsInfo;
-    }
-  
+  async getTransactionsInfo(
+    transactionHashes: string[],
+  ): Promise<TransactionInfo[]> {
+    const endpoint = "transaction/info";
+    const apiUrl = this.apiTxUrl === "" ? this.apiUrl : this.apiTxUrl;
+    logger.debug({ endpoint }, "Calling client at");
+
+    const res = await axios.post(`${apiUrl}/${endpoint}`, {
+      transactionHashes,
+    });
+    logger.info(
+      { status: res.status, data: res.data },
+      `Client at ${endpoint} responded`,
+    );
+
+    return res.data.transactionsInfo;
+  }
 }
 
 export default Client;
