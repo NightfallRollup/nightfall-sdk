@@ -97,7 +97,6 @@
     "eg:edge:finalise-withdrawal": "ts-node -r dotenv/config examples/scripts/txWithdrawalFinalise.ts dotenv_config_path=./examples/scripts/.env.edge",
     "eg:edge:balances": "ts-node -r dotenv/config examples/scripts/balances.ts dotenv_config_path=./examples/scripts/.env.edge",
     "eg:edge:export-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsExport.ts dotenv_config_path=./examples/scripts/.env.edge",
-    "eg:edge:import-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsImport.ts dotenv_config_path=./examples/scripts/.env.edge",
-    "start-react-app": "npm run build && cd examples/web-app/ && npm start"
+    "eg:edge:import-commitments": "ts-node -r dotenv/config examples/scripts/commitmentsImport.ts dotenv_config_path=./examples/scripts/.env.edge"
   }
 }
