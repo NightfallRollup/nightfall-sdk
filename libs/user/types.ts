@@ -46,17 +46,26 @@ export interface UserMintL2Token extends UserL2TokenisationTransaction {
   salt?: string;
 }
 
-export interface UserMakeTransfer extends UserMakeTransaction {
-  recipientNightfallAddress: string;
-  isOffChain?: boolean;
-  providedCommitments?: string[] | [];
+export interface RegulatorTransaction {
   regulatorUrl?: string;
+}
+
+export interface AtomicTransaction {
   atomicHash?: string;
   atomicTimestamp?: number;
   salt?: string;
 }
 
-export interface Token {
+export interface UserMakeTransfer
+  extends UserMakeTransaction,
+    RegulatorTransaction,
+    AtomicTransaction {
+  recipientNightfallAddress: string;
+  isOffChain?: boolean;
+  providedCommitments?: string[] | [];
+}
+
+export interface L2Token {
   id: number;
   address: string;
   value: number;
@@ -64,17 +73,15 @@ export interface Token {
   commitmentHash?: string;
 }
 
-export interface UserMakeTransformTransfer {
+export interface UserMakeTransformTransfer
+  extends RegulatorTransaction,
+    AtomicTransaction {
   feeWei?: string;
   recipientNightfallAddress: string;
   providedCommitments?: string[] | [];
   providedCommitmentsFee?: string[] | [];
-  regulatorUrl?: string;
-  atomicHash?: string;
-  atomicTimestamp?: number;
-  salt?: string;
-  inputTokens?: Token[] | undefined;
-  outputTokens?: Token[] | undefined;
+  inputTokens?: L2Token[] | undefined;
+  outputTokens?: L2Token[] | undefined;
 }
 
 export interface UserBurnL2Token extends UserL2TokenisationTransaction {

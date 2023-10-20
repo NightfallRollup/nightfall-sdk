@@ -1,14 +1,8 @@
-import axios from "axios";
 import { Commitment, UserFactory } from "../../libs";
 import { createZkpKeys } from "../../libs";
 import { randomL2TokenAddress, randomSalt } from "../../libs";
 import { config } from "./appConfig";
-
-const makeBlock = async (timeoutms: number) => {
-  await new Promise((resolve) => setTimeout(resolve, timeoutms));
-  // TODO: For now, i am assuming this works only on localhost with optimist workers, not on testnet
-  await axios.post(`${config.optimistApiBawUrl}/block/make-now`);
-};
+import makeBlock from "./utils/blocks";
 
 const main = async () => {
   let userSender;
