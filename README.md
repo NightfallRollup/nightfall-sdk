@@ -6,7 +6,7 @@
 
 Software Development Kit for interacting with Nightfall.
 
-Clone the repo and [play with the scripts and the web app](#play-with-the-sdk-repository), or [install it as a dependency](#install-the-sdk-as-a-dependency) from NPM.
+Clone the repo and [play with the scripts](#play-with-the-sdk-repository), or [install it as a dependency](#install-the-sdk-as-a-dependency) from NPM.
 
 More about [Nightfall protocol](https://github.com/NightfallRollup/nightfall-docs).
 
@@ -55,7 +55,7 @@ nvm use && npm install
 
 ### Getting started
 
-To get a good idea of how to interact with Nightfall using the SDK, we provide a set of example scripts and a React web app.
+To get a good idea of how to interact with Nightfall using the SDK, we provide a set of example scripts.
 
 **Read this section carefully to learn how to run these examples successfully**.
 
@@ -247,43 +247,6 @@ When running Nightfall in Ganache, the following Mock Tokens are deployed: ERC20
 
 ```bash
 npm run utils:ganache:contract-addresses
-```
-
-### Example web app
-
-See [web app](/examples/web-app/).
-
-This React app is an example of how to use the SDK in the browser, to interact with Nightfall via MetaMask.
-
-**We strongly recommend reading the [Getting started](#getting-started) section first**.
-
-#### Configure MetaMask
-
-The app is set to work on Ganache. Set MetaMask provider to `localhost`:
-
-| Key             | Value                 |
-| --------------- | --------------------- |
-| Network name    | localhost             |
-| RPC URL         | http://localhost:8546 |
-| Chain ID        | 1337                  |
-| Currency symbol | Test                  |
-
-Then, import a ganache account with Test token to be able to execute transactions. Use the private key given in the above [.env file](#environment-setup).
-
-#### Start the app
-
-Open the repository, navigate to the web-app and install the dependencies:
-
-```bash
-cd examples/web-app
-npm install
-```
-
-Navigate to the root directory and run the following script. The app is running on port 4000.
-
-```bash
-cd ../..
-npm run start-react-app
 ```
 
 ## Install the SDK as a dependency
